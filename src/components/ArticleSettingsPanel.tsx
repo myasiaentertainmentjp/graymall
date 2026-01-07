@@ -135,14 +135,22 @@
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (!file) return;
+              // GIFチェック（念のため）
+              if (file.type === 'image/gif') {
+                alert('GIF画像はサポートされていません。JPG、PNG、WebPをお使いください。');
+                e.currentTarget.value = '';
+                return;
+              }
               try {
                 const url = await onUploadThumbnail(file);
                 onChangeThumbnail(url);
+              } catch (err: any) {
+                alert(err?.message || 'サムネイルのアップロードに失敗しました');
               } finally {
                 e.currentTarget.value = '';
               }
