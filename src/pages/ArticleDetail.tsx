@@ -347,46 +347,43 @@ export default function ArticleDetail() {
               )}
 
               <div className="relative">
-                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent to-white pointer-events-none" style={{ marginTop: '-6rem' }} />
-                <div className="bg-orange-50 rounded-2xl p-8 text-center border-2 border-orange-200">
-                  <Lock className="w-16 h-16 mx-auto mb-4 text-orange-500" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    ここから先は有料コンテンツです
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    購入すると続きを読めます
-                  </p>
+                <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-transparent via-white/80 to-white pointer-events-none" style={{ marginTop: '-8rem' }} />
+                <div className="bg-gray-50 rounded-xl p-8 text-center border border-gray-200">
+                  <div className="w-12 h-12 mx-auto mb-5 bg-gray-900 rounded-full flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-sm text-gray-500 mb-2">この続きを読むには</p>
+                  <div className="text-3xl font-bold text-gray-900 mb-6">
+                    ¥{article.price.toLocaleString()}
+                  </div>
 
                   {/* アフィリエイト経由の場合の表示 */}
                   {affiliateUserId && canAffiliate && (
-                    <p className="text-sm text-green-600 mb-4">
-                      紹介リンク経由でのご購入です
+                    <p className="text-xs text-green-600 mb-4 bg-green-50 py-1 px-3 rounded-full inline-block">
+                      紹介リンク経由
                     </p>
                   )}
 
-                  <div className="text-4xl font-bold text-gray-900 mb-6">
-                    ¥{article.price.toLocaleString()}
-                  </div>
                   <button
                     onClick={handlePurchase}
                     disabled={purchasing}
-                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl transition disabled:opacity-50 text-lg font-bold"
+                    className="w-full max-w-xs mx-auto flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3.5 rounded-full transition disabled:opacity-50 font-medium"
                   >
                     {purchasing ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <ShoppingCart className="w-5 h-5" />
+                      <ShoppingCart className="w-4 h-4" />
                     )}
-                    <span>{purchasing ? '処理中...' : '記事を購入する'}</span>
+                    <span>{purchasing ? '処理中...' : '購入して続きを読む'}</span>
                   </button>
                   {!user && (
-                    <p className="text-sm text-gray-600 mt-4">
-                      購入するには
+                    <p className="text-xs text-gray-500 mt-4">
+                      購入には
                       <button
                         onClick={() => navigate(`/signin?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
-                        className="text-blue-600 hover:underline ml-1"
+                        className="text-gray-900 font-medium hover:underline mx-1"
                       >
-                        サインイン
+                        ログイン
                       </button>
                       が必要です
                     </p>
