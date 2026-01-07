@@ -271,15 +271,15 @@ export default function PaymentSettingsPage() {
           </div>
         )}
 
-        {/* Stripe Connect 設定 */}
+        {/* 振込口座設定 */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Stripe Connect 口座設定</h2>
+          <h2 className="text-lg font-semibold mb-4">振込口座設定</h2>
 
           {!profile?.stripe_account_id ? (
             <div>
               <p className="text-gray-600 mb-4">
                 記事を販売したり、アフィリエイト報酬を受け取るには、
-                Stripeアカウントの設定が必要です。
+                振込口座の設定が必要です。
               </p>
               <button
                 onClick={handleCreateAccount}
@@ -313,7 +313,7 @@ export default function PaymentSettingsPage() {
                 ) : (
                   <ExternalLink className="w-5 h-5" />
                 )}
-                <span>Stripe ダッシュボードを開く</span>
+                <span>口座ダッシュボードを開く</span>
               </button>
             </div>
           ) : (
@@ -345,9 +345,9 @@ export default function PaymentSettingsPage() {
         <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
           <h3 className="font-medium text-gray-700 mb-2">注意事項</h3>
           <ul className="list-disc list-inside space-y-1">
-            <li>売上の振込にはStripe口座設定が必要です</li>
+            <li>売上の振込には口座設定が必要です</li>
             <li>口座設定が完了するまで、売上は保留されます</li>
-            <li>プラットフォーム手数料は15%です</li>
+            <li>プラットフォーム手数料は10%です</li>
             <li>振込は売上確定後、自動的に処理されます</li>
           </ul>
         </div>

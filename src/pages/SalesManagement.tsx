@@ -62,6 +62,15 @@ type Balance = {
   withdrawable_amount: number;
 };
 
+type MonthlySummary = {
+  month: string; // "2026-01"
+  label: string; // "2026年1月"
+  salesAmount: number;
+  affiliateAmount: number;
+  salesCount: number;
+  affiliateCount: number;
+};
+
 export default function SalesManagement() {
   const { user, session, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'summary' | 'sales' | 'affiliate' | 'withdrawal'>('summary');
@@ -90,6 +99,9 @@ export default function SalesManagement() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Monthly Summary
+  const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>([]);
+
   useEffect(() => {
     if (user && session) {
       loadData();
@@ -101,6 +113,7 @@ export default function SalesManagement() {
     try {
       await Promise.all([
         loadSummary(),
+        loadMonthlySummary(),
         loadSales(),
         loadAffiliateEarnings(),
         loadBalance(),
@@ -151,6 +164,73 @@ export default function SalesManagement() {
       todaySales, thisMonthSales, totalSales,
       todayAffiliate, thisMonthAffiliate, totalAffiliate,
     });
+  };
+
+  const loadMonthlySummary = async () => {
+    if (!user) return;
+
+    // Get last 6 months of data
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+
+    // Author sales
+    const { data: authorOrders } = await supabase
+      .from('orders')
+      .select('author_amount, paid_at')
+      .eq('author_id', user.id)
+      .eq('status', 'paid')
+      .gte('paid_at', sixMonthsAgo);
+
+    // Affiliate earnings
+    const { data: affiliateOrders } = await supabase
+      .from('orders')
+      .select('affiliate_amount, paid_at')
+      .eq('affiliate_user_id', user.id)
+      .eq('status', 'paid')
+      .gte('paid_at', sixMonthsAgo);
+
+    // Group by month
+    const monthlyData: Record<string, MonthlySummary> = {};
+
+    // Initialize last 6 months
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthlyData[monthKey] = {
+        month: monthKey,
+        label: `${d.getFullYear()}年${d.getMonth() + 1}月`,
+        salesAmount: 0,
+        affiliateAmount: 0,
+        salesCount: 0,
+        affiliateCount: 0,
+      };
+    }
+
+    // Aggregate author orders
+    (authorOrders || []).forEach(o => {
+      if (!o.paid_at) return;
+      const d = new Date(o.paid_at);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].salesAmount += o.author_amount || 0;
+        monthlyData[monthKey].salesCount += 1;
+      }
+    });
+
+    // Aggregate affiliate orders
+    (affiliateOrders || []).forEach(o => {
+      if (!o.paid_at) return;
+      const d = new Date(o.paid_at);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].affiliateAmount += o.affiliate_amount || 0;
+        monthlyData[monthKey].affiliateCount += 1;
+      }
+    });
+
+    // Sort by month descending
+    const sorted = Object.values(monthlyData).sort((a, b) => b.month.localeCompare(a.month));
+    setMonthlySummaries(sorted);
   };
 
   const loadSales = async () => {
@@ -391,6 +471,47 @@ export default function SalesManagement() {
                 </div>
               </div>
             </div>
+
+            {/* Monthly Summary */}
+            {monthlySummaries.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">月別推移</h2>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">月</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">販売収益</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">紹介報酬</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">合計</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {monthlySummaries.map(m => (
+                        <tr key={m.month} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{m.label}</td>
+                          <td className="px-4 py-3 text-sm text-right text-gray-900">
+                            ¥{m.salesAmount.toLocaleString()}
+                            {m.salesCount > 0 && (
+                              <span className="text-xs text-gray-500 ml-1">({m.salesCount}件)</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right text-orange-500">
+                            ¥{m.affiliateAmount.toLocaleString()}
+                            {m.affiliateCount > 0 && (
+                              <span className="text-xs text-gray-500 ml-1">({m.affiliateCount}件)</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-gray-900">
+                            ¥{(m.salesAmount + m.affiliateAmount).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* Balance */}
             {balance && (

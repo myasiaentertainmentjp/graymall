@@ -5,7 +5,7 @@ export default function GuidelinesPage() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">コンテンツガイドライン</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">使い方ガイド</h1>
 
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">1. 掲載可能なコンテンツの基本的な考え方</h2>
@@ -161,9 +161,8 @@ export default function GuidelinesPage() {
           <p className="text-gray-600 leading-relaxed">本ガイドラインは、法令改正、決済事業者の方針変更、運営上の必要に応じて、予告なく変更されることがあります。</p>
         </section>
 
-        <footer className="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-400">
-          <p>コンテンツガイドライン</p>
-          <p>最終更新日：2026年1月6日</p>
+        <footer className="mt-12 pt-4 text-right text-xs text-gray-300">
+          <p>最終更新：2026年1月6日</p>
         </footer>
       </div>
     </Layout>

@@ -149,9 +149,8 @@ export default function TermsPage() {
           <p className="text-gray-600 leading-relaxed">本規約は日本法に準拠し、本サービスに関する紛争は東京地方裁判所または東京簡易裁判所を第一審の専属的合意管轄裁判所とします。</p>
         </section>
 
-        <footer className="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-400">
-          <p>グレーモール利用規約</p>
-          <p>最終更新日：2026年1月6日</p>
+        <footer className="mt-12 pt-4 text-right text-xs text-gray-300">
+          <p>最終更新：2026年1月6日</p>
         </footer>
       </div>
     </Layout>

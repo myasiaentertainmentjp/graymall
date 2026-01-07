@@ -125,9 +125,8 @@ export default function PrivacyPage() {
           </div>
         </section>
 
-        <footer className="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-400">
-          <p>プライバシーポリシー</p>
-          <p>最終更新日：2026年1月6日</p>
+        <footer className="mt-12 pt-4 text-right text-xs text-gray-300">
+          <p>最終更新：2026年1月6日</p>
         </footer>
       </div>
     </Layout>
