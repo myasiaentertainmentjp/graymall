@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Block admin and private pages
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /profile
+Disallow: /editor/*
+Disallow: /me/*
+Disallow: /signin
+Disallow: /signup
+
+# Sitemap
+Sitemap: https://graymall.jp/sitemap.xml
