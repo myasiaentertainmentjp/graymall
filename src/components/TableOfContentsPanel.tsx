@@ -10,8 +10,6 @@
   export function TableOfContentsPanel({ headings, onJump }: Props) {
     return (
       <div>
-        <div className="text-base font-bold text-gray-900 mb-4">目次</div>
-
         {headings.length === 0 ? (
           <div className="text-sm text-gray-500">見出しがまだありません</div>
         ) : (
