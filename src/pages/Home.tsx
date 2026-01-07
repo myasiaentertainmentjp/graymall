@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Database } from '../lib/database.types';
-import { ChevronRight, ChevronDown, FolderOpen } from 'lucide-react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -41,7 +41,6 @@ export default function Home() {
   const [editorPickArticles, setEditorPickArticles] = useState<Article[]>([]);
   const [categoryArticles, setCategoryArticles] = useState<Record<string, Article[]>>({});
   const [loading, setLoading] = useState(true);
-  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -191,15 +190,6 @@ export default function Home() {
     }
   };
 
-  // 全カテゴリをフラットに表示（親・子を同じ階層で）
-  const allCategories: Category[] = [];
-  parentCategories.forEach(parent => {
-    allCategories.push(parent);
-    if (subCategories[parent.id]) {
-      allCategories.push(...subCategories[parent.id]);
-    }
-  });
-
   // カテゴリ開閉トグル
   const toggleCategory = (categoryId: string) => {
     setCollapsedCategories(prev => {
@@ -278,49 +268,33 @@ export default function Home() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* モバイル: カテゴリ折りたたみ */}
-        <div className="lg:hidden mb-4">
-          <button
-            onClick={() => setMobileCategoryOpen(!mobileCategoryOpen)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
-          >
-            <span className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" />
-              カテゴリを選択
-            </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${mobileCategoryOpen ? 'rotate-180' : ''}`} />
-          </button>
-          {mobileCategoryOpen && (
-            <div className="mt-2 p-4 bg-gray-50 rounded-lg">
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  to="/"
-                  onClick={() => setMobileCategoryOpen(false)}
-                  className={`px-3 py-2 text-sm rounded-lg text-center transition ${
-                    !selectedCategory
-                      ? 'bg-gray-900 text-white font-medium'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                  }`}
-                >
-                  すべて
-                </Link>
-                {allCategories.map(cat => (
-                  <Link
-                    key={cat.id}
-                    to={`/articles?category=${cat.slug}`}
-                    onClick={() => setMobileCategoryOpen(false)}
-                    className={`px-3 py-2 text-sm rounded-lg text-center transition ${
-                      selectedCategory === cat.slug
-                        ? 'bg-gray-900 text-white font-medium'
-                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                    }`}
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* モバイル: カテゴリ横スクロール */}
+        <div className="lg:hidden mb-4 -mx-4 px-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <Link
+              to="/"
+              className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition whitespace-nowrap ${
+                !selectedCategory
+                  ? 'bg-gray-900 text-white font-medium'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              すべて
+            </Link>
+            {parentCategories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/articles?category=${cat.slug}`}
+                className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition whitespace-nowrap ${
+                  selectedCategory === cat.slug
+                    ? 'bg-gray-900 text-white font-medium'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* デスクトップ: 2カラムレイアウト */}
