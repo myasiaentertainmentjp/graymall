@@ -133,58 +133,6 @@
   // 画像をwebpに変換・リサイズ
   const MAX_IMAGE_WIDTH = 1200;
   const WEBP_QUALITY = 0.85;
-  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
-  // ファイルからWebPに変換（直接アップロード用）
-  async function convertImageFileToWebp(file: File): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
-
-      img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-
-        // リサイズ計算
-        let width = img.width;
-        let height = img.height;
-        if (width > MAX_IMAGE_WIDTH) {
-          height = Math.round((height * MAX_IMAGE_WIDTH) / width);
-          width = MAX_IMAGE_WIDTH;
-        }
-
-        // Canvasでwebpに変換
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Canvas context取得に失敗'));
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('WebP変換に失敗'));
-            }
-          },
-          'image/webp',
-          WEBP_QUALITY
-        );
-      };
-
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        reject(new Error('画像の読み込みに失敗'));
-      };
-
-      img.src = objectUrl;
-    });
-  }
 
   async function convertToWebp(base64: string, contentType: string): Promise<Blob | null> {
     try {
@@ -785,35 +733,10 @@
     const currentEditor = useMemo(() => (active === 'paid' ? paidEditor : freeEditor), [active, freeEditor, paidEditor]);
 
     async function handlePickImage(file: File) {
-      // GIFはサポート対象外
-      if (file.type === 'image/gif') {
-        alert('GIF画像はサポートされていません。JPG、PNG、WebPをお使いください。');
-        return;
-      }
-
-      // 対応形式のチェック
-      if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
-        alert('サポートされていない画像形式です。JPG、PNG、WebPをお使いください。');
-        return;
-      }
-
-      try {
-        // WebPに変換・圧縮
-        const webpBlob = await convertImageFileToWebp(file);
-        const webpFile = new File([webpBlob], `${Date.now()}.webp`, { type: 'image/webp' });
-
-        const url = await uploadToArticleImages(articleId, 'articles', webpFile);
-        runOn(currentEditor, (ed) => {
-          ed.chain().focus().insertContent({ type: 'imageWithCaption', attrs: { src: url, alt: file.name, caption: '' } }).run();
-        });
-      } catch (err) {
-        console.error('画像変換エラー:', err);
-        // フォールバック: 変換失敗時は元のファイルをアップロード
-        const url = await uploadToArticleImages(articleId, 'articles', file);
-        runOn(currentEditor, (ed) => {
-          ed.chain().focus().insertContent({ type: 'imageWithCaption', attrs: { src: url, alt: file.name, caption: '' } }).run();
-        });
-      }
+      const url = await uploadToArticleImages(articleId, 'articles', file);
+      runOn(currentEditor, (ed) => {
+        ed.chain().focus().insertContent({ type: 'imageWithCaption', attrs: { src: url, alt: file.name, caption: '' } }).run();
+      });
     }
 
     async function handlePickFile(file: File) {
@@ -827,101 +750,47 @@
     // 外部画像を含むHTMLをペースト時に変換・アップロード
     const processingImagesRef = useRef(false);
 
-    // HTMLからfigure/figcaptionを解析してキャプション付き画像を抽出
-    function extractFiguresWithCaptions(html: string): { src: string; caption: string; figureHtml: string }[] {
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const figures = doc.querySelectorAll('figure');
-
-        return Array.from(figures).map(fig => {
-          const img = fig.querySelector('img');
-          const figcaption = fig.querySelector('figcaption');
-          return {
-            src: img?.getAttribute('src') || '',
-            caption: figcaption?.textContent?.trim() || '',
-            figureHtml: fig.outerHTML,
-          };
-        }).filter(f => f.src && isExternalImageUrl(f.src));
-      } catch {
-        return [];
-      }
-    }
-
     async function processExternalImagesInHtml(html: string, editor: Editor): Promise<void> {
       if (processingImagesRef.current) return;
 
-      // まずfigure/figcaptionを処理（note.com等からのコピー対応）
-      const figuresWithCaptions = extractFiguresWithCaptions(html);
-
-      // 通常のimg要素も抽出（figure内以外）
+      // HTMLから外部画像URLを抽出
       const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
-      const matches: { fullMatch: string; url: string; caption: string }[] = [];
+      const matches: { fullMatch: string; url: string }[] = [];
       let match;
-
-      // figure内の画像URLを記録（重複処理を避ける）
-      const figureImageUrls = new Set(figuresWithCaptions.map(f => f.src));
 
       while ((match = imgRegex.exec(html)) !== null) {
         const url = match[1];
-        if (isExternalImageUrl(url) && !figureImageUrls.has(url)) {
-          matches.push({ fullMatch: match[0], url, caption: '' });
+        if (isExternalImageUrl(url)) {
+          matches.push({ fullMatch: match[0], url });
         }
       }
 
-      // figure + 通常の画像がなければ終了
-      if (figuresWithCaptions.length === 0 && matches.length === 0) return;
+      if (matches.length === 0) return;
 
       processingImagesRef.current = true;
 
-      let currentHtml = editor.getHTML();
-      const { from } = editor.state.selection;
-
-      // 1. figureキャプション付き画像を処理
-      for (const { src, caption, figureHtml } of figuresWithCaptions) {
-        try {
-          const newUrl = await proxyImageToStorage(src, articleId);
-          if (!newUrl) continue;
-
-          // figure要素をimageWithCaptionノードに置換
-          // まずfigure全体を探して、imageWithCaptionのHTMLに置換
-          const imageWithCaptionHtml = `<div data-gm-image="1"><img src="${newUrl}" alt=""><figcaption>${caption}</figcaption></div>`;
-
-          // HTMLからfigure要素を検索して置換
-          const escapedFigureHtml = figureHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const figureRegex = new RegExp(escapedFigureHtml, 'g');
-
-          if (figureRegex.test(currentHtml)) {
-            currentHtml = currentHtml.replace(figureRegex, imageWithCaptionHtml);
-          } else {
-            // figureが見つからない場合、src URLで置換を試みる
-            const escapedUrl = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            currentHtml = currentHtml.replace(new RegExp(escapedUrl, 'g'), newUrl);
-          }
-        } catch (e) {
-          console.warn('figure画像の変換に失敗:', src, e);
-        }
-      }
-
-      // 2. 通常の画像を処理
+      // 各外部画像をEdge Function経由でアップロード
       for (const { url } of matches) {
         try {
           const newUrl = await proxyImageToStorage(url, articleId);
           if (!newUrl) continue;
 
+          // エディタ内のURLを置換
+          const currentHtml = editor.getHTML();
           const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          currentHtml = currentHtml.replace(new RegExp(escapedUrl, 'g'), newUrl);
+          const updatedHtml = currentHtml.replace(new RegExp(escapedUrl, 'g'), newUrl);
+
+          if (currentHtml !== updatedHtml) {
+            const { from } = editor.state.selection;
+            editor.commands.setContent(updatedHtml, false);
+            // カーソル位置を復元
+            try {
+              editor.commands.setTextSelection(Math.min(from, editor.state.doc.content.size));
+            } catch {}
+          }
         } catch (e) {
           console.warn('外部画像の変換に失敗:', url, e);
         }
-      }
-
-      // 変更があれば更新
-      if (currentHtml !== editor.getHTML()) {
-        editor.commands.setContent(currentHtml, false);
-        try {
-          editor.commands.setTextSelection(Math.min(from, editor.state.doc.content.size));
-        } catch {}
       }
 
       processingImagesRef.current = false;
@@ -1701,7 +1570,7 @@
 
     return (
       <div className={`space-y-4 ${isMobile ? 'pb-16' : ''}`}>
-        <input ref={imgInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+        <input ref={imgInputRef} type="file" accept="image/*" className="hidden"
           onChange={async (e) => {
             const f = e.target.files?.[0];
             e.currentTarget.value = '';

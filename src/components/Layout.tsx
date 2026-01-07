@@ -87,26 +87,23 @@ export default function Layout({ children }: LayoutProps) {
                       </button>
                       <div className="absolute right-0 pt-2 w-52 hidden group-hover:block">
                         <div className="bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                          <Link to={`/users/${user.id}`} className="block px-4 py-3 hover:bg-gray-50">
-                            <div className="flex items-center gap-3">
-                              {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-                              ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                  <User className="w-5 h-5 text-gray-500" />
-                                </div>
-                              )}
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">
-                                  {profile?.display_name || user.email?.split('@')[0]}
-                                </div>
-                                <div className="text-xs text-gray-500">マイページを見る</div>
-                              </div>
+                          <div className="px-4 py-2 border-b border-gray-100">
+                            <div className="text-sm font-medium text-gray-900 truncate">
+                              {profile?.display_name || user.email?.split('@')[0]}
                             </div>
+                            <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                          </div>
+                          <Link to={`/users/${user.id}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            マイページ
                           </Link>
-                          <div className="border-t border-gray-100 my-1"></div>
                           <Link to="/me/articles" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             自分の記事
+                          </Link>
+                          <Link to="/me/favorites" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            お気に入り記事
+                          </Link>
+                          <Link to="/me/following" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            フォロー中
                           </Link>
                           <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             売上管理
@@ -125,7 +122,7 @@ export default function Layout({ children }: LayoutProps) {
                           <div className="border-t border-gray-100 my-1"></div>
                           <button
                             onClick={handleSignOut}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                             type="button"
                           >
                             サインアウト
@@ -177,84 +174,50 @@ export default function Layout({ children }: LayoutProps) {
               </form>
             </div>
 
-            {/* User Profile Section */}
-            <Link
-              to={`/users/${user?.id}`}
-              className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 hover:bg-gray-50"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-500" />
-                </div>
+            <div className="px-4 py-3 space-y-1">
+              <Link to="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                ホーム
+              </Link>
+              <Link to="/articles" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                記事一覧
+              </Link>
+              <Link to="/me/articles" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                自分の記事
+              </Link>
+              <Link to="/editor/new" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                記事を投稿
+              </Link>
+              <Link to="/dashboard" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                売上管理
+              </Link>
+              {profile?.is_admin && (
+                <Link to="/admin" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  管理画面
+                </Link>
               )}
-              <div>
-                <div className="font-medium text-gray-900">
-                  {profile?.display_name || user.email?.split('@')[0]}
-                </div>
-                <div className="text-xs text-gray-500">マイページを見る</div>
-              </div>
-            </Link>
-
-            <div className="py-2">
-              {/* Main Actions */}
-              <div className="px-4 py-2">
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">メニュー</div>
-                <Link to="/" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  ホーム
-                </Link>
-                <Link to="/articles" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  記事を探す
-                </Link>
-                <Link to="/editor/new" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  記事を投稿
-                </Link>
-              </div>
-
               <div className="border-t border-gray-100 my-2"></div>
-
-              {/* My Content */}
-              <div className="px-4 py-2">
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">マイコンテンツ</div>
-                <Link to="/me/articles" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  自分の記事
-                </Link>
-                <Link to="/me/favorites" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  お気に入り
-                </Link>
-                <Link to="/me/following" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  フォロー中
-                </Link>
-                <Link to="/dashboard" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  売上管理
-                </Link>
-              </div>
-
-              <div className="border-t border-gray-100 my-2"></div>
-
-              {/* Settings */}
-              <div className="px-4 py-2">
-                <Link to="/settings" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                  設定
-                </Link>
-                {profile?.is_admin && (
-                  <Link to="/admin" className="flex items-center gap-3 py-2.5 text-gray-700" onClick={() => setMobileMenuOpen(false)}>
-                    管理画面
-                  </Link>
-                )}
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 py-2.5 text-red-600 w-full text-left"
-                  type="button"
-                >
-                  サインアウト
-                </button>
-              </div>
+              <Link to={`/users/${user?.id}`} className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                マイページ
+              </Link>
+              <Link to="/me/favorites" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                お気に入り記事
+              </Link>
+              <Link to="/me/following" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                フォロー中
+              </Link>
+              <Link to="/settings" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                設定
+              </Link>
+              <button
+                onClick={() => {
+                  handleSignOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium"
+                type="button"
+              >
+                サインアウト
+              </button>
             </div>
           </div>
         )}

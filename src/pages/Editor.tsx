@@ -288,75 +288,13 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
       return data;
     }
 
-    // サムネイルをWebPに変換
-    async function convertThumbnailToWebp(file: File): Promise<Blob> {
-      const MAX_WIDTH = 1200;
-      const WEBP_QUALITY = 0.85;
-
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        img.onload = () => {
-          URL.revokeObjectURL(objectUrl);
-
-          let width = img.width;
-          let height = img.height;
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('Canvas context取得に失敗'));
-            return;
-          }
-
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => blob ? resolve(blob) : reject(new Error('WebP変換に失敗')),
-            'image/webp',
-            WEBP_QUALITY
-          );
-        };
-
-        img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
-          reject(new Error('画像の読み込みに失敗'));
-        };
-
-        img.src = objectUrl;
-      });
-    }
-
     async function uploadThumbnail(file: File): Promise<string> {
-      // GIFは禁止
-      if (file.type === 'image/gif') {
-        throw new Error('GIF画像はサポートされていません。JPG、PNG、WebPをお使いください。');
-      }
-
-      let uploadFile: File = file;
-      let contentType = file.type || 'image/*';
-
-      try {
-        // WebPに変換
-        const webpBlob = await convertThumbnailToWebp(file);
-        uploadFile = new File([webpBlob], `${Date.now()}.webp`, { type: 'image/webp' });
-        contentType = 'image/webp';
-      } catch (err) {
-        console.warn('WebP変換失敗、元ファイルを使用:', err);
-        // フォールバック: 変換失敗時は元ファイルを使用
-      }
-
-      const path = `covers/${articleId}/${Date.now()}.webp`;
+      const safeName = (file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '_');
+      const path = `covers/${articleId}/${Date.now()}-${safeName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('article-images')
-        .upload(path, uploadFile, { upsert: true, contentType });
+        .upload(path, file, { upsert: true, contentType: file.type || 'image/*' });
 
       if (uploadError) throw uploadError;
 
