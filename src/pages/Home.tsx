@@ -39,6 +39,7 @@ export default function Home() {
   const [categoryArticles, setCategoryArticles] = useState<Record<string, Article[]>>({});
   const [loading, setLoading] = useState(true);
   const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadData();
@@ -149,56 +150,76 @@ export default function Home() {
     }
   });
 
-  // カテゴリサイドバーコンポーネント
+  // カテゴリ開閉トグル
+  const toggleCategory = (categoryId: string) => {
+    setCollapsedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) {
+        next.delete(categoryId);
+      } else {
+        next.add(categoryId);
+      }
+      return next;
+    });
+  };
+
+  // note風カテゴリサイドバーコンポーネント
   const CategorySidebar = ({ className = '' }: { className?: string }) => (
     <aside className={className}>
       <div className="sticky top-20">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
-          カテゴリ
-        </h3>
-        <nav className="space-y-1">
-          <Link
-            to="/"
-            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition ${
-              !selectedCategory
-                ? 'bg-gray-900 text-white font-medium'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <FolderOpen className="w-4 h-4" />
-            すべて
-          </Link>
-          {parentCategories.map(parent => (
-            <div key={parent.id}>
-              <Link
-                to={`/articles?category=${parent.slug}`}
-                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition ${
-                  selectedCategory === parent.slug
-                    ? 'bg-gray-900 text-white font-medium'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {parent.name}
-              </Link>
-              {subCategories[parent.id]?.length > 0 && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {subCategories[parent.id].map(sub => (
-                    <Link
-                      key={sub.id}
-                      to={`/articles?category=${sub.slug}`}
-                      className={`block px-3 py-1.5 text-sm rounded-lg transition ${
-                        selectedCategory === sub.slug
-                          ? 'bg-gray-200 text-gray-900 font-medium'
-                          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                      }`}
+        <nav>
+          {parentCategories.map(parent => {
+            const isCollapsed = collapsedCategories.has(parent.id);
+            const children = subCategories[parent.id] || [];
+            const hasChildren = children.length > 0;
+
+            return (
+              <div key={parent.id} className="border-b border-gray-100 last:border-b-0">
+                {/* 親カテゴリ */}
+                <div className="flex items-center">
+                  <Link
+                    to={`/articles?category=${parent.slug}`}
+                    className={`flex-1 py-3 text-base font-medium transition ${
+                      selectedCategory === parent.slug
+                        ? 'text-gray-900'
+                        : 'text-gray-700 hover:text-gray-900'
+                    }`}
+                  >
+                    {parent.name}
+                  </Link>
+                  {hasChildren && (
+                    <button
+                      onClick={() => toggleCategory(parent.id)}
+                      className="p-2 text-gray-400 hover:text-gray-600 transition"
                     >
-                      {sub.name}
-                    </Link>
-                  ))}
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+                      />
+                    </button>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+
+                {/* 子カテゴリ */}
+                {hasChildren && !isCollapsed && (
+                  <div className="pb-3 space-y-1">
+                    {children.map(sub => (
+                      <Link
+                        key={sub.id}
+                        to={`/articles?category=${sub.slug}`}
+                        className={`block py-1.5 text-sm transition ${
+                          selectedCategory === sub.slug
+                            ? 'text-gray-900 bg-gray-100 -mx-2 px-2 rounded'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
       </div>
     </aside>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
-import { Crown, Check, Clock, Link as LinkIcon, Zap, ChevronLeft } from 'lucide-react';
+import { Crown, Check, Clock, Link as LinkIcon, Zap, ChevronLeft, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const PREMIUM_PRICE = 1480; // 月額料金
@@ -12,8 +12,24 @@ export default function SubscriptionPage() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const isPremium = profile?.is_premium === true;
+
+  const faqs = [
+    {
+      question: 'いつでも解約できますか？',
+      answer: 'はい、いつでも解約できます。解約後も請求期間の終了まで引き続きプレミアム機能をご利用いただけます。',
+    },
+    {
+      question: '支払い方法は何が使えますか？',
+      answer: 'クレジットカード（Visa, Mastercard, American Express, JCB）でお支払いいただけます。',
+    },
+    {
+      question: '領収書は発行できますか？',
+      answer: 'はい、サブスクリプション管理ページから領収書をダウンロードいただけます。',
+    },
+  ];
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -219,33 +235,29 @@ export default function SubscriptionPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">よくある質問</h2>
 
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-1">
-                いつでも解約できますか？
-              </h3>
-              <p className="text-sm text-gray-600">
-                はい、いつでも解約できます。解約後も請求期間の終了まで引き続きプレミアム機能をご利用いただけます。
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-1">
-                支払い方法は何が使えますか？
-              </h3>
-              <p className="text-sm text-gray-600">
-                クレジットカード（Visa, Mastercard, American Express, JCB）でお支払いいただけます。
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-1">
-                領収書は発行できますか？
-              </h3>
-              <p className="text-sm text-gray-600">
-                はい、サブスクリプション管理ページから領収書をダウンロードいただけます。
-              </p>
-            </div>
+          <div className="divide-y divide-gray-200">
+            {faqs.map((faq, index) => (
+              <div key={index} className="py-4 first:pt-0 last:pb-0">
+                <button
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between text-left"
+                >
+                  <h3 className="text-sm font-medium text-gray-900 pr-4">
+                    {faq.question}
+                  </h3>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${
+                      openFaq === index ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {openFaq === index && (
+                  <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
