@@ -41,7 +41,6 @@ import LikedArticles from './pages/LikedArticles';
 import PurchasedArticles from './pages/PurchasedArticles';
 import FavoriteArticles from './pages/FavoriteArticles';
 import RecentArticles from './pages/RecentArticles';
-import FollowingUsers from './pages/FollowingUsers';
 
 // 法務・補助ページ
 import TermsPage from './pages/terms';
@@ -119,15 +118,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <RecentArticles />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/me/following"
-              element={
-                <ProtectedRoute>
-                  <FollowingUsers />
                 </ProtectedRoute>
               }
             />

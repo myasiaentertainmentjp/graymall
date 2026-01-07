@@ -81,7 +81,7 @@
                 <p className="text-sm text-gray-500">{authorStats.total_sales_count}件</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">手数料（15%）</p>
+                <p className="text-sm text-gray-500">手数料（10%）</p>
                 <p className="text-2xl font-bold text-red-600">-{formatCurrency(authorStats.total_platform_fee)}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">

@@ -115,7 +115,7 @@ export default function PrivacyPage() {
               </div>
               <div>
                 <dt className="font-semibold text-gray-700">住所</dt>
-                <dd className="text-gray-600">東京都小金井市本町6-9-39</dd>
+                <dd className="text-gray-600">東京都小金井市本町6-9-39-104</dd>
               </div>
               <div>
                 <dt className="font-semibold text-gray-700">メールアドレス</dt>

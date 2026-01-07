@@ -16,7 +16,7 @@ export default function LawPage() {
               </tr>
               <tr className="border border-gray-200">
                 <th className="bg-gray-50 px-4 py-3 text-left font-semibold text-gray-700 border-r border-gray-200">所在地</th>
-                <td className="px-4 py-3 text-gray-600">東京都小金井市本町6-9-39</td>
+                <td className="px-4 py-3 text-gray-600">東京都小金井市本町6-9-39-104</td>
               </tr>
               <tr className="border border-gray-200">
                 <th className="bg-gray-50 px-4 py-3 text-left font-semibold text-gray-700 border-r border-gray-200">代表者名</th>

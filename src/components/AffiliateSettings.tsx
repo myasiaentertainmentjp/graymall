@@ -281,7 +281,7 @@ export default function AffiliateSettings({ article, onUpdate }: Props) {
                     return (
                       <>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">プラットフォーム手数料 (15%)</span>
+                          <span className="text-gray-600">プラットフォーム手数料 (10%)</span>
                           <span>¥{sim.platformFee}</span>
                         </div>
                         <div className="flex justify-between text-green-700">

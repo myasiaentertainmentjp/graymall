@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
 import type { Database } from '../lib/database.types';
 import { ChevronRight, ChevronDown, FolderOpen } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
@@ -30,12 +29,10 @@ const MAIN_BANNER = {
 };
 
 export default function Home() {
-  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get('category');
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<Record<string, Category[]>>({});
-  const [followingArticles, setFollowingArticles] = useState<Article[]>([]);
   const [popularArticles, setPopularArticles] = useState<Article[]>([]);
   const [newArticles, setNewArticles] = useState<Article[]>([]);
   const [editorPickArticles, setEditorPickArticles] = useState<Article[]>([]);
@@ -47,53 +44,6 @@ export default function Home() {
   useEffect(() => {
     loadData();
   }, []);
-
-  // フォロー中ユーザーの記事を取得
-  useEffect(() => {
-    if (user) {
-      loadFollowingArticles();
-    } else {
-      setFollowingArticles([]);
-    }
-  }, [user]);
-
-  const loadFollowingArticles = async () => {
-    if (!user) return;
-
-    try {
-      // フォロー中のユーザーIDを取得
-      const { data: follows } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
-
-      if (!follows || follows.length === 0) {
-        setFollowingArticles([]);
-        return;
-      }
-
-      const followingIds = follows.map(f => f.following_id);
-
-      // フォロー中ユーザーの記事を取得
-      const { data: articles } = await supabase
-        .from('articles')
-        .select(`
-          *,
-          users:author_id (display_name, email, avatar_url),
-          primary_category:primary_category_id (id, name, slug),
-          sub_category:sub_category_id (id, name, slug)
-        `)
-        .in('author_id', followingIds)
-        .eq('status', 'published')
-        .eq('is_archived', false)
-        .order('published_at', { ascending: false })
-        .limit(8);
-
-      setFollowingArticles((articles || []) as Article[]);
-    } catch (err) {
-      console.error('Error loading following articles:', err);
-    }
-  };
 
   const loadData = async () => {
     setLoading(true);
@@ -364,20 +314,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-
-            {/* Following Articles - フォロー中のユーザーがいる場合のみ表示 */}
-            {followingArticles.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">フォロー中</h2>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {followingArticles.map(article => (
-                    <ArticleCard key={article.id} article={article} />
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Popular Articles */}
             <section>
