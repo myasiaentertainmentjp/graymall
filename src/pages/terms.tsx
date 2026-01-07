@@ -68,7 +68,7 @@ export default function TermsPage() {
             <li>当社は、本サービスの利用に際し、販売者または紹介者に対して手数料を課すことがあります。</li>
             <li>標準的な手数料の目安は、次のとおりとします。
               <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>販売手数料 販売価格の10％</li>
+                <li>販売手数料 販売価格の15％</li>
                 <li>出金手数料 1回あたり350円</li>
                 <li>チャージバック事務手数料 1件あたり3,000円</li>
               </ul>

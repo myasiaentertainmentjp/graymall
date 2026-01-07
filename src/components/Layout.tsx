@@ -99,6 +99,12 @@ export default function Layout({ children }: LayoutProps) {
                           <Link to="/me/articles" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             自分の記事
                           </Link>
+                          <Link to="/me/favorites" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            お気に入り記事
+                          </Link>
+                          <Link to="/me/following" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            フォロー中
+                          </Link>
                           <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             売上管理
                           </Link>
@@ -192,6 +198,12 @@ export default function Layout({ children }: LayoutProps) {
               <div className="border-t border-gray-100 my-2"></div>
               <Link to={`/users/${user?.id}`} className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
                 マイページ
+              </Link>
+              <Link to="/me/favorites" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                お気に入り記事
+              </Link>
+              <Link to="/me/following" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                フォロー中
               </Link>
               <Link to="/settings" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
                 設定
