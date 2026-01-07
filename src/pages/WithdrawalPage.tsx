@@ -656,7 +656,7 @@ export default function WithdrawalPage() {
             <li>最低出金額は¥{MINIMUM_WITHDRAWAL.toLocaleString()}です</li>
             <li>出金申請は月末にまとめて処理されます</li>
             <li>振込処理開始前であればキャンセル可能です</li>
-            <li>プラットフォーム手数料（10%）は売上時点で差し引かれています</li>
+            <li>プラットフォーム手数料（15%）は売上時点で差し引かれています</li>
           </ul>
         </div>
       </div>
