@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import Layout from '../components/Layout';
-import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown } from 'lucide-react';
+import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown, Wallet } from 'lucide-react';
 
 export default function Settings() {
   const { user, profile, refreshProfile } = useAuth();
@@ -478,20 +478,37 @@ export default function Settings() {
               </Link>
             </div>
 
-            {/* Payment Method */}
+            {/* Credit Card - for buyers */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <CreditCard className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-900">支払い方法</h2>
+                <h2 className="text-lg font-semibold text-gray-900">クレジットカード登録</h2>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                記事購入時に使用するクレジットカードを登録できます。
+                記事を購入する際に使用するクレジットカードを登録・管理できます。
+              </p>
+              <Link
+                to="/settings/card"
+                className="inline-block px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+              >
+                カードを管理
+              </Link>
+            </div>
+
+            {/* Bank Account - for sellers */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Wallet className="w-5 h-5 text-gray-600" />
+                <h2 className="text-lg font-semibold text-gray-900">振込口座設定</h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                記事の売上やアフィリエイト報酬を受け取るための振込先口座を設定できます。
               </p>
               <Link
                 to="/settings/payments"
                 className="inline-block px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
               >
-                支払い方法を管理
+                口座を設定
               </Link>
             </div>
           </div>

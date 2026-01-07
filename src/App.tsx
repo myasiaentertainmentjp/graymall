@@ -32,6 +32,7 @@ import UserProfile from './pages/UserProfile';
 import PreviewArticle from './pages/PreviewArticle';
 import PublishConfirm from './pages/PublishConfirm';
 import PaymentSettingsPage from './pages/PaymentSettingsPage';
+import CardRegistrationPage from './pages/CardRegistrationPage';
 import Settings from './pages/Settings';
 import SubscriptionPage from './pages/SubscriptionPage';
 import ArticleSettings from './pages/ArticleSettings';
@@ -220,6 +221,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PaymentSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings/card"
+              element={
+                <ProtectedRoute>
+                  <CardRegistrationPage />
                 </ProtectedRoute>
               }
             />
