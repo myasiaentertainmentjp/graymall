@@ -69,12 +69,7 @@ export default function ContactPage() {
       <div className="max-w-3xl mx-auto px-4 py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">お問い合わせ</h1>
 
-        <p className="text-gray-600 leading-relaxed mb-8">
-          グレーモールに関するお問い合わせは、以下のフォームよりお願いいたします。<br />
-          <span className="text-sm text-gray-500">※内容によっては、ご返信までお時間をいただく場合や、ご回答いたしかねる場合がございます。</span>
-        </p>
-
-        <section className="mb-8">
+        <section className="mb-12">
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col gap-2">
