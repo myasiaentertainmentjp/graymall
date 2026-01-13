@@ -90,15 +90,15 @@
     font-size: 0.875rem;
     color: #6b7280;
     margin-top: 0.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 4rem !important;
   }
 
   .prose figure {
-    margin-bottom: 3rem;
+    margin-bottom: 3rem !important;
   }
 
   .prose figure:has(figcaption) {
-    margin-bottom: 0;
+    margin-bottom: 4rem !important;
   }
 
   /* Mobile: smaller max height */
