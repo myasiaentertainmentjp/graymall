@@ -6,6 +6,9 @@ import Layout from '../components/Layout';
 import CategorySidebar from '../components/CategorySidebar';
 import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 15;
 
 type Category = {
   id: string;
@@ -21,14 +24,18 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
 };
 
 export default function ArticleList() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get('category');
+  const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
 
   const [articles, setArticles] = useState<Article[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [category, setCategory] = useState<Category | null>(null);
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   useEffect(() => {
     loadCategories();
@@ -36,7 +43,7 @@ export default function ArticleList() {
 
   useEffect(() => {
     loadArticles();
-  }, [categorySlug]);
+  }, [categorySlug, currentPage]);
 
   const loadCategories = async () => {
     const { data } = await supabase
@@ -71,7 +78,10 @@ export default function ArticleList() {
         setCategory(null);
       }
 
-      // 記事を取得
+      // 記事を取得（ページネーション付き）
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from('articles')
         .select(`
@@ -79,7 +89,7 @@ export default function ArticleList() {
           users:author_id (display_name, email),
           primary_category:primary_category_id (id, name, slug),
           sub_category:sub_category_id (id, name, slug)
-        `)
+        `, { count: 'exact' })
         .eq('status', 'published')
         .eq('is_archived', false);
 
@@ -88,13 +98,16 @@ export default function ArticleList() {
         query = query.or(`primary_category_id.eq.${categoryId},sub_category_id.eq.${categoryId}`);
       }
 
-      const { data, error: fetchError } = await query.order('published_at', { ascending: false });
+      const { data, error: fetchError, count } = await query
+        .order('published_at', { ascending: false })
+        .range(from, to);
 
       if (fetchError) {
         setError('記事の読み込みに失敗しました');
         console.error('Error loading articles:', fetchError);
       } else {
         setArticles((data ?? []) as Article[]);
+        setTotalCount(count ?? 0);
       }
     } catch (err) {
       setError('記事の読み込みに失敗しました');
@@ -102,6 +115,55 @@ export default function ArticleList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ページ変更
+  const goToPage = (page: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (page === 1) {
+      newParams.delete('page');
+    } else {
+      newParams.set('page', String(page));
+    }
+    setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ページネーションの番号を生成
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    const showPages = 5; // 表示するページ番号の数
+
+    if (totalPages <= showPages + 2) {
+      // 全ページ表示
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 最初のページ
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push('ellipsis');
+      }
+
+      // 現在のページ周辺
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('ellipsis');
+      }
+
+      // 最後のページ
+      pages.push(totalPages);
+    }
+
+    return pages;
   };
 
   return (
@@ -146,9 +208,10 @@ export default function ArticleList() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {category ? category.name : '記事一覧'}
               </h1>
-              {category && (
+              {!loading && (
                 <p className="text-gray-500 text-sm mt-1">
-                  {articles.length}件の記事
+                  {totalCount}件の記事
+                  {totalPages > 1 && ` (${currentPage}/${totalPages}ページ)`}
                 </p>
               )}
             </div>
@@ -168,11 +231,69 @@ export default function ArticleList() {
                 {category ? 'このカテゴリにはまだ記事がありません' : 'まだ公開記事がありません'}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {articles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {articles.map((article) => (
+                    <ArticleCard key={article.id} article={article} />
+                  ))}
+                </div>
+
+                {/* ページネーション */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-1 sm:gap-2">
+                    {/* 前へボタン */}
+                    <button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === 1
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                      aria-label="前のページ"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    {/* ページ番号 */}
+                    <div className="flex items-center gap-1">
+                      {getPageNumbers().map((page, idx) =>
+                        page === 'ellipsis' ? (
+                          <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => goToPage(page)}
+                            className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${
+                              currentPage === page
+                                ? 'bg-gray-900 text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+                    </div>
+
+                    {/* 次へボタン */}
+                    <button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === totalPages
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                      aria-label="次のページ"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
