@@ -1,5 +1,6 @@
 // src/pages/contact.tsx
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 
@@ -68,9 +69,42 @@ export default function ContactPage() {
       <div className="max-w-3xl mx-auto px-4 py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">お問い合わせ</h1>
 
-        <p className="text-gray-600 leading-relaxed mb-8">
-          グレーモールに関するお問い合わせは、以下のフォームよりお願いいたします。<br />
-          <span className="text-sm text-gray-500">※内容によっては、ご返信までお時間をいただく場合や、回答いたしかねる場合がございます。</span>
+        <p className="text-gray-600 leading-relaxed mb-6">
+          グレーモールに関するお問い合わせは、以下のフォームよりお願いいたします。
+        </p>
+
+        {/* 運営者連絡先ブロック */}
+        <div className="bg-gray-50 p-5 rounded-lg mb-6">
+          <h2 className="font-semibold text-gray-800 mb-3">運営者連絡先</h2>
+          <dl className="space-y-2 text-sm">
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">運営者</dt>
+              <dd className="text-gray-800">合同会社マイアジアエンターテインメント</dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">メール</dt>
+              <dd><a href="mailto:info@graymall.jp" className="text-blue-600 hover:underline">info@graymall.jp</a></dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">電話</dt>
+              <dd className="text-gray-800">090-5835-6898</dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">受付時間</dt>
+              <dd className="text-gray-800">平日10:00〜18:00（年末年始を除く）</dd>
+            </div>
+          </dl>
+          <p className="text-sm text-gray-500 mt-3">受付時間外はメールにてお願いいたします。</p>
+        </div>
+
+        {/* プライバシーポリシーへのリンク */}
+        <p className="text-sm text-gray-600 mb-6">
+          送信いただいた内容は、<Link to="/privacy" className="text-blue-600 hover:underline">プライバシーポリシー</Link>に従って取り扱います。
+        </p>
+
+        {/* 注意書き */}
+        <p className="text-sm text-gray-500 mb-8">
+          ※内容によっては、ご返信までお時間をいただく場合や、ご回答いたしかねる場合がございます。
         </p>
 
         <section className="mb-8">
