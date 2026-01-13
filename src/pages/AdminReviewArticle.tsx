@@ -1,7 +1,7 @@
 // src/pages/AdminReviewArticle.tsx
   import { useEffect, useState } from 'react';
   import { useNavigate, useParams } from 'react-router-dom';
-  import { ChevronLeft, Check, X, Image, Tag } from 'lucide-react';
+  import { ChevronLeft, Check, X, Image, Tag, Layout } from 'lucide-react';
   import { supabase } from '../lib/supabase';
 
   type Category = {
@@ -10,6 +10,14 @@
     name: string;
     slug: string;
     sort_order: number;
+  };
+
+  type HomepageSection = {
+    id: string;
+    section_key: string;
+    title: string;
+    display_order: number;
+    is_active: boolean;
   };
 
   type Article = {
@@ -49,6 +57,10 @@
     const [selectedPrimaryCategoryId, setSelectedPrimaryCategoryId] = useState<string>('');
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string>('');
 
+    // ホームページセクション関連
+    const [homepageSections, setHomepageSections] = useState<HomepageSection[]>([]);
+    const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
+
     // 親カテゴリ一覧
     const parentCategories = categories.filter((c) => c.parent_id === null);
 
@@ -60,6 +72,7 @@
 
     useEffect(() => {
       loadCategories();
+      loadHomepageSections();
     }, []);
 
     useEffect(() => {
@@ -76,6 +89,27 @@
       if (!error && data) {
         setCategories(data);
       }
+    }
+
+    async function loadHomepageSections() {
+      const { data, error } = await supabase
+        .from('homepage_sections')
+        .select('*')
+        .order('display_order');
+
+      if (!error && data) {
+        setHomepageSections(data);
+      }
+    }
+
+    function handleSectionToggle(sectionId: string) {
+      setSelectedSectionIds(prev => {
+        if (prev.includes(sectionId)) {
+          return prev.filter(id => id !== sectionId);
+        } else {
+          return [...prev, sectionId];
+        }
+      });
     }
 
     async function loadArticle() {
@@ -164,7 +198,30 @@
         return;
       }
 
-      // 2. 旧バージョンがあればアーカイブ
+      // 2. 選択されたホームページセクションに記事を追加
+      if (selectedSectionIds.length > 0) {
+        for (const sectionId of selectedSectionIds) {
+          // 既存の記事数を取得して display_order を決定
+          const { data: existingArticles } = await supabase
+            .from('homepage_section_articles')
+            .select('display_order')
+            .eq('section_id', sectionId)
+            .order('display_order', { ascending: false })
+            .limit(1);
+
+          const maxOrder = existingArticles && existingArticles.length > 0
+            ? existingArticles[0].display_order
+            : 0;
+
+          await supabase.from('homepage_section_articles').insert({
+            section_id: sectionId,
+            article_id: id,
+            display_order: maxOrder + 1,
+          });
+        }
+      }
+
+      // 3. 旧バージョンがあればアーカイブ
       if (article.parent_article_id) {
         const { error: archiveError } = await supabase
           .from('articles')
@@ -320,6 +377,42 @@
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* トップページ表示設定 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
+              <div className="flex items-center gap-2 text-blue-800 font-semibold">
+                <Layout className="w-4 h-4" />
+                トップページ表示設定（任意）
+              </div>
+              <div className="text-sm text-blue-700 mb-2">
+                この記事を表示するセクションを選択してください。後から「トップページ管理」で変更することもできます。
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {homepageSections.map((section) => (
+                  <label
+                    key={section.id}
+                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedSectionIds.includes(section.id)
+                        ? 'bg-blue-100 border-blue-400'
+                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSectionIds.includes(section.id)}
+                      onChange={() => handleSectionToggle(section.id)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-900">{section.title}</span>
+                  </label>
+                ))}
+              </div>
+              {homepageSections.length === 0 && (
+                <div className="text-sm text-gray-500">
+                  セクションが設定されていません。
+                </div>
+              )}
             </div>
 
             <div>

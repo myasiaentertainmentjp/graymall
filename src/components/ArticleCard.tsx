@@ -173,16 +173,12 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             {article.price > 0 ? `¥${article.price.toLocaleString()}` : '無料'}
           </div>
 
-          {/* Affiliate info */}
-          {affiliateLabel ? (
+          {/* Affiliate info - only show when affiliate is enabled */}
+          {affiliateLabel && (
             <div className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded inline-block">
               {affiliateLabel}
             </div>
-          ) : article.affiliate_enabled === false ? (
-            <div className="text-xs text-gray-400 mb-2">
-              紹介機能を利用できません
-            </div>
-          ) : null}
+          )}
 
           {/* Divider */}
           <div className="border-t border-gray-100 my-2"></div>

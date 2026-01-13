@@ -1,7 +1,7 @@
 // src/pages/Editor.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Eye, Save, Send, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ChevronLeft, Eye, Save, Send, MoreHorizontal, Trash2, X, List, Settings } from 'lucide-react';
 
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -78,6 +78,10 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
 
     // SP用メニュー表示状態
     const [spMenuOpen, setSpMenuOpen] = useState(false);
+
+    // サイドバーの表示状態
+    const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+    const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 
     // アフィリエイト関連
     const [affiliateEnabled, setAffiliateEnabled] = useState(false);
@@ -600,17 +604,59 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
 
         <div className="max-w-[1400px] mx-auto px-4 py-4">
           <div className="grid grid-cols-12 gap-4">
-            <div className="hidden lg:block col-span-3">
-              <div className="rounded-2xl border border-gray-200 bg-white p-3">
-                <div className="text-sm font-semibold text-gray-900 mb-3">目次</div>
-                <TableOfContentsPanel
-                  headings={headings}
-                  onJump={handleJumpToHeading}
-                />
+            {/* 左サイドバー（目次） */}
+            <div className={`hidden lg:block col-span-3 ${leftSidebarOpen ? '' : 'lg:hidden'}`}>
+              <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+                <div className="rounded-2xl border border-gray-200 bg-white p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-semibold text-gray-900">目次</div>
+                    <button
+                      type="button"
+                      onClick={() => setLeftSidebarOpen(false)}
+                      className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                      title="閉じる"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <TableOfContentsPanel
+                    headings={headings}
+                    onJump={handleJumpToHeading}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="col-span-12 lg:col-span-6">
+            {/* メインエディタ - サイドバーの開閉に応じて幅を調整 */}
+            <div className={`col-span-12 ${
+              leftSidebarOpen && rightSidebarOpen ? 'lg:col-span-6' :
+              leftSidebarOpen || rightSidebarOpen ? 'lg:col-span-9' :
+              'lg:col-span-12'
+            }`}>
+              {/* サイドバー再表示ボタン */}
+              <div className="hidden lg:flex gap-2 mb-4">
+                {!leftSidebarOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setLeftSidebarOpen(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50"
+                  >
+                    <List className="w-4 h-4" />
+                    目次を表示
+                  </button>
+                )}
+                {!rightSidebarOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setRightSidebarOpen(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50"
+                  >
+                    <Settings className="w-4 h-4" />
+                    設定を表示
+                  </button>
+                )}
+              </div>
+
               <div className="bg-white p-4">
                 <textarea
                   value={title}
@@ -642,33 +688,46 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
               </div>
             </div>
 
-            <div className="hidden lg:block col-span-3">
-              <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                <div className="text-sm font-semibold text-gray-900 mb-3">記事設定</div>
+            {/* 右サイドバー（記事設定） */}
+            <div className={`hidden lg:block col-span-3 ${rightSidebarOpen ? '' : 'lg:hidden'}`}>
+              <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+                <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-semibold text-gray-900">記事設定</div>
+                    <button
+                      type="button"
+                      onClick={() => setRightSidebarOpen(false)}
+                      className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                      title="閉じる"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                <ArticleSettingsPanel
-                  thumbnailUrl={coverImageUrl || null}
-                  onChangeThumbnail={setCoverImageUrl}
-                  isPaid={isPaid}
-                  onChangeIsPaid={handleChangeIsPaid}
-                  price={price}
-                  onChangePrice={setPrice}
-                  tags={tags}
-                  onChangeTags={setTags}
-                  status={status}
-                  onChangeStatus={setStatus}
-                  stats={stats}
-                  onUploadThumbnail={uploadThumbnail}
-                  affiliateEnabled={affiliateEnabled}
-                  onChangeAffiliateEnabled={setAffiliateEnabled}
-                  affiliateTarget={affiliateTarget}
-                  onChangeAffiliateTarget={setAffiliateTarget}
-                  affiliateRate={affiliateRate}
-                  onChangeAffiliateRate={handleAffiliateRateChange}
-                  affiliateRateError={affiliateRateError}
-                  affiliateRateNextChangeAt={affiliateRateNextChangeAt}
-                  showPaidBoundary={showPaidBoundary}
-                />
+                  <ArticleSettingsPanel
+                    thumbnailUrl={coverImageUrl || null}
+                    onChangeThumbnail={setCoverImageUrl}
+                    isPaid={isPaid}
+                    onChangeIsPaid={handleChangeIsPaid}
+                    price={price}
+                    onChangePrice={setPrice}
+                    tags={tags}
+                    onChangeTags={setTags}
+                    status={status}
+                    onChangeStatus={setStatus}
+                    stats={stats}
+                    onUploadThumbnail={uploadThumbnail}
+                    affiliateEnabled={affiliateEnabled}
+                    onChangeAffiliateEnabled={setAffiliateEnabled}
+                    affiliateTarget={affiliateTarget}
+                    onChangeAffiliateTarget={setAffiliateTarget}
+                    affiliateRate={affiliateRate}
+                    onChangeAffiliateRate={handleAffiliateRateChange}
+                    affiliateRateError={affiliateRateError}
+                    affiliateRateNextChangeAt={affiliateRateNextChangeAt}
+                    showPaidBoundary={showPaidBoundary}
+                  />
+                </div>
               </div>
             </div>
           </div>

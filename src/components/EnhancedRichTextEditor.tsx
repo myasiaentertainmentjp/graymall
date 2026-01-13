@@ -635,6 +635,11 @@
       onCreate: ({ editor }) => {
         freeEditorInitializedRef.current = true;
         setTimeout(() => updatePlusButtonPosition(editor, freeEditorContainerRef), 50);
+        // 初期化時に見出しを抽出
+        const initialHtml = editor.getHTML();
+        if (initialHtml) {
+          scheduleHeadingExtraction(initialHtml);
+        }
       },
       onFocus: ({ editor }) => {
         setActive('free');
@@ -766,10 +771,12 @@
         const currentHtml = freeEditor.getHTML();
         if (currentHtml !== content) {
           freeEditor.commands.setContent(content || '<p></p>', false);
+          // コンテンツ読み込み時に見出しを抽出
+          scheduleHeadingExtraction(content || '');
         }
         lastExternalContentRef.current = content;
       }
-    }, [content, freeEditor]);
+    }, [content, freeEditor, scheduleHeadingExtraction]);
 
     useEffect(() => {
       if (!paidEditor || !paidEditorInitializedRef.current) return;

@@ -15,11 +15,18 @@
             className="w-full rounded-xl"
           />
           <div className="mt-2 flex items-center justify-center">
-            <input
+            <textarea
               value={caption || ''}
               onChange={(e) => props.updateAttributes({ caption: e.target.value })}
               placeholder="キャプションを入力"
-              className="text-center text-sm text-gray-500 bg-transparent border-none outline-none w-full placeholder:text-gray-400"
+              className="text-center text-sm text-gray-500 bg-transparent border-none outline-none w-full placeholder:text-gray-400 resize-none overflow-hidden"
+              rows={1}
+              style={{ minHeight: '1.5em' }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                target.style.height = target.scrollHeight + 'px';
+              }}
             />
           </div>
         </figure>

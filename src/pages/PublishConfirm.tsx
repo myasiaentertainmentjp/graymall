@@ -70,7 +70,7 @@
       }
 
       alert('公開申請を送信しました。管理者の確認をお待ちください。');
-      navigate('/dashboard');
+      navigate('/me/articles');
     }
 
     if (loading) {

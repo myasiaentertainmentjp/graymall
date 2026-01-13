@@ -101,8 +101,8 @@
           </div>
 
           {thumbnailUrl ? (
-            <div className="relative rounded-2xl overflow-hidden border border-gray-200">
-              <img src={thumbnailUrl} alt="thumbnail" className="w-full h-[180px] object-cover" />
+            <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-100">
+              <img src={thumbnailUrl} alt="thumbnail" className="w-full h-[180px] object-contain" />
               <div className="absolute top-3 right-3 flex items-center gap-2">
                 <button
                   type="button"
