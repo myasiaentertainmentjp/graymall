@@ -1,7 +1,19 @@
 User-agent: *
 Allow: /
 
-# Block admin and private pages
+# 公開ページ
+Allow: /articles
+Allow: /articles/*
+Allow: /users/*
+Allow: /terms
+Allow: /privacy
+Allow: /law
+Allow: /guidelines
+Allow: /faq
+Allow: /contact
+Allow: /company
+
+# 認証・管理ページはブロック
 Disallow: /admin
 Disallow: /admin/*
 Disallow: /dashboard
@@ -9,8 +21,19 @@ Disallow: /dashboard/*
 Disallow: /profile
 Disallow: /editor/*
 Disallow: /me/*
-Disallow: /signin
-Disallow: /signup
+Disallow: /settings
+Disallow: /settings/*
+Disallow: /withdrawal
+Disallow: /preview/*
+Disallow: /publish/*
+Disallow: /article/*/settings
+
+# 認証ページ（インデックスさせる場合はコメントアウト）
+# Disallow: /signin
+# Disallow: /signup
 
 # Sitemap
 Sitemap: https://graymall.jp/sitemap.xml
+
+# Crawl-delay (optional)
+Crawl-delay: 1

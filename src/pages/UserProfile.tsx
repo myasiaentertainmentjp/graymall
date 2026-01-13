@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
 import { Settings, ExternalLink } from 'lucide-react';
+import { FollowButton } from '../features/social/FollowButton';
 
 // SNS Icons
 function XIcon({ className }: { className?: string }) {
@@ -139,7 +140,7 @@ export default function UserProfile() {
                   <h1 className="text-2xl font-bold text-gray-900 truncate">
                     {profile.display_name || 'ユーザー'}
                   </h1>
-                  {isOwnProfile && (
+                  {isOwnProfile ? (
                     <Link
                       to="/settings"
                       className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
@@ -147,6 +148,8 @@ export default function UserProfile() {
                     >
                       <Settings className="w-5 h-5" />
                     </Link>
+                  ) : (
+                    <FollowButton targetUserId={userId} />
                   )}
                 </div>
 

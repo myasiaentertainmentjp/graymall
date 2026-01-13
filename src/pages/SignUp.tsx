@@ -41,6 +41,16 @@ export default function SignUp() {
       console.log('[SignUp] User ID:', user?.id);
       console.log('[SignUp] Email:', user?.email);
 
+      // GTM: 会員登録完了イベント
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+          event: 'sign_up',
+          method: 'email',
+          user_id: user?.id,
+        });
+        console.log('[GTM] sign_up event pushed');
+      }
+
       setSuccess(true);
       setLoading(false);
 

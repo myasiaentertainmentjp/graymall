@@ -174,6 +174,8 @@ export interface Database {
           affiliate_target: 'all' | 'buyers' | null
           affiliate_rate: number | null
           affiliate_rate_last_changed_at: string | null
+          // Tags
+          tags: string[]
         }
         Insert: {
           id?: string
@@ -199,6 +201,7 @@ export interface Database {
           affiliate_target?: 'all' | 'buyers' | null
           affiliate_rate?: number | null
           affiliate_rate_last_changed_at?: string | null
+          tags?: string[]
         }
         Update: {
           id?: string
@@ -224,6 +227,7 @@ export interface Database {
           affiliate_target?: 'all' | 'buyers' | null
           affiliate_rate?: number | null
           affiliate_rate_last_changed_at?: string | null
+          tags?: string[]
         }
       }
       orders: {
@@ -516,31 +520,28 @@ export interface Database {
       homepage_sections: {
         Row: {
           id: string
-          section_type: 'popular' | 'new' | 'category_pickup' | 'editor_pick' | 'ad_banner'
+          section_key: string
           title: string
-          sort_order: number
+          display_order: number
           is_active: boolean
-          category_id: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          section_type: 'popular' | 'new' | 'category_pickup' | 'editor_pick' | 'ad_banner'
+          section_key: string
           title: string
-          sort_order?: number
+          display_order?: number
           is_active?: boolean
-          category_id?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          section_type?: 'popular' | 'new' | 'category_pickup' | 'editor_pick' | 'ad_banner'
+          section_key?: string
           title?: string
-          sort_order?: number
+          display_order?: number
           is_active?: boolean
-          category_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -637,6 +638,26 @@ export interface Database {
           id?: string
           user_id?: string
           article_id?: string
+          created_at?: string
+        }
+      }
+      follows: {
+        Row: {
+          id: string
+          follower_id: string
+          following_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          following_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          following_id?: string
           created_at?: string
         }
       }

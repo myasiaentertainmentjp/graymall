@@ -57,6 +57,8 @@ import { supabase } from '../lib/supabase';
     const [homepageSections, setHomepageSections] = useState<HomepageSection[]>([]);
     const [sectionArticles, setSectionArticles] = useState<SectionArticle[]>([]);
     const [loading, setLoading] = useState(true);
+    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+    const [savingCategory, setSavingCategory] = useState(false);
 
     useEffect(() => {
       let alive = true;
@@ -161,6 +163,44 @@ import { supabase } from '../lib/supabase';
 
     function handleReview(articleId: string) {
       navigate(`/admin/review/${articleId}`);
+    }
+
+    async function handleCategoryChange(articleId: string, primaryCategoryId: string | null, subCategoryId: string | null) {
+      setSavingCategory(true);
+      try {
+        const { error } = await supabase
+          .from('articles')
+          .update({
+            primary_category_id: primaryCategoryId,
+            sub_category_id: subCategoryId,
+          })
+          .eq('id', articleId);
+
+        if (error) throw error;
+
+        // Update local state
+        setPublishedArticles(prev =>
+          prev.map(a =>
+            a.id === articleId
+              ? { ...a, primary_category_id: primaryCategoryId, sub_category_id: subCategoryId }
+              : a
+          )
+        );
+        setEditingCategoryId(null);
+      } catch (err) {
+        console.error('Error updating category:', err);
+        alert('カテゴリの更新に失敗しました');
+      } finally {
+        setSavingCategory(false);
+      }
+    }
+
+    function getParentCategories() {
+      return categories.filter(c => !c.parent_id);
+    }
+
+    function getSubCategories(parentId: string) {
+      return categories.filter(c => c.parent_id === parentId);
     }
 
     return (
@@ -273,18 +313,37 @@ import { supabase } from '../lib/supabase';
                             {/* カテゴリ */}
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <Tag className="w-3 h-3 text-gray-400" />
-                              {parentCat ? (
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                                  {parentCat}
-                                </span>
-                              ) : null}
-                              {subCat ? (
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                                  {subCat}
-                                </span>
-                              ) : null}
-                              {!parentCat && !subCat && (
-                                <span className="text-xs text-gray-400">未設定</span>
+                              {editingCategoryId === a.id ? (
+                                <CategoryEditor
+                                  article={a}
+                                  parentCategories={getParentCategories()}
+                                  getSubCategories={getSubCategories}
+                                  onSave={handleCategoryChange}
+                                  onCancel={() => setEditingCategoryId(null)}
+                                  saving={savingCategory}
+                                />
+                              ) : (
+                                <>
+                                  {parentCat ? (
+                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                      {parentCat}
+                                    </span>
+                                  ) : null}
+                                  {subCat ? (
+                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                      {subCat}
+                                    </span>
+                                  ) : null}
+                                  {!parentCat && !subCat && (
+                                    <span className="text-xs text-gray-400">未設定</span>
+                                  )}
+                                  <button
+                                    onClick={() => setEditingCategoryId(a.id)}
+                                    className="text-xs text-blue-600 hover:text-blue-800 ml-2"
+                                  >
+                                    編集
+                                  </button>
+                                </>
                               )}
                             </div>
 
@@ -315,6 +374,76 @@ import { supabase } from '../lib/supabase';
             </>
           )}
         </div>
+      </div>
+    );
+  }
+
+  // Category Editor Component
+  function CategoryEditor({
+    article,
+    parentCategories,
+    getSubCategories,
+    onSave,
+    onCancel,
+    saving,
+  }: {
+    article: PublishedArticle;
+    parentCategories: Category[];
+    getSubCategories: (parentId: string) => Category[];
+    onSave: (articleId: string, primaryCategoryId: string | null, subCategoryId: string | null) => void;
+    onCancel: () => void;
+    saving: boolean;
+  }) {
+    const [primaryId, setPrimaryId] = useState(article.primary_category_id || '');
+    const [subId, setSubId] = useState(article.sub_category_id || '');
+
+    const subCategories = primaryId ? getSubCategories(primaryId) : [];
+
+    return (
+      <div className="flex items-center gap-2 flex-wrap">
+        <select
+          value={primaryId}
+          onChange={(e) => {
+            setPrimaryId(e.target.value);
+            setSubId(''); // Reset sub when parent changes
+          }}
+          className="text-xs border border-gray-300 rounded px-2 py-1"
+          disabled={saving}
+        >
+          <option value="">親カテゴリを選択</option>
+          {parentCategories.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+
+        {subCategories.length > 0 && (
+          <select
+            value={subId}
+            onChange={(e) => setSubId(e.target.value)}
+            className="text-xs border border-gray-300 rounded px-2 py-1"
+            disabled={saving}
+          >
+            <option value="">サブカテゴリを選択</option>
+            {subCategories.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        )}
+
+        <button
+          onClick={() => onSave(article.id, primaryId || null, subId || null)}
+          disabled={saving}
+          className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {saving ? '保存中...' : '保存'}
+        </button>
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="text-xs text-gray-500 hover:text-gray-700"
+        >
+          キャンセル
+        </button>
       </div>
     );
   }

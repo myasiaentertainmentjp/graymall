@@ -252,7 +252,7 @@ export default function Layout({ children }: LayoutProps) {
                   className="flex items-center gap-3 py-2.5 text-red-600 w-full text-left"
                   type="button"
                 >
-                  サインアウト
+                  ログアウト
                 </button>
               </div>
             </div>

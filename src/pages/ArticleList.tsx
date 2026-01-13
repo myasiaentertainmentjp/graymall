@@ -83,9 +83,9 @@ export default function ArticleList() {
         .eq('status', 'published')
         .eq('is_archived', false);
 
-      // カテゴリで絞り込み
+      // カテゴリで絞り込み（primary_category_id または sub_category_id で一致）
       if (categoryId) {
-        query = query.eq('primary_category_id', categoryId);
+        query = query.or(`primary_category_id.eq.${categoryId},sub_category_id.eq.${categoryId}`);
       }
 
       const { data, error: fetchError } = await query.order('published_at', { ascending: false });

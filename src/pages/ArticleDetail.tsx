@@ -52,6 +52,27 @@ export default function ArticleDetail() {
     }
   }, [searchParams]);
 
+  // GTM: 購入完了イベント
+  useEffect(() => {
+    if (paymentSuccess && article && typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: `${article.id}_${Date.now()}`,
+          value: article.price || 0,
+          currency: 'JPY',
+          items: [{
+            item_id: article.id,
+            item_name: article.title,
+            price: article.price || 0,
+            quantity: 1,
+          }],
+        },
+      });
+      console.log('[GTM] purchase event pushed', article.id);
+    }
+  }, [paymentSuccess, article]);
+
   // 記事読み込み
   useEffect(() => {
     loadArticle();
@@ -253,7 +274,7 @@ export default function ArticleDetail() {
           <img
             src={article.cover_image_url}
             alt={article.title}
-            className="w-full h-48 sm:h-64 md:h-80 object-contain bg-gray-100 rounded-lg mb-8"
+            className="w-full h-auto max-h-96 object-contain rounded-lg mb-8"
           />
         )}
 

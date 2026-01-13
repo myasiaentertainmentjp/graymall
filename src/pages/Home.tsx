@@ -345,9 +345,11 @@ export default function Home() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-900">フォロー中</h2>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
                   {followingArticles.map(article => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -364,9 +366,11 @@ export default function Home() {
                   もっと見る <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {popularArticles.slice(0, 8).map((article, idx) => (
-                  <ArticleCard key={article.id} article={article} rank={idx + 1} />
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                {popularArticles.slice(0, 6).map((article, idx) => (
+                  <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                    <ArticleCard article={article} rank={idx + 1} />
+                  </div>
                 ))}
               </div>
             </section>
@@ -382,9 +386,11 @@ export default function Home() {
                   もっと見る <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {newArticles.map(article => (
-                  <ArticleCard key={article.id} article={article} />
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                {newArticles.slice(0, 6).map(article => (
+                  <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                    <ArticleCard article={article} />
+                  </div>
                 ))}
               </div>
             </section>
@@ -395,37 +401,16 @@ export default function Home() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-900">編集部おすすめ</h2>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {editorPickArticles.map(article => (
-                    <ArticleCard key={article.id} article={article} />
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {editorPickArticles.slice(0, 6).map(article => (
+                    <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Category Pickups */}
-            {parentCategories.map(cat => {
-              const articles = categoryArticles[cat.id] || [];
-              if (articles.length === 0) return null;
-              return (
-                <section key={cat.id}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">{cat.name}</h2>
-                    <Link
-                      to={`/articles?category=${cat.slug}`}
-                      className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
-                    >
-                      もっと見る <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {articles.map(article => (
-                      <ArticleCard key={article.id} article={article} />
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
               </div>
             )}
           </div>

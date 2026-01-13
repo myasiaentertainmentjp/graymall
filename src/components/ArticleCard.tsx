@@ -1,7 +1,7 @@
 // src/components/ArticleCard.tsx
 import { Link } from 'react-router-dom';
 import type { Database } from '../lib/database.types';
-import { Heart, Tag } from 'lucide-react';
+import { Heart, ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -50,6 +50,23 @@ function getAffiliateLabel(article: Article): string | null {
   const target = article.affiliate_target === 'buyers' ? '購入者のみ' : '全員';
 
   return `紹介で${rate}%還元（${target}）`;
+}
+
+// カテゴリごとの背景色
+const CATEGORY_COLORS: Record<string, string> = {
+  'general-business': 'bg-blue-100 text-blue-700',
+  'side-business': 'bg-green-100 text-green-700',
+  'investment': 'bg-yellow-100 text-yellow-700',
+  'lifestyle': 'bg-pink-100 text-pink-700',
+  'career': 'bg-purple-100 text-purple-700',
+  'health': 'bg-red-100 text-red-700',
+  'technology': 'bg-indigo-100 text-indigo-700',
+  'creative': 'bg-orange-100 text-orange-700',
+};
+
+function getCategoryColor(slug: string | undefined): string {
+  if (!slug) return 'bg-gray-100 text-gray-600';
+  return CATEGORY_COLORS[slug] || 'bg-gray-100 text-gray-600';
 }
 
 interface ArticleCardProps {
@@ -124,7 +141,7 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-300">
-              <Tag className="w-8 h-8" />
+              <ImageIcon className="w-8 h-8" />
             </div>
           )}
 
@@ -158,12 +175,11 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             {article.title}
           </h3>
 
-          {/* Category tag */}
-          {categoryLabel && (
+          {/* Category */}
+          {article.primary_category && (
             <div className="mb-2">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                <Tag className="w-3 h-3" />
-                {categoryLabel}
+              <span className={`inline-block px-2 py-0.5 text-xs rounded-full font-medium ${getCategoryColor(article.primary_category.slug)}`}>
+                {article.primary_category.name}
               </span>
             </div>
           )}
