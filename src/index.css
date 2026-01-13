@@ -66,3 +66,52 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+
+  /* Article content images - constrain size and center */
+  .prose img,
+  .prose figure {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.75rem;
+  }
+
+  .prose figure img {
+    max-height: 500px;
+  }
+
+  .prose figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  /* Mobile: smaller max height */
+  @media (max-width: 768px) {
+    .prose img,
+    .prose figure img {
+      max-height: 350px;
+    }
+  }
+
+  /* Ensure images with data-gm-image are also constrained */
+  .prose figure[data-gm-image] {
+    text-align: center;
+  }
+
+  .prose figure[data-gm-image] img {
+    display: inline-block;
+    max-height: 500px;
+  }
+
+  @media (max-width: 768px) {
+    .prose figure[data-gm-image] img {
+      max-height: 350px;
+    }
+  }

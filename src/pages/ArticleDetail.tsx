@@ -253,7 +253,7 @@ export default function ArticleDetail() {
           <img
             src={article.cover_image_url}
             alt={article.title}
-            className="w-full h-96 object-cover rounded-lg mb-8"
+            className="w-full h-48 sm:h-64 md:h-80 object-contain bg-gray-100 rounded-lg mb-8"
           />
         )}
 

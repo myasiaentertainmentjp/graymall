@@ -8,11 +8,11 @@
 
     return (
       <NodeViewWrapper className="my-6">
-        <figure className="m-0">
+        <figure className="m-0 text-center">
           <img
             src={src}
             alt={alt || ''}
-            className="w-full rounded-xl"
+            className="max-w-full max-h-[400px] w-auto h-auto mx-auto rounded-xl object-contain"
           />
           <div className="mt-2 flex items-center justify-center">
             <textarea
@@ -79,18 +79,19 @@
       const imgAttrs = mergeAttributes(rest, {
         src,
         alt: alt || '',
+        style: 'max-width:100%;max-height:500px;width:auto;height:auto;display:block;margin:0 auto;border-radius:0.75rem;',
       });
 
       if (caption) {
         return [
           'figure',
-          { 'data-gm-image': '1' },
+          { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0;' },
           ['img', imgAttrs],
           ['figcaption', { style: 'margin-top:8px;font-size:14px;color:#6b7280;text-align:center;' }, caption],
         ];
       }
 
-      return ['figure', { 'data-gm-image': '1' }, ['img', imgAttrs]];
+      return ['figure', { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0;' }, ['img', imgAttrs]];
     },
 
     addNodeView() {
