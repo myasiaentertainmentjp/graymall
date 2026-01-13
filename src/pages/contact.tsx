@@ -73,30 +73,6 @@ export default function ContactPage() {
           グレーモールに関するお問い合わせは、以下のフォームよりお願いいたします。
         </p>
 
-        {/* 運営者連絡先ブロック */}
-        <div className="bg-gray-50 p-5 rounded-lg mb-6">
-          <h2 className="font-semibold text-gray-800 mb-3">運営者連絡先</h2>
-          <dl className="space-y-2 text-sm">
-            <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">運営者</dt>
-              <dd className="text-gray-800">合同会社マイアジアエンターテインメント</dd>
-            </div>
-            <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">メール</dt>
-              <dd><a href="mailto:info@graymall.jp" className="text-blue-600 hover:underline">info@graymall.jp</a></dd>
-            </div>
-            <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">電話</dt>
-              <dd className="text-gray-800">090-5835-6898</dd>
-            </div>
-            <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">受付時間</dt>
-              <dd className="text-gray-800">平日10:00〜18:00（年末年始を除く）</dd>
-            </div>
-          </dl>
-          <p className="text-sm text-gray-500 mt-3">受付時間外はメールにてお願いいたします。</p>
-        </div>
-
         {/* プライバシーポリシーへのリンク */}
         <p className="text-sm text-gray-600 mb-6">
           送信いただいた内容は、<Link to="/privacy" className="text-blue-600 hover:underline">プライバシーポリシー</Link>に従って取り扱います。
@@ -201,6 +177,30 @@ export default function ContactPage() {
             </div>
           </form>
         </section>
+
+        {/* 運営者連絡先ブロック */}
+        <div className="bg-gray-50 p-5 rounded-lg">
+          <h2 className="font-semibold text-gray-800 mb-3">運営者連絡先</h2>
+          <dl className="space-y-2 text-sm">
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">運営者</dt>
+              <dd className="text-gray-800">合同会社マイアジアエンターテインメント</dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">メール</dt>
+              <dd><a href="mailto:info@graymall.jp" className="text-blue-600 hover:underline">info@graymall.jp</a></dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">電話</dt>
+              <dd className="text-gray-800">090-5835-6898</dd>
+            </div>
+            <div className="flex">
+              <dt className="text-gray-600 w-24 flex-shrink-0">受付時間</dt>
+              <dd className="text-gray-800">平日10:00〜18:00（年末年始を除く）</dd>
+            </div>
+          </dl>
+          <p className="text-sm text-gray-500 mt-3">受付時間外はメールにてお願いいたします。</p>
+        </div>
       </div>
     </Layout>
   );
