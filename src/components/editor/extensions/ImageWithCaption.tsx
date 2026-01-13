@@ -85,13 +85,13 @@
       if (caption) {
         return [
           'figure',
-          { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0 2.5rem 0;' },
+          { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0 4rem 0;' },
           ['img', imgAttrs],
-          ['figcaption', { style: 'margin-top:8px;margin-bottom:2.5rem;font-size:14px;color:#6b7280;text-align:center;' }, caption],
+          ['figcaption', { style: 'margin-top:8px;margin-bottom:4rem;font-size:14px;color:#6b7280;text-align:center;' }, caption],
         ];
       }
 
-      return ['figure', { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0;' }, ['img', imgAttrs]];
+      return ['figure', { 'data-gm-image': '1', style: 'text-align:center;margin:1.5rem 0 3rem 0;' }, ['img', imgAttrs]];
     },
 
     addNodeView() {
