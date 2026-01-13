@@ -23,9 +23,18 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
   sub_category?: { id: string; name: string; slug: string } | null;
 };
 
+type SortType = 'new' | 'popular';
+
+const SORT_OPTIONS: { value: SortType; label: string }[] = [
+  { value: 'new', label: '新着' },
+  { value: 'popular', label: '人気' },
+];
+
 export default function ArticleList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get('category');
+  const sortParam = searchParams.get('sort') as SortType | null;
+  const currentSort: SortType = sortParam === 'popular' ? 'popular' : 'new';
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
 
   const [articles, setArticles] = useState<Article[]>([]);
@@ -37,13 +46,20 @@ export default function ArticleList() {
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
+  // ページタイトルを決定
+  const getPageTitle = () => {
+    if (category) return category.name;
+    if (currentSort === 'popular') return '人気の記事';
+    return '新着記事';
+  };
+
   useEffect(() => {
     loadCategories();
   }, []);
 
   useEffect(() => {
     loadArticles();
-  }, [categorySlug, currentPage]);
+  }, [categorySlug, currentSort, currentPage]);
 
   const loadCategories = async () => {
     const { data } = await supabase
@@ -98,9 +114,14 @@ export default function ArticleList() {
         query = query.or(`primary_category_id.eq.${categoryId},sub_category_id.eq.${categoryId}`);
       }
 
-      const { data, error: fetchError, count } = await query
-        .order('published_at', { ascending: false })
-        .range(from, to);
+      // ソート順を設定
+      if (currentSort === 'popular') {
+        query = query.order('view_count', { ascending: false, nullsFirst: false });
+      } else {
+        query = query.order('published_at', { ascending: false });
+      }
+
+      const { data, error: fetchError, count } = await query.range(from, to);
 
       if (fetchError) {
         setError('記事の読み込みに失敗しました');
@@ -115,6 +136,18 @@ export default function ArticleList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ソート変更
+  const changeSort = (sort: SortType) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (sort === 'new') {
+      newParams.delete('sort');
+    } else {
+      newParams.set('sort', sort);
+    }
+    newParams.delete('page'); // ソート変更時はページをリセット
+    setSearchParams(newParams);
   };
 
   // ページ変更
@@ -132,22 +165,19 @@ export default function ArticleList() {
   // ページネーションの番号を生成
   const getPageNumbers = () => {
     const pages: (number | 'ellipsis')[] = [];
-    const showPages = 5; // 表示するページ番号の数
+    const showPages = 5;
 
     if (totalPages <= showPages + 2) {
-      // 全ページ表示
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // 最初のページ
       pages.push(1);
 
       if (currentPage > 3) {
         pages.push('ellipsis');
       }
 
-      // 現在のページ周辺
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
 
@@ -159,7 +189,6 @@ export default function ArticleList() {
         pages.push('ellipsis');
       }
 
-      // 最後のページ
       pages.push(totalPages);
     }
 
@@ -175,7 +204,7 @@ export default function ArticleList() {
             <Link
               to="/articles"
               className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition whitespace-nowrap ${
-                !categorySlug
+                !categorySlug && !sortParam
                   ? 'bg-gray-900 text-white font-medium'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -206,7 +235,7 @@ export default function ArticleList() {
           <div className="flex-1 min-w-0">
             <div className="mb-6">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                {category ? category.name : '記事一覧'}
+                {getPageTitle()}
               </h1>
               {!loading && (
                 <p className="text-gray-500 text-sm mt-1">
@@ -215,6 +244,25 @@ export default function ArticleList() {
                 </p>
               )}
             </div>
+
+            {/* ソートタブ（カテゴリ未選択時のみ表示） */}
+            {!categorySlug && (
+              <div className="flex gap-2 mb-6">
+                {SORT_OPTIONS.map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => changeSort(option.value)}
+                    className={`px-4 py-2 text-sm rounded-lg transition ${
+                      currentSort === option.value
+                        ? 'bg-gray-900 text-white font-medium'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
@@ -233,8 +281,12 @@ export default function ArticleList() {
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {articles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                  {articles.map((article, idx) => (
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      rank={currentSort === 'popular' ? idx + 1 + (currentPage - 1) * ITEMS_PER_PAGE : undefined}
+                    />
                   ))}
                 </div>
 
