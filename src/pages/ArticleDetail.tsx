@@ -171,29 +171,29 @@ export default function ArticleDetail() {
   };
 
   const handlePurchase = async () => {
-    if (!user || !session) {
-      // ログイン後に戻ってこれるようにリファラルも保持
-      const currentUrl = window.location.pathname + window.location.search;
-      navigate(`/signin?redirect=${encodeURIComponent(currentUrl)}`);
-      return;
-    }
     if (!article) return;
 
     setPurchasing(true);
 
     try {
+      // Build headers - include auth token if logged in
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const res = await fetch(
         `${SUPABASE_URL}/functions/v1/create-checkout-session`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
+          headers,
           body: JSON.stringify({
-            article_id: article.id,
+            type: 'article',
+            articleId: article.id,
             // アフィリエイトリファラルIDを渡す（有効な場合のみ）
-            affiliate_user_id: affiliateUserId || undefined,
+            affiliateUserId: affiliateUserId || undefined,
           }),
         }
       );
@@ -397,18 +397,13 @@ export default function ArticleDetail() {
                     )}
                     <span>{purchasing ? '処理中...' : '購入して続きを読む'}</span>
                   </button>
-                  {!user && (
-                    <p className="text-xs text-gray-500 mt-4">
-                      購入には
-                      <button
-                        onClick={() => navigate(`/signin?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
-                        className="text-gray-900 font-medium hover:underline mx-1"
-                      >
-                        ログイン
-                      </button>
-                      が必要です
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-500 mt-4">
+                    {user ? (
+                      'クレジットカードで安全にお支払い'
+                    ) : (
+                      '会員登録不要・クレジットカードで購入できます'
+                    )}
+                  </p>
                 </div>
               </div>
             </>

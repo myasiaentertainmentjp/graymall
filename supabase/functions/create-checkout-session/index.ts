@@ -32,30 +32,28 @@ Deno.serve(async (req: Request) => {
   try {
     const body: CheckoutRequest = await req.json();
     const authHeader = req.headers.get('Authorization');
-
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // 認証ユーザーの取得（任意）
+    let user = null;
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      user = authUser;
     }
 
     const origin = req.headers.get('Origin') || req.headers.get('Referer') || '';
     const siteUrl = origin ? new URL(origin).origin : 'https://graymall.jp';
 
-    // Subscription type
+    // Subscription type - requires authentication
     if (body.type === 'subscription') {
+      if (!user) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required for subscription' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       const { data: userProfile } = await supabase
         .from('users')
         .select('stripe_customer_id')
@@ -102,7 +100,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Article purchase type (original logic)
+    // Article purchase type - supports guest checkout
     if (body.type === 'article' && body.articleId) {
       const { data: article } = await supabase
         .from('articles')
@@ -124,38 +122,44 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      if (article.author_id === user.id) {
+      // Check if logged-in user is trying to buy their own article
+      if (user && article.author_id === user.id) {
         return new Response(
           JSON.stringify({ error: 'Cannot purchase own article' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      const { data: existingOrder } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('buyer_id', user.id)
-        .eq('article_id', body.articleId)
-        .eq('status', 'paid')
-        .maybeSingle();
+      // Check if logged-in user already purchased
+      if (user) {
+        const { data: existingOrder } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('buyer_id', user.id)
+          .eq('article_id', body.articleId)
+          .eq('status', 'paid')
+          .maybeSingle();
 
-      if (existingOrder) {
-        return new Response(
-          JSON.stringify({ error: 'Already purchased' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        if (existingOrder) {
+          return new Response(
+            JSON.stringify({ error: 'Already purchased' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
       }
 
+      // Create order (buyer_id is null for guest purchases)
       const { data: order } = await supabase
         .from('orders')
         .insert({
-          buyer_id: user.id,
+          buyer_id: user?.id || null,
           article_id: article.id,
           author_id: article.author_id,
           affiliate_user_id: body.affiliateUserId || null,
           amount: article.price,
           status: 'pending',
           payment_provider: 'stripe',
+          is_guest: !user, // ゲスト購入フラグ
         })
         .select('id')
         .maybeSingle();
@@ -167,7 +171,8 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      const session = await stripe.checkout.sessions.create({
+      // Stripe Checkout session configuration
+      const sessionConfig: Stripe.Checkout.SessionCreateParams = {
         payment_method_types: ['card'],
         line_items: [
           {
@@ -185,9 +190,21 @@ Deno.serve(async (req: Request) => {
         metadata: {
           order_id: order.id,
           article_id: article.id,
-          buyer_user_id: user.id,
+          buyer_user_id: user?.id || 'guest',
+          is_guest: user ? 'false' : 'true',
         },
-      });
+      };
+
+      // For guest checkout, collect email via Stripe
+      if (!user) {
+        sessionConfig.customer_email = undefined; // Let Stripe collect it
+        sessionConfig.customer_creation = 'if_required';
+      } else {
+        // For logged-in users, pre-fill email
+        sessionConfig.customer_email = user.email;
+      }
+
+      const session = await stripe.checkout.sessions.create(sessionConfig);
 
       await supabase
         .from('orders')

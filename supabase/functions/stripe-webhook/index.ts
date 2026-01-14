@@ -128,7 +128,12 @@ async function handleCheckoutCompleted(
   // Handle article purchases
   const orderId = session.metadata?.order_id;
   if (orderId && session.payment_intent) {
-    await handleOrderPayment(orderId, session.payment_intent as string, supabase);
+    // Get guest email from Stripe session
+    const guestEmail = session.metadata?.is_guest === 'true'
+      ? session.customer_details?.email || null
+      : null;
+
+    await handleOrderPayment(orderId, session.payment_intent as string, supabase, guestEmail);
   }
 }
 
@@ -237,9 +242,10 @@ async function handleChargeRefunded(
 async function handleOrderPayment(
   orderId: string,
   paymentIntentId: string,
-  supabase: ReturnType<typeof createClient>
+  supabase: ReturnType<typeof createClient>,
+  guestEmail?: string | null
 ) {
-  console.log(`Processing order payment: ${orderId}`);
+  console.log(`Processing order payment: ${orderId}, guest email: ${guestEmail || 'N/A'}`);
 
   const { data: order } = await supabase
     .from('orders')
@@ -260,19 +266,26 @@ async function handleOrderPayment(
   const platformFee = Math.floor(order.amount * 0.15);
   const authorAmount = order.amount - platformFee;
 
+  const updateData: Record<string, unknown> = {
+    status: 'paid',
+    stripe_payment_intent_id: paymentIntentId,
+    paid_at: new Date().toISOString(),
+    platform_fee: platformFee,
+    author_amount: authorAmount,
+    affiliate_amount: 0,
+    transfer_status: 'ready',
+    updated_at: new Date().toISOString(),
+  };
+
+  // Save guest email if provided
+  if (guestEmail) {
+    updateData.guest_email = guestEmail;
+  }
+
   await supabase
     .from('orders')
-    .update({
-      status: 'paid',
-      stripe_payment_intent_id: paymentIntentId,
-      paid_at: new Date().toISOString(),
-      platform_fee: platformFee,
-      author_amount: authorAmount,
-      affiliate_amount: 0,
-      transfer_status: 'ready',
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq('id', orderId);
 
-  console.log(`Order ${orderId} payment processed`);
+  console.log(`Order ${orderId} payment processed${guestEmail ? ' (guest)' : ''}`);
 }
