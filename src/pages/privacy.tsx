@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           合同会社マイアジアエンターテインメント（以下「当社」といいます。）は、当社が運営する「グレーモール」（以下「本サービス」といいます。）における、利用者の個人情報および利用者情報の取扱いについて、以下のとおりプライバシーポリシー（以下「本ポリシー」といいます。）を定めます。
         </p>
         <p className="text-gray-600 leading-relaxed mb-8">
-          本サービスURL：<a href="https://graymall.jp/" className="text-blue-600 hover:underline">https://graymall.jp/</a>
+          本サービスURL：<a href="https://graymall.jp" className="text-blue-600 hover:underline">https://graymall.jp</a>
         </p>
 
         <section className="mb-10">

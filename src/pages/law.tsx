@@ -28,7 +28,6 @@ export default function LawPage() {
                   メールアドレス：<a href="mailto:info@graymall.jp" className="text-blue-600 hover:underline">info@graymall.jp</a><br />
                   電話番号：090-5835-6898<br />
                   <span className="text-sm text-gray-500 block mt-2">受付時間：平日10:00〜18:00（年末年始を除く）</span>
-                  <span className="text-sm text-gray-500 block">受付時間外のお問い合わせはメールにてお願いいたします。</span>
                 </td>
               </tr>
             </tbody>

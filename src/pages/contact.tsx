@@ -185,7 +185,6 @@ export default function ContactPage() {
               <dd className="text-gray-800">平日10:00〜18:00（年末年始を除く）</dd>
             </div>
           </dl>
-          <p className="text-sm text-gray-500 mt-3">受付時間外はメールにてお願いいたします。</p>
         </div>
       </div>
     </Layout>

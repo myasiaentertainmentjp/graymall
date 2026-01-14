@@ -41,8 +41,7 @@ export default function CompanyPage() {
               <tr className="border border-gray-200">
                 <th className="bg-gray-50 px-4 py-4 text-left font-semibold text-gray-700 border-r border-gray-200">受付時間</th>
                 <td className="px-4 py-4 text-gray-600">
-                  平日10:00〜18:00（年末年始を除く）<br />
-                  <span className="text-sm text-gray-500">受付時間外はメールにてお願いいたします。</span>
+                  平日10:00〜18:00（年末年始を除く）
                 </td>
               </tr>
               <tr className="border border-gray-200">

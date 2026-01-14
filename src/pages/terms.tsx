@@ -10,7 +10,7 @@ export default function TermsPage() {
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">第1条（適用）</h2>
           <p className="text-gray-600 leading-relaxed mb-4">本規約は、合同会社マイアジアエンターテインメント（以下「当社」といいます。）が運営するマーケットプレイス「グレーモール」（以下「本サービス」といいます。）の利用条件を定めるものです。</p>
-          <p className="text-gray-600 leading-relaxed mb-4">本サービスURL：<a href="https://graymall.jp/" className="text-blue-600 hover:underline">https://graymall.jp/</a></p>
+          <p className="text-gray-600 leading-relaxed mb-4">本サービスURL：<a href="https://graymall.jp" className="text-blue-600 hover:underline">https://graymall.jp</a></p>
           <p className="text-gray-600 leading-relaxed mb-4">利用者は、本サービスを利用した時点で、本規約の内容に同意したものとみなします。</p>
           <p className="text-gray-600 leading-relaxed mb-4">当社は、本サービス上にガイドライン、ヘルプ、注意事項等を定める場合があり、これらは本規約の一部を構成します。</p>
           <p className="text-gray-600 leading-relaxed">本規約と当社が別途定める個別規定の内容が異なる場合には、当該個別規定が優先されます。</p>
