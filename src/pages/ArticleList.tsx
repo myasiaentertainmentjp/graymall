@@ -121,7 +121,32 @@ export default function ArticleList() {
         query = query.order('published_at', { ascending: false });
       }
 
-      const { data, error: fetchError, count } = await query.range(from, to);
+      let { data, error: fetchError, count } = await query.range(from, to);
+
+      // view_countカラムが存在しない場合のフォールバック
+      if (fetchError && currentSort === 'popular') {
+        console.warn('Falling back to published_at sort:', fetchError);
+        const fallbackQuery = supabase
+          .from('articles')
+          .select(`
+            *,
+            users:author_id (display_name, email),
+            primary_category:primary_category_id (id, name, slug),
+            sub_category:sub_category_id (id, name, slug)
+          `, { count: 'exact' })
+          .eq('status', 'published')
+          .eq('is_archived', false)
+          .order('published_at', { ascending: false });
+
+        if (categoryId) {
+          fallbackQuery.or(`primary_category_id.eq.${categoryId},sub_category_id.eq.${categoryId}`);
+        }
+
+        const fallbackResult = await fallbackQuery.range(from, to);
+        data = fallbackResult.data;
+        count = fallbackResult.count;
+        fetchError = fallbackResult.error;
+      }
 
       if (fetchError) {
         setError('記事の読み込みに失敗しました');
