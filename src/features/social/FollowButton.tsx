@@ -1,5 +1,6 @@
 // src/features/social/FollowButton.tsx
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { isFollowing, toggleFollow } from "./follows";
 
@@ -8,9 +9,12 @@ type Props = {
 };
 
 export function FollowButton({ targetUserId }: Props) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [meId, setMeId] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +27,7 @@ export function FollowButton({ targetUserId }: Props) {
       if (cancelled) return;
 
       setMeId(me);
+      setInitialized(true);
 
       if (!me || !targetUserId || me === targetUserId) {
         setFollowing(false);
@@ -43,11 +48,19 @@ export function FollowButton({ targetUserId }: Props) {
     };
   }, [targetUserId]);
 
-  if (!meId) return null;
+  // Don't render until initialized
+  if (!initialized) return null;
   if (!targetUserId) return null;
-  if (meId === targetUserId) return null;
+  // Don't show on own profile
+  if (meId && meId === targetUserId) return null;
 
   const onClick = async () => {
+    // Not logged in - redirect to login
+    if (!meId) {
+      navigate(`/signin?redirect=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+
     if (loading) return;
 
     const next = !following;
@@ -66,13 +79,13 @@ export function FollowButton({ targetUserId }: Props) {
     <button
       type="button"
       onClick={onClick}
-      disabled={loading}
+      disabled={loading && !!meId}
       className={
         "px-4 py-2 rounded-md text-sm font-medium border " +
         (following
           ? "bg-gray-900 text-white border-gray-900"
           : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50") +
-        (loading ? " opacity-60" : "")
+        (loading && meId ? " opacity-60" : "")
       }
     >
       {following ? "フォロー中" : "フォロー"}
