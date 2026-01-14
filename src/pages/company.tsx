@@ -21,7 +21,7 @@ export default function CompanyPage() {
                 <th className="bg-gray-50 px-4 py-4 text-left font-semibold text-gray-700 border-r border-gray-200">住所</th>
                 <td className="px-4 py-4 text-gray-600">
                   〒184-0004<br />
-                  東京都小金井市本町6-9-39
+                  東京都小金井市本町6-9-39 メゾンルビエール106
                 </td>
               </tr>
               <tr className="border border-gray-200">
