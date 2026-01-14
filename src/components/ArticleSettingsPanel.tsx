@@ -373,10 +373,11 @@
               />
               <button
                 type="button"
-                className="h-10 px-4 rounded-xl bg-slate-900 text-white text-sm font-semibold"
+                className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center"
                 onClick={addTag}
+                aria-label="タグを追加"
               >
-                追加
+                <span className="text-xl leading-none">+</span>
               </button>
             </div>
 
