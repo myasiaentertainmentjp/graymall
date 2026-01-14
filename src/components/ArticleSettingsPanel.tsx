@@ -42,6 +42,10 @@
 
     // 有料エリア表示状態
     showPaidBoundary?: boolean;
+
+    // お礼メッセージ
+    thankYouMessage?: string;
+    onChangeThankYouMessage?: (v: string) => void;
   };
 
   const AFFILIATE_RATES: AffiliateRate[] = [10, 20, 30, 40, 50];
@@ -224,6 +228,22 @@
                   placeholder="0"
                   className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm"
                 />
+              </div>
+            )}
+
+            {isPaid && (
+              <div className="mt-4">
+                <div className="text-xs text-gray-600 mb-2">購入者へのお礼メッセージ</div>
+                <textarea
+                  value={props.thankYouMessage || ''}
+                  onChange={(e) => props.onChangeThankYouMessage?.(e.target.value)}
+                  placeholder="ご購入ありがとうございます！&#10;この記事がお役に立てれば幸いです。"
+                  className="w-full h-24 rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none"
+                  maxLength={500}
+                />
+                <div className="text-xs text-gray-400 mt-1 text-right">
+                  {(props.thankYouMessage || '').length}/500
+                </div>
               </div>
             )}
           </div>

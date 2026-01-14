@@ -45,12 +45,20 @@ export default function ArticleDetail() {
   useEffect(() => {
     if (searchParams.get('payment') === 'success') {
       setPaymentSuccess(true);
-      const timer = setTimeout(() => {
-        window.location.href = window.location.pathname;
-      }, 1500);
-      return () => clearTimeout(timer);
     }
   }, [searchParams]);
+
+  // 購入完了後のリダイレクト（お礼メッセージがある場合は長めに表示）
+  useEffect(() => {
+    if (paymentSuccess && article) {
+      const hasThankYouMsg = !!(article as any)?.thank_you_message;
+      const delay = hasThankYouMsg ? 5000 : 1500;
+      const timer = setTimeout(() => {
+        window.location.href = window.location.pathname;
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentSuccess, article]);
 
   // GTM: 購入完了イベント
   useEffect(() => {
@@ -249,12 +257,21 @@ export default function ArticleDetail() {
   }
 
   if (paymentSuccess) {
+    const thankYouMsg = (article as any)?.thank_you_message;
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
           <CheckCircle className="w-16 h-16 text-green-500" />
           <div className="text-xl font-bold text-gray-900">購入が完了しました</div>
-          <div className="text-gray-600">ページを更新しています...</div>
+
+          {thankYouMsg && (
+            <div className="max-w-md w-full bg-green-50 border border-green-200 rounded-xl p-6 mt-2">
+              <div className="text-sm text-green-700 font-medium mb-2">著者からのメッセージ</div>
+              <div className="text-gray-800 whitespace-pre-wrap">{thankYouMsg}</div>
+            </div>
+          )}
+
+          <div className="text-gray-600 mt-2">ページを更新しています...</div>
           <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
         </div>
       </Layout>

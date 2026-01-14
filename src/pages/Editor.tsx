@@ -92,6 +92,9 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
     const [affiliateRateError, setAffiliateRateError] = useState<string | null>(null);
     const [affiliateRateNextChangeAt, setAffiliateRateNextChangeAt] = useState<Date | null>(null);
 
+    // お礼メッセージ
+    const [thankYouMessage, setThankYouMessage] = useState<string>('');
+
     const paidEnabled = showPaidBoundary;
 
     const stats = useMemo(() => {
@@ -163,6 +166,9 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
 
         // タグを読み込む
         setTags(Array.isArray(data?.tags) ? data.tags : []);
+
+        // お礼メッセージを読み込む
+        setThankYouMessage(data?.thank_you_message || '');
 
         setLoading(false);
       })();
@@ -264,6 +270,7 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
         affiliate_target: affiliateEnabled ? affiliateTarget : null,
         affiliate_rate: affiliateEnabled ? affiliateRate : null,
         tags: tags,
+        thank_you_message: isPaid ? thankYouMessage : null,
       };
 
       if (rateChanged) {
@@ -728,6 +735,8 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
                     affiliateRateError={affiliateRateError}
                     affiliateRateNextChangeAt={affiliateRateNextChangeAt}
                     showPaidBoundary={showPaidBoundary}
+                    thankYouMessage={thankYouMessage}
+                    onChangeThankYouMessage={setThankYouMessage}
                   />
                 </div>
               </div>
