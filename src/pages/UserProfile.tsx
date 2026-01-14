@@ -118,77 +118,81 @@ export default function UserProfile() {
         ) : (
           <>
             {/* Profile Header */}
-            <div className="flex items-start gap-6 mb-8">
-              {/* Avatar */}
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
+            <div className="relative mb-8">
+              {/* Top-right action button */}
+              <div className="absolute top-0 right-0">
+                {isOwnProfile ? (
+                  <Link
+                    to="/settings"
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                    title="設定"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Link>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
-                    {(profile.display_name?.[0] || 'U').toUpperCase()}
-                  </div>
+                  <FollowButton targetUserId={userId} />
                 )}
               </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold text-gray-900 truncate">
-                    {profile.display_name || 'ユーザー'}
-                  </h1>
-                  {isOwnProfile ? (
-                    <Link
-                      to="/settings"
-                      className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                      title="設定"
-                    >
-                      <Settings className="w-5 h-5" />
-                    </Link>
+              <div className="flex items-start gap-6">
+                {/* Avatar */}
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <FollowButton targetUserId={userId} />
+                    <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
+                      {(profile.display_name?.[0] || 'U').toUpperCase()}
+                    </div>
                   )}
                 </div>
 
-                {/* Bio */}
-                {profile.bio && (
-                  <p className="text-gray-600 text-sm mb-4 whitespace-pre-wrap">
-                    {profile.bio}
-                  </p>
-                )}
+                {/* Info */}
+                <div className="flex-1 min-w-0 pr-20">
+                  <h1 className="text-2xl font-bold text-gray-900 truncate mb-2">
+                    {profile.display_name || 'ユーザー'}
+                  </h1>
 
-                {/* SNS Links */}
-                {(snsLinks.length > 0 || customLinks.length > 0) && (
-                  <div className="flex flex-wrap items-center gap-3">
-                    {snsLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
-                        title={link.label}
-                      >
-                        <link.icon className="w-5 h-5" />
-                      </a>
-                    ))}
-                    {customLinks.map((link, idx) => (
-                      <a
-                        key={`custom-${idx}`}
-                        href={link.url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        {link.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
+                  {/* Bio */}
+                  {profile.bio && (
+                    <p className="text-gray-600 text-sm mb-4 whitespace-pre-wrap">
+                      {profile.bio}
+                    </p>
+                  )}
+
+                  {/* SNS Links */}
+                  {(snsLinks.length > 0 || customLinks.length > 0) && (
+                    <div className="flex flex-wrap items-center gap-3">
+                      {snsLinks.map((link, idx) => (
+                        <a
+                          key={idx}
+                          href={link.url!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                          title={link.label}
+                        >
+                          <link.icon className="w-5 h-5" />
+                        </a>
+                      ))}
+                      {customLinks.map((link, idx) => (
+                        <a
+                          key={`custom-${idx}`}
+                          href={link.url!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

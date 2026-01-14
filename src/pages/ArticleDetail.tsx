@@ -477,7 +477,7 @@ export default function ArticleDetail() {
 
           {/* 著者プロフィール */}
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
               <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
                 <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden">
                   {article.users?.avatar_url ? (
