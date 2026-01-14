@@ -262,12 +262,6 @@ export default function ArticleList() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {getPageTitle()}
               </h1>
-              {!loading && (
-                <p className="text-gray-500 text-sm mt-1">
-                  {totalCount}件の記事
-                  {totalPages > 1 && ` (${currentPage}/${totalPages}ページ)`}
-                </p>
-              )}
             </div>
 
             {/* ソートタブ（カテゴリ未選択時のみ表示） */}

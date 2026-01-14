@@ -8,6 +8,7 @@ import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import type { Database } from '../lib/database.types';
 import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User } from 'lucide-react';
+import { FollowButton } from '../features/social/FollowButton';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null };
@@ -505,6 +506,9 @@ export default function ArticleDetail() {
                   プロフィールを見る
                   <ChevronRight className="w-4 h-4" />
                 </Link>
+              </div>
+              <div className="flex-shrink-0">
+                <FollowButton targetUserId={article.author_id} />
               </div>
             </div>
           </div>
