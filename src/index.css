@@ -52,6 +52,19 @@
     height: 0;
   }
 
+  /* ProseMirror figure/caption spacing */
+  .ProseMirror figure {
+    margin-bottom: 2rem;
+  }
+
+  .ProseMirror figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
   /* Hide scrollbar for mobile toolbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -90,15 +103,15 @@
     font-size: 0.875rem;
     color: #6b7280;
     margin-top: 0.5rem;
-    margin-bottom: 4rem !important;
+    padding-bottom: 1.5rem;
   }
 
   .prose figure {
-    margin-bottom: 3rem !important;
+    margin-bottom: 2rem !important;
   }
 
   .prose figure:has(figcaption) {
-    margin-bottom: 4rem !important;
+    margin-bottom: 2.5rem !important;
   }
 
   /* Mobile: smaller max height */
