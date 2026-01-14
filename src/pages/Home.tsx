@@ -367,9 +367,9 @@ export default function Home() {
                 </Link>
               </div>
               <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
-                {popularArticles.slice(0, 6).map((article, idx) => (
+                {popularArticles.slice(0, 6).map((article) => (
                   <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
-                    <ArticleCard article={article} rank={idx + 1} />
+                    <ArticleCard article={article} />
                   </div>
                 ))}
               </div>

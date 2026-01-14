@@ -18,7 +18,7 @@ type Category = {
 };
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
-  users?: { display_name: string | null; email: string };
+  users?: { display_name: string | null; email: string; avatar_url?: string | null };
   primary_category?: { id: string; name: string; slug: string } | null;
   sub_category?: { id: string; name: string; slug: string } | null;
 };
@@ -102,7 +102,7 @@ export default function ArticleList() {
         .from('articles')
         .select(`
           *,
-          users:author_id (display_name, email),
+          users:author_id (display_name, email, avatar_url),
           primary_category:primary_category_id (id, name, slug),
           sub_category:sub_category_id (id, name, slug)
         `, { count: 'exact' })
@@ -130,7 +130,7 @@ export default function ArticleList() {
           .from('articles')
           .select(`
             *,
-            users:author_id (display_name, email),
+            users:author_id (display_name, email, avatar_url),
             primary_category:primary_category_id (id, name, slug),
             sub_category:sub_category_id (id, name, slug)
           `, { count: 'exact' })
@@ -300,11 +300,10 @@ export default function ArticleList() {
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {articles.map((article, idx) => (
+                  {articles.map((article) => (
                     <ArticleCard
                       key={article.id}
                       article={article}
-                      rank={currentSort === 'popular' ? idx + 1 + (currentPage - 1) * ITEMS_PER_PAGE : undefined}
                     />
                   ))}
                 </div>
