@@ -43,7 +43,7 @@ export default function FollowingUsers() {
 
         // ユーザー情報を取得
         const { data: usersData } = await supabase
-          .from('profiles')
+          .from('users')
           .select('id, display_name, email, avatar_url, bio')
           .in('id', followingIds);
 
