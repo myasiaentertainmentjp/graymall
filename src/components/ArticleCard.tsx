@@ -1,7 +1,7 @@
 // src/components/ArticleCard.tsx
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Database } from '../lib/database.types';
-import { Heart, ImageIcon } from 'lucide-react';
+import { Heart, ImageIcon, Bookmark } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -76,17 +76,21 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ article, rank }: ArticleCardProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState(0);
+  const [realFavoriteCount, setRealFavoriteCount] = useState(0);
 
   const label = authorLabel(article);
   const avatarUrl = article.users?.avatar_url;
-  const categoryLabel = article.sub_category?.name || article.primary_category?.name || null;
   const affiliateLabel = getAffiliateLabel(article);
   const timeAgo = formatTimeAgo(article.published_at || article.created_at);
 
-  // Load favorite count (for all users)
+  // Total favorite count = fake + real
+  const fakeFavoriteCount = (article as any).fake_favorite_count || 0;
+  const totalFavoriteCount = fakeFavoriteCount + realFavoriteCount;
+
+  // Load real favorite count (for all users)
   useEffect(() => {
     const loadFavoriteCount = async () => {
       const { count } = await supabase
@@ -94,7 +98,7 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
         .select('*', { count: 'exact', head: true })
         .eq('article_id', article.id);
 
-      setFavoriteCount(count || 0);
+      setRealFavoriteCount(count || 0);
     };
 
     loadFavoriteCount();
@@ -122,7 +126,13 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!user || favoriteLoading) return;
+    // Redirect to login if not logged in
+    if (!user) {
+      navigate('/signin');
+      return;
+    }
+
+    if (favoriteLoading) return;
 
     setFavoriteLoading(true);
 
@@ -133,13 +143,13 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
         .eq('user_id', user.id)
         .eq('article_id', article.id);
       setIsFavorite(false);
-      setFavoriteCount(prev => Math.max(0, prev - 1));
+      setRealFavoriteCount(prev => Math.max(0, prev - 1));
     } else {
       await supabase
         .from('article_favorites')
         .insert({ user_id: user.id, article_id: article.id });
       setIsFavorite(true);
-      setFavoriteCount(prev => prev + 1);
+      setRealFavoriteCount(prev => prev + 1);
     }
 
     setFavoriteLoading(false);
@@ -168,31 +178,6 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
               {rank}
             </div>
           )}
-
-          {/* Favorite button */}
-          {user && (
-            <button
-              onClick={toggleFavorite}
-              className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition ${
-                isFavorite
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/80 text-gray-600 hover:bg-white'
-              }`}
-              disabled={favoriteLoading}
-            >
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
-          )}
-        </div>
-
-        {/* Favorite count - shown below thumbnail */}
-        <div className="flex items-center justify-end px-3 pt-2 -mb-1">
-          <div className="flex items-center gap-1">
-            <Heart className={`w-3.5 h-3.5 ${favoriteCount > 0 ? 'text-gray-400' : 'text-gray-300'}`} />
-            {favoriteCount > 0 && (
-              <span className="text-xs text-gray-500">{favoriteCount}</span>
-            )}
-          </div>
         </div>
 
         {/* Content */}
@@ -202,18 +187,9 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             {article.title}
           </h3>
 
-          {/* Category */}
-          {article.primary_category && (
-            <div className="mb-2">
-              <span className={`inline-block px-2 py-0.5 text-xs rounded-full font-medium ${getCategoryColor(article.primary_category.slug)}`}>
-                {article.primary_category.name}
-              </span>
-            </div>
-          )}
-
           {/* Price */}
-          <div className="text-base font-bold text-gray-900 mb-1">
-            {article.price > 0 ? `¥${article.price.toLocaleString()}` : '無料'}
+          <div className="text-base font-bold text-gray-900 mb-2">
+            {article.price > 0 ? `¥${article.price.toLocaleString()}` : '¥0（無料）'}
           </div>
 
           {/* Affiliate info - only show when affiliate is enabled */}
@@ -223,11 +199,8 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             </div>
           )}
 
-          {/* Divider */}
-          <div className="border-t border-gray-100 my-2"></div>
-
           {/* Author & time */}
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
             <Link
               to={`/users/${article.author_id}`}
               onClick={(e) => e.stopPropagation()}
@@ -245,6 +218,34 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
               <span className="truncate">{label}</span>
             </Link>
             <span className="flex-shrink-0">{timeAgo}</span>
+          </div>
+
+          {/* Like & Bookmark buttons - note style */}
+          <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
+            {/* Like button */}
+            <button
+              onClick={toggleFavorite}
+              disabled={favoriteLoading}
+              className="flex items-center gap-1 group/like"
+            >
+              <Heart
+                className={`w-4 h-4 transition ${
+                  isFavorite
+                    ? 'text-red-500 fill-red-500'
+                    : 'text-gray-400 group-hover/like:text-red-400'
+                }`}
+              />
+              {totalFavoriteCount > 0 && (
+                <span className={`text-xs ${isFavorite ? 'text-red-500' : 'text-gray-500'}`}>
+                  {totalFavoriteCount}
+                </span>
+              )}
+            </button>
+
+            {/* Bookmark icon (visual only, like note) */}
+            <div className="flex items-center">
+              <Bookmark className="w-4 h-4 text-gray-400" />
+            </div>
           </div>
         </div>
       </Link>

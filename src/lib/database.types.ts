@@ -176,6 +176,8 @@ export interface Database {
           affiliate_rate_last_changed_at: string | null
           // Tags
           tags: string[]
+          // Fake favorite count for initial boost
+          fake_favorite_count: number
         }
         Insert: {
           id?: string
@@ -202,6 +204,7 @@ export interface Database {
           affiliate_rate?: number | null
           affiliate_rate_last_changed_at?: string | null
           tags?: string[]
+          fake_favorite_count?: number
         }
         Update: {
           id?: string
@@ -228,6 +231,7 @@ export interface Database {
           affiliate_rate?: number | null
           affiliate_rate_last_changed_at?: string | null
           tags?: string[]
+          fake_favorite_count?: number
         }
       }
       orders: {
