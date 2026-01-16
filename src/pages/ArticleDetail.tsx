@@ -42,6 +42,9 @@ export default function ArticleDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [realFavoriteCount, setRealFavoriteCount] = useState(0);
+  const [anonLikeCount, setAnonLikeCount] = useState(0);
+  const [hasAnonLiked, setHasAnonLiked] = useState(false);
+  const [heartAnimating, setHeartAnimating] = useState(false);
 
   // アフィリエイトリファラルID（URLの?ref=xxx）
   const affiliateUserId = searchParams.get('ref');
@@ -95,22 +98,32 @@ export default function ArticleDetail() {
     }
   }, [paymentSuccess, article]);
 
-  // いいね数を読み込み
+  // いいね数を読み込み（会員 + 匿名）
   useEffect(() => {
     if (!article) return;
 
     const loadFavoriteCount = async () => {
+      // 会員いいね数
       const { count } = await supabase
         .from('article_favorites')
         .select('*', { count: 'exact', head: true })
         .eq('article_id', article.id);
       setRealFavoriteCount(count || 0);
+
+      // 匿名いいね数（localStorage）
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      const articleAnonCount = anonLikes[`count_${article.id}`] || 0;
+      setAnonLikeCount(articleAnonCount);
+
+      // 自分が匿名いいね済みか
+      const likedArticles = JSON.parse(localStorage.getItem('liked_articles') || '[]');
+      setHasAnonLiked(likedArticles.includes(article.id));
     };
 
     loadFavoriteCount();
   }, [article?.id]);
 
-  // ユーザーがいいね済みかチェック
+  // ユーザーがいいね済みかチェック（会員）
   useEffect(() => {
     if (!user || !article) return;
 
@@ -127,36 +140,69 @@ export default function ArticleDetail() {
     checkFavorite();
   }, [user, article?.id]);
 
-  // いいねトグル
+  // いいねトグル（会員 & 非会員対応）
   const toggleFavorite = async () => {
     if (!article) return;
+    if (favoriteLoading) return;
 
-    if (!user) {
-      navigate('/signin');
+    // アニメーション開始
+    setHeartAnimating(true);
+    setTimeout(() => setHeartAnimating(false), 300);
+
+    // ===== 会員の場合 =====
+    if (user) {
+      setFavoriteLoading(true);
+
+      if (isFavorite) {
+        await supabase
+          .from('article_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('article_id', article.id);
+        setIsFavorite(false);
+        setRealFavoriteCount(prev => Math.max(0, prev - 1));
+      } else {
+        await supabase
+          .from('article_favorites')
+          .insert({ user_id: user.id, article_id: article.id });
+        setIsFavorite(true);
+        setRealFavoriteCount(prev => prev + 1);
+      }
+
+      setFavoriteLoading(false);
       return;
     }
 
-    if (favoriteLoading) return;
-    setFavoriteLoading(true);
+    // ===== 非会員の場合（localStorage） =====
+    const likedArticles = JSON.parse(localStorage.getItem('liked_articles') || '[]');
 
-    if (isFavorite) {
-      await supabase
-        .from('article_favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('article_id', article.id);
-      setIsFavorite(false);
-      setRealFavoriteCount(prev => Math.max(0, prev - 1));
+    if (hasAnonLiked) {
+      // 既にいいね済み → 解除
+      const updated = likedArticles.filter((id: string) => id !== article.id);
+      localStorage.setItem('liked_articles', JSON.stringify(updated));
+      setHasAnonLiked(false);
+      setAnonLikeCount(prev => Math.max(0, prev - 1));
+
+      // グローバルカウントも更新
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      anonLikes[`count_${article.id}`] = Math.max(0, (anonLikes[`count_${article.id}`] || 0) - 1);
+      localStorage.setItem('anon_likes', JSON.stringify(anonLikes));
     } else {
-      await supabase
-        .from('article_favorites')
-        .insert({ user_id: user.id, article_id: article.id });
-      setIsFavorite(true);
-      setRealFavoriteCount(prev => prev + 1);
-    }
+      // いいね追加
+      likedArticles.push(article.id);
+      localStorage.setItem('liked_articles', JSON.stringify(likedArticles));
+      setHasAnonLiked(true);
+      setAnonLikeCount(prev => prev + 1);
 
-    setFavoriteLoading(false);
+      // グローバルカウントも更新
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      anonLikes[`count_${article.id}`] = (anonLikes[`count_${article.id}`] || 0) + 1;
+      localStorage.setItem('anon_likes', JSON.stringify(anonLikes));
+    }
   };
+
+  // いいね済み判定（会員 or 非会員）
+  const isLiked = user ? isFavorite : hasAnonLiked;
 
   // 記事読み込み
   useEffect(() => {
@@ -415,23 +461,27 @@ export default function ArticleDetail() {
 
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{article.title}</h1>
 
-          {/* いいねボタン */}
-          <button
-            onClick={toggleFavorite}
-            disabled={favoriteLoading}
-            className="flex items-center gap-2 mb-6 group"
-          >
-            <Heart
-              className={`w-6 h-6 transition ${
-                isFavorite
-                  ? 'text-red-500 fill-red-500'
-                  : 'text-gray-400 group-hover:text-red-400'
-              }`}
-            />
-            <span className={`text-lg ${isFavorite ? 'text-red-500' : 'text-gray-600'}`}>
-              {((article as any).fake_favorite_count || 0) + realFavoriteCount}
-            </span>
-          </button>
+          {/* いいねボタン（noteスタイル） */}
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={toggleFavorite}
+              disabled={favoriteLoading}
+              className="flex items-center gap-2 group"
+            >
+              <Heart
+                className={`w-6 h-6 transition-all duration-200 ${
+                  heartAnimating ? 'scale-125' : 'scale-100'
+                } ${
+                  isLiked
+                    ? 'text-red-500 fill-red-500'
+                    : 'text-gray-400 group-hover:text-red-400'
+                }`}
+              />
+              <span className={`text-lg ${isLiked ? 'text-red-500' : 'text-gray-600'}`}>
+                {((article as any).fake_favorite_count || 0) + realFavoriteCount + anonLikeCount}
+              </span>
+            </button>
+          </div>
 
           <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
             <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">

@@ -80,15 +80,17 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [realFavoriteCount, setRealFavoriteCount] = useState(0);
+  const [anonLikeCount, setAnonLikeCount] = useState(0);
+  const [hasAnonLiked, setHasAnonLiked] = useState(false);
 
   const label = authorLabel(article);
   const avatarUrl = article.users?.avatar_url;
   const affiliateLabel = getAffiliateLabel(article);
   const timeAgo = formatTimeAgo(article.published_at || article.created_at);
 
-  // Total favorite count = fake + real
+  // Total favorite count = fake + real + anon
   const fakeFavoriteCount = (article as any).fake_favorite_count || 0;
-  const totalFavoriteCount = fakeFavoriteCount + realFavoriteCount;
+  const totalFavoriteCount = fakeFavoriteCount + realFavoriteCount + anonLikeCount;
 
   // Load real favorite count (for all users)
   useEffect(() => {
@@ -99,6 +101,14 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
         .eq('article_id', article.id);
 
       setRealFavoriteCount(count || 0);
+
+      // 匿名いいね数
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      setAnonLikeCount(anonLikes[`count_${article.id}`] || 0);
+
+      // 自分が匿名いいね済みか
+      const likedArticles = JSON.parse(localStorage.getItem('liked_articles') || '[]');
+      setHasAnonLiked(likedArticles.includes(article.id));
     };
 
     loadFavoriteCount();
@@ -122,37 +132,63 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
     checkFavorite();
   }, [user, article.id]);
 
+  // いいね済み判定（会員 or 非会員）
+  const isLiked = user ? isFavorite : hasAnonLiked;
+
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Redirect to login if not logged in
-    if (!user) {
-      navigate('/signin');
+    if (favoriteLoading) return;
+
+    // ===== 会員の場合 =====
+    if (user) {
+      setFavoriteLoading(true);
+
+      if (isFavorite) {
+        await supabase
+          .from('article_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('article_id', article.id);
+        setIsFavorite(false);
+        setRealFavoriteCount(prev => Math.max(0, prev - 1));
+      } else {
+        await supabase
+          .from('article_favorites')
+          .insert({ user_id: user.id, article_id: article.id });
+        setIsFavorite(true);
+        setRealFavoriteCount(prev => prev + 1);
+      }
+
+      setFavoriteLoading(false);
       return;
     }
 
-    if (favoriteLoading) return;
+    // ===== 非会員の場合（localStorage） =====
+    const likedArticles = JSON.parse(localStorage.getItem('liked_articles') || '[]');
 
-    setFavoriteLoading(true);
+    if (hasAnonLiked) {
+      // いいね解除
+      const updated = likedArticles.filter((id: string) => id !== article.id);
+      localStorage.setItem('liked_articles', JSON.stringify(updated));
+      setHasAnonLiked(false);
+      setAnonLikeCount(prev => Math.max(0, prev - 1));
 
-    if (isFavorite) {
-      await supabase
-        .from('article_favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('article_id', article.id);
-      setIsFavorite(false);
-      setRealFavoriteCount(prev => Math.max(0, prev - 1));
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      anonLikes[`count_${article.id}`] = Math.max(0, (anonLikes[`count_${article.id}`] || 0) - 1);
+      localStorage.setItem('anon_likes', JSON.stringify(anonLikes));
     } else {
-      await supabase
-        .from('article_favorites')
-        .insert({ user_id: user.id, article_id: article.id });
-      setIsFavorite(true);
-      setRealFavoriteCount(prev => prev + 1);
-    }
+      // いいね追加
+      likedArticles.push(article.id);
+      localStorage.setItem('liked_articles', JSON.stringify(likedArticles));
+      setHasAnonLiked(true);
+      setAnonLikeCount(prev => prev + 1);
 
-    setFavoriteLoading(false);
+      const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
+      anonLikes[`count_${article.id}`] = (anonLikes[`count_${article.id}`] || 0) + 1;
+      localStorage.setItem('anon_likes', JSON.stringify(anonLikes));
+    }
   };
 
   return (
@@ -229,13 +265,13 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             >
               <Heart
                 className={`w-4 h-4 transition ${
-                  isFavorite
+                  isLiked
                     ? 'text-red-500 fill-red-500'
                     : 'text-gray-400 group-hover/like:text-red-400'
                 }`}
               />
               {totalFavoriteCount > 0 && (
-                <span className={`text-xs ${isFavorite ? 'text-red-500' : 'text-gray-500'}`}>
+                <span className={`text-xs ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
                   {totalFavoriteCount}
                 </span>
               )}
