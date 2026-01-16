@@ -1,7 +1,7 @@
 // src/components/ArticleCard.tsx
 import { Link, useNavigate } from 'react-router-dom';
 import type { Database } from '../lib/database.types';
-import { Heart, ImageIcon, Bookmark } from 'lucide-react';
+import { Heart, ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -220,9 +220,8 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             <span className="flex-shrink-0">{timeAgo}</span>
           </div>
 
-          {/* Like & Bookmark buttons - note style */}
-          <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-            {/* Like button */}
+          {/* Like button - note style */}
+          <div className="flex items-center">
             <button
               onClick={toggleFavorite}
               disabled={favoriteLoading}
@@ -241,11 +240,6 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
                 </span>
               )}
             </button>
-
-            {/* Bookmark icon (visual only, like note) */}
-            <div className="flex items-center">
-              <Bookmark className="w-4 h-4 text-gray-400" />
-            </div>
           </div>
         </div>
       </Link>
