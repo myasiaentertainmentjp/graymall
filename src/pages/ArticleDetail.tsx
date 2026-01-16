@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { checkArticleAccess } from '../lib/articleAccess';
 import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
+import ArticleComments from '../components/ArticleComments';
 import type { Database } from '../lib/database.types';
 import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
@@ -710,6 +711,14 @@ export default function ArticleDetail() {
               </div>
             </div>
           )}
+
+          {/* コメントセクション */}
+          <ArticleComments
+            articleId={article.id}
+            articleAuthorId={article.author_id}
+            articlePrice={article.price || 0}
+            hasPurchased={hasAccess}
+          />
 
           {/* 関連記事（同じカテゴリ） */}
           {relatedArticles.length > 0 && (
