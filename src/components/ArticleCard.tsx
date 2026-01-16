@@ -78,6 +78,7 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
   const label = authorLabel(article);
   const avatarUrl = article.users?.avatar_url;
@@ -85,7 +86,21 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
   const affiliateLabel = getAffiliateLabel(article);
   const timeAgo = formatTimeAgo(article.published_at || article.created_at);
 
-  // Check if favorited
+  // Load favorite count (for all users)
+  useEffect(() => {
+    const loadFavoriteCount = async () => {
+      const { count } = await supabase
+        .from('article_favorites')
+        .select('*', { count: 'exact', head: true })
+        .eq('article_id', article.id);
+
+      setFavoriteCount(count || 0);
+    };
+
+    loadFavoriteCount();
+  }, [article.id]);
+
+  // Check if favorited (for logged-in user)
   useEffect(() => {
     if (!user) return;
 
@@ -118,11 +133,13 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
         .eq('user_id', user.id)
         .eq('article_id', article.id);
       setIsFavorite(false);
+      setFavoriteCount(prev => Math.max(0, prev - 1));
     } else {
       await supabase
         .from('article_favorites')
         .insert({ user_id: user.id, article_id: article.id });
       setIsFavorite(true);
+      setFavoriteCount(prev => prev + 1);
     }
 
     setFavoriteLoading(false);
@@ -166,6 +183,16 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
           )}
+        </div>
+
+        {/* Favorite count - shown below thumbnail */}
+        <div className="flex items-center justify-end px-3 pt-2 -mb-1">
+          <div className="flex items-center gap-1">
+            <Heart className={`w-3.5 h-3.5 ${favoriteCount > 0 ? 'text-gray-400' : 'text-gray-300'}`} />
+            {favoriteCount > 0 && (
+              <span className="text-xs text-gray-500">{favoriteCount}</span>
+            )}
+          </div>
         </div>
 
         {/* Content */}

@@ -4,7 +4,16 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import Layout from '../components/Layout';
-import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown, Wallet } from 'lucide-react';
+import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown, Wallet, ImageIcon } from 'lucide-react';
+
+type PurchasedArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  cover_image_url: string | null;
+  price: number;
+  purchased_at: string;
+};
 
 export default function Settings() {
   const { user, profile, refreshProfile } = useAuth();
@@ -25,6 +34,10 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'profile' | 'sns' | 'account' | 'purchases'>('profile');
+
+  // Purchased articles
+  const [purchasedArticles, setPurchasedArticles] = useState<PurchasedArticle[]>([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
 
   // Load user data
   useEffect(() => {
@@ -54,6 +67,63 @@ export default function Settings() {
 
     loadUserData();
   }, [user]);
+
+  // Load purchased articles when tab is selected
+  useEffect(() => {
+    if (activeTab === 'purchases' && user && purchasedArticles.length === 0) {
+      loadPurchasedArticles();
+    }
+  }, [activeTab, user]);
+
+  const loadPurchasedArticles = async () => {
+    if (!user) return;
+    setPurchasesLoading(true);
+    try {
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('article_id, paid_at, amount')
+        .eq('buyer_id', user.id)
+        .eq('status', 'paid')
+        .order('paid_at', { ascending: false });
+
+      if (orders && orders.length > 0) {
+        const articleIds = [...new Set(orders.map(o => o.article_id))];
+        const { data: articlesData } = await supabase
+          .from('articles')
+          .select('id, title, slug, cover_image_url, price')
+          .in('id', articleIds);
+
+        // Map orders to articles with purchase date
+        const orderMap = new Map(orders.map(o => [o.article_id, { paid_at: o.paid_at, amount: o.amount }]));
+        const purchased = articleIds
+          .map(id => {
+            const article = articlesData?.find(a => a.id === id);
+            const order = orderMap.get(id);
+            if (!article || !order) return null;
+            return {
+              ...article,
+              purchased_at: order.paid_at,
+              price: order.amount,
+            };
+          })
+          .filter(Boolean) as PurchasedArticle[];
+
+        setPurchasedArticles(purchased);
+      }
+    } catch (err) {
+      console.error('Error loading purchased articles:', err);
+    } finally {
+      setPurchasesLoading(false);
+    }
+  };
+
+  const formatPurchaseDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -518,12 +588,53 @@ export default function Settings() {
         {activeTab === 'purchases' && (
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">購入履歴</h2>
-            <Link
-              to="/me/purchased"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              購入した記事一覧を見る →
-            </Link>
+
+            {purchasesLoading ? (
+              <div className="text-center py-8 text-gray-500">読み込み中...</div>
+            ) : purchasedArticles.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">購入した記事はありません</div>
+            ) : (
+              <div className="space-y-4">
+                {purchasedArticles.map(article => (
+                  <div
+                    key={article.id}
+                    className="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-20 h-14 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                      {article.cover_image_url ? (
+                        <img
+                          src={article.cover_image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <ImageIcon className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Article Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">{article.title}</h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                        <span>購入日: {formatPurchaseDate(article.purchased_at)}</span>
+                        <span>¥{article.price.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Read Button */}
+                    <Link
+                      to={`/articles/${article.slug}`}
+                      className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition flex-shrink-0"
+                    >
+                      記事を読む
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

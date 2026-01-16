@@ -453,19 +453,19 @@ export default function SalesManagement() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white rounded-lg border border-gray-200 p-5">
                   <div className="text-sm text-gray-600 mb-1">今日</div>
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-gray-600">
                     ¥{summary.todayAffiliate.toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-white rounded-lg border border-gray-200 p-5">
                   <div className="text-sm text-gray-600 mb-1">今月</div>
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-gray-600">
                     ¥{summary.thisMonthAffiliate.toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-white rounded-lg border border-gray-200 p-5">
                   <div className="text-sm text-gray-600 mb-1">累計</div>
-                  <div className="text-2xl font-bold text-orange-500">
+                  <div className="text-2xl font-bold text-gray-600">
                     ¥{summary.totalAffiliate.toLocaleString()}
                   </div>
                 </div>
@@ -496,7 +496,7 @@ export default function SalesManagement() {
                               <span className="text-xs text-gray-500 ml-1">({m.salesCount}件)</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-sm text-right text-orange-500">
+                          <td className="px-4 py-3 text-sm text-right text-gray-600">
                             ¥{m.affiliateAmount.toLocaleString()}
                             {m.affiliateCount > 0 && (
                               <span className="text-xs text-gray-500 ml-1">({m.affiliateCount}件)</span>
@@ -574,7 +574,7 @@ export default function SalesManagement() {
                           ¥{sale.author_amount.toLocaleString()}
                         </div>
                         {sale.affiliate_user_id && (
-                          <div className="text-xs text-orange-500">
+                          <div className="text-xs text-gray-600">
                             紹介経由
                           </div>
                         )}
@@ -616,7 +616,7 @@ export default function SalesManagement() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-orange-500">
+                        <div className="font-bold text-gray-600">
                           ¥{record.affiliate_amount.toLocaleString()}
                         </div>
                         <div className="text-xs text-gray-500">

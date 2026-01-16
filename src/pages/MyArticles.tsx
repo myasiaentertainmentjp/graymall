@@ -1,19 +1,21 @@
- // src/pages/MyArticles.tsx
-  import { useState, useEffect } from 'react';
-  import { Link } from 'react-router-dom';
-  import { useAuth } from '../contexts/AuthContext';
-  import { supabase } from '../lib/supabase';
-  import Layout from '../components/Layout';
-  import type { Database } from '../lib/database.types';
-  import { FileText, Plus } from 'lucide-react';
+// src/pages/MyArticles.tsx
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import Layout from '../components/Layout';
+import type { Database } from '../lib/database.types';
+import { FileText, Plus } from 'lucide-react';
 
-  type Article = Database['public']['Tables']['articles']['Row'];
+type Article = Database['public']['Tables']['articles']['Row'];
+type StatusFilter = 'all' | 'draft' | 'published' | 'pending_review' | 'rejected';
 
-  export default function MyArticles() {
-    const { user } = useAuth();
-    const [articles, setArticles] = useState<Article[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+export default function MyArticles() {
+  const { user } = useAuth();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
     useEffect(() => {
       if (user) {
@@ -70,16 +72,47 @@
       );
     };
 
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    };
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
-    return (
+  // Count articles by status
+  const statusCounts = useMemo(() => {
+    const counts = {
+      all: articles.length,
+      draft: 0,
+      published: 0,
+      pending_review: 0,
+      rejected: 0,
+    };
+    articles.forEach(article => {
+      if (article.status in counts) {
+        counts[article.status as keyof typeof counts]++;
+      }
+    });
+    return counts;
+  }, [articles]);
+
+  // Filter articles by status
+  const filteredArticles = useMemo(() => {
+    if (statusFilter === 'all') return articles;
+    return articles.filter(article => article.status === statusFilter);
+  }, [articles, statusFilter]);
+
+  const statusTabs: { id: StatusFilter; label: string }[] = [
+    { id: 'all', label: 'すべて' },
+    { id: 'draft', label: '下書き' },
+    { id: 'published', label: '公開中' },
+    { id: 'pending_review', label: '審査中' },
+    { id: 'rejected', label: '却下' },
+  ];
+
+  return (
       <Layout>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="mb-8 flex items-center justify-between">
@@ -94,6 +127,31 @@
               <Plus className="w-4 h-4" />
               <span>新規作成</span>
             </Link>
+          </div>
+
+          {/* Status Filter Tabs */}
+          <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
+            {statusTabs.map(tab => {
+              const count = statusCounts[tab.id];
+              // Hide tabs with 0 count except "all"
+              if (tab.id !== 'all' && count === 0) return null;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition whitespace-nowrap ${
+                    statusFilter === tab.id
+                      ? 'border-gray-900 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`ml-1.5 ${statusFilter === tab.id ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {error && (
@@ -118,9 +176,14 @@
                 <span>最初の記事を作成</span>
               </Link>
             </div>
+          ) : filteredArticles.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">該当する記事がありません</p>
+            </div>
           ) : (
             <div className="space-y-4">
-              {articles.map((article) => (
+              {filteredArticles.map((article) => (
                 <div
                   key={article.id}
                   className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition"
