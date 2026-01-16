@@ -16,19 +16,6 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
   sub_category?: { id: string; name: string; slug: string } | null;
 };
 
-/**
- * 横長バナー推奨サイズ:
- * - 表示サイズ: 幅100%（最大1200px）× 高さ120px
- * - 入稿推奨サイズ: 2400×240px（Retina対応で2倍）
- * - フォーマット: JPG, PNG, WebP
- */
-const MAIN_BANNER = {
-  id: 'main-banner',
-  image_url: null, // 後で画像URLを設定
-  link_url: null,
-  alt_text: 'プロモーションバナー',
-};
-
 export default function Home() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -310,35 +297,6 @@ export default function Home() {
               </div>
             ) : (
               <div className="space-y-10">
-            {/* 横長バナー（人気記事の上） - 推奨サイズ: 2400×240px (Retina対応) */}
-            <div className="w-full">
-              {MAIN_BANNER.link_url ? (
-                <a
-                  href={MAIN_BANNER.link_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  {MAIN_BANNER.image_url ? (
-                    <img
-                      src={MAIN_BANNER.image_url}
-                      alt={MAIN_BANNER.alt_text}
-                      className="w-full h-auto rounded-xl object-cover"
-                      style={{ maxHeight: '120px' }}
-                    />
-                  ) : (
-                    <div className="w-full h-[120px] bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">バナー広告枠（2400×240px推奨）</span>
-                    </div>
-                  )}
-                </a>
-              ) : (
-                <div className="w-full h-[120px] bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">バナー広告枠（2400×240px推奨）</span>
-                </div>
-              )}
-            </div>
-
             {/* Following Articles - フォロー中のユーザーがいる場合のみ表示 */}
             {followingArticles.length > 0 && (
               <section>
