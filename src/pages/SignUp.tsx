@@ -157,7 +157,7 @@ export default function SignUp() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
-              表示名
+              ユーザー名
             </label>
             <input
               id="displayName"
@@ -165,7 +165,8 @@ export default function SignUp() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="任意（未入力の場合はメールアドレスの@前が使用されます）"
+              placeholder="ユーザー名"
+              required
               disabled={loading || success}
             />
           </div>

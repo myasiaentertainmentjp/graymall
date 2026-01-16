@@ -7,8 +7,9 @@ import { checkArticleAccess } from '../lib/articleAccess';
 import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
+import { useSEO } from '../hooks/useSEO';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null };
@@ -38,9 +39,21 @@ export default function ArticleDetail() {
   const [copied, setCopied] = useState(false);
   const [authorArticles, setAuthorArticles] = useState<RelatedArticle[]>([]);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [realFavoriteCount, setRealFavoriteCount] = useState(0);
 
   // アフィリエイトリファラルID（URLの?ref=xxx）
   const affiliateUserId = searchParams.get('ref');
+
+  // SEO設定
+  useSEO({
+    title: article?.title,
+    description: article?.excerpt || undefined,
+    ogImage: article?.cover_image_url || undefined,
+    ogType: 'article',
+    canonicalUrl: article ? `/articles/${article.slug}` : undefined,
+  });
 
   // 決済成功で戻ってきた場合
   useEffect(() => {
@@ -81,6 +94,69 @@ export default function ArticleDetail() {
       console.log('[GTM] purchase event pushed', article.id);
     }
   }, [paymentSuccess, article]);
+
+  // いいね数を読み込み
+  useEffect(() => {
+    if (!article) return;
+
+    const loadFavoriteCount = async () => {
+      const { count } = await supabase
+        .from('article_favorites')
+        .select('*', { count: 'exact', head: true })
+        .eq('article_id', article.id);
+      setRealFavoriteCount(count || 0);
+    };
+
+    loadFavoriteCount();
+  }, [article?.id]);
+
+  // ユーザーがいいね済みかチェック
+  useEffect(() => {
+    if (!user || !article) return;
+
+    const checkFavorite = async () => {
+      const { data } = await supabase
+        .from('article_favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('article_id', article.id)
+        .maybeSingle();
+      setIsFavorite(!!data);
+    };
+
+    checkFavorite();
+  }, [user, article?.id]);
+
+  // いいねトグル
+  const toggleFavorite = async () => {
+    if (!article) return;
+
+    if (!user) {
+      navigate('/signin');
+      return;
+    }
+
+    if (favoriteLoading) return;
+    setFavoriteLoading(true);
+
+    if (isFavorite) {
+      await supabase
+        .from('article_favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('article_id', article.id);
+      setIsFavorite(false);
+      setRealFavoriteCount(prev => Math.max(0, prev - 1));
+    } else {
+      await supabase
+        .from('article_favorites')
+        .insert({ user_id: user.id, article_id: article.id });
+      setIsFavorite(true);
+      setRealFavoriteCount(prev => prev + 1);
+    }
+
+    setFavoriteLoading(false);
+  };
 
   // 記事読み込み
   useEffect(() => {
@@ -153,9 +229,34 @@ export default function ArticleDetail() {
 
       setAuthorArticles((authorArts || []) as RelatedArticle[]);
 
-      // 関連記事（同じカテゴリ）を取得
-      if (data.primary_category_id) {
-        const { data: relatedArts } = await supabase
+      // 関連記事を取得（タグマッチング優先、同カテゴリでフォールバック）
+      const articleTags = data.tags || [];
+      let relatedArts: RelatedArticle[] = [];
+
+      // Step 1: タグが一致する記事を優先取得
+      if (articleTags.length > 0) {
+        const { data: tagMatched } = await supabase
+          .from('articles')
+          .select(`
+            *,
+            users:author_id (display_name, email, avatar_url),
+            primary_category:primary_category_id (id, name, slug)
+          `)
+          .eq('status', 'published')
+          .neq('id', data.id)
+          .neq('author_id', data.author_id)
+          .overlaps('tags', articleTags)
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        relatedArts = (tagMatched || []) as RelatedArticle[];
+      }
+
+      // Step 2: タグマッチで足りない場合、同カテゴリから補完
+      if (relatedArts.length < 4 && data.primary_category_id) {
+        const existingIds = relatedArts.map(a => a.id);
+
+        let query = supabase
           .from('articles')
           .select(`
             *,
@@ -165,12 +266,21 @@ export default function ArticleDetail() {
           .eq('primary_category_id', data.primary_category_id)
           .eq('status', 'published')
           .neq('id', data.id)
-          .neq('author_id', data.author_id)
-          .order('created_at', { ascending: false })
-          .limit(4);
+          .neq('author_id', data.author_id);
 
-        setRelatedArticles((relatedArts || []) as RelatedArticle[]);
+        // 既に取得済みの記事は除外
+        if (existingIds.length > 0) {
+          query = query.not('id', 'in', `(${existingIds.join(',')})`);
+        }
+
+        const { data: categoryMatched } = await query
+          .order('created_at', { ascending: false })
+          .limit(4 - relatedArts.length);
+
+        relatedArts = [...relatedArts, ...((categoryMatched || []) as RelatedArticle[])];
       }
+
+      setRelatedArticles(relatedArts);
     } catch (err) {
       console.error('Unexpected error:', err);
       setNotFound(true);
@@ -303,7 +413,25 @@ export default function ArticleDetail() {
             </span>
           )}
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">{article.title}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{article.title}</h1>
+
+          {/* いいねボタン */}
+          <button
+            onClick={toggleFavorite}
+            disabled={favoriteLoading}
+            className="flex items-center gap-2 mb-6 group"
+          >
+            <Heart
+              className={`w-6 h-6 transition ${
+                isFavorite
+                  ? 'text-red-500 fill-red-500'
+                  : 'text-gray-400 group-hover:text-red-400'
+              }`}
+            />
+            <span className={`text-lg ${isFavorite ? 'text-red-500' : 'text-gray-600'}`}>
+              {((article as any).fake_favorite_count || 0) + realFavoriteCount}
+            </span>
+          </button>
 
           <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
             <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
@@ -476,14 +604,14 @@ export default function ArticleDetail() {
           )}
 
           {/* 著者プロフィール */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-4">
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
+            <div className="flex items-center gap-3 sm:gap-4">
               <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
                   {article.users?.avatar_url ? (
                     <img src={article.users.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
                       {(article.users?.display_name?.[0] || 'U').toUpperCase()}
                     </div>
                   )}
@@ -492,16 +620,13 @@ export default function ArticleDetail() {
               <div className="flex-1 min-w-0">
                 <Link
                   to={`/users/${article.author_id}`}
-                  className="font-bold text-lg text-gray-900 hover:text-gray-700"
+                  className="font-bold text-base sm:text-lg text-gray-900 hover:text-gray-700 line-clamp-1 block"
                 >
                   {article.users?.display_name || article.users?.email?.split('@')[0]}
                 </Link>
-                {article.users?.bio && (
-                  <p className="text-gray-600 text-sm mt-1 line-clamp-2">{article.users.bio}</p>
-                )}
                 <Link
                   to={`/users/${article.author_id}`}
-                  className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mt-2"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
                 >
                   プロフィールを見る
                   <ChevronRight className="w-4 h-4" />

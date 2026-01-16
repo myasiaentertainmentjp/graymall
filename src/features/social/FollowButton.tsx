@@ -6,9 +6,10 @@ import { isFollowing, toggleFollow } from "./follows";
 
 type Props = {
   targetUserId: string;
+  fullWidth?: boolean;
 };
 
-export function FollowButton({ targetUserId }: Props) {
+export function FollowButton({ targetUserId, fullWidth = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const [meId, setMeId] = useState<string | null>(null);
@@ -81,10 +82,13 @@ export function FollowButton({ targetUserId }: Props) {
       onClick={onClick}
       disabled={loading && !!meId}
       className={
-        "px-4 py-2 rounded-md text-sm font-medium border " +
+        (fullWidth ? "w-full py-3 rounded-full " : "px-4 py-2 rounded-md ") +
+        "text-sm font-medium border " +
         (following
           ? "bg-gray-900 text-white border-gray-900"
-          : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50") +
+          : fullWidth
+            ? "bg-gray-900 text-white border-gray-900 hover:bg-gray-800"
+            : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50") +
         (loading && meId ? " opacity-60" : "")
       }
     >

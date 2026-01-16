@@ -4,6 +4,33 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import EnhancedRichTextEditor from '../components/EnhancedRichTextEditor';
 
+// HTMLからプレーンテキストを抽出してメタディスクリプションを生成
+function generateExcerpt(html: string, maxLength = 150): string {
+  // HTMLタグを除去
+  const text = html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+  // 改行を半角スペースに置換し、連続するスペースを1つに
+  const cleaned = text
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // 指定文字数で切り詰め
+  if (cleaned.length <= maxLength) {
+    return cleaned;
+  }
+
+  // 文の途中で切れる場合は「...」を付与
+  return cleaned.slice(0, maxLength).trim() + '...';
+}
+
 export default function ArticleEditor() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -75,11 +102,15 @@ export default function ArticleEditor() {
     if (!id) return;
     setSaving(true);
     try {
+      // 本文からメタディスクリプション（excerpt）を自動生成
+      const excerpt = generateExcerpt(content);
+
       const { error } = await supabase
         .from('articles')
         .update({
           title: title.trim() || '無題',
           content,
+          excerpt,
           price,
           status: 'draft' as const,
           updated_at: new Date().toISOString(),
@@ -99,11 +130,15 @@ export default function ArticleEditor() {
     if (!id || !canSubmit) return;
     setSaving(true);
     try {
+      // 本文からメタディスクリプション（excerpt）を自動生成
+      const excerpt = generateExcerpt(content);
+
       const { error } = await supabase
         .from('articles')
         .update({
           title: title.trim() || '無題',
           content,
+          excerpt,
           price,
           status: 'pending_review' as const,
           updated_at: new Date().toISOString(),

@@ -117,83 +117,98 @@ export default function UserProfile() {
           <div className="text-gray-600">ユーザーが見つかりませんでした</div>
         ) : (
           <>
-            {/* Profile Header */}
-            <div className="relative mb-8">
-              {/* Top-right action button */}
-              <div className="absolute top-0 right-0">
-                {isOwnProfile ? (
-                  <Link
-                    to="/settings"
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                    title="設定"
-                  >
-                    <Settings className="w-5 h-5" />
-                  </Link>
-                ) : (
-                  <FollowButton targetUserId={userId} />
-                )}
-              </div>
-
-              <div className="flex items-start gap-6">
+            {/* Profile Header - note.com風 */}
+            <div className="mb-6">
+              {/* Avatar + Name row */}
+              <div className="flex items-start gap-4 mb-4">
                 {/* Avatar */}
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                   {profile.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
                       {(profile.display_name?.[0] || 'U').toUpperCase()}
                     </div>
                   )}
                 </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0 pr-20">
-                  <h1 className="text-2xl font-bold text-gray-900 truncate mb-2">
+                {/* Name */}
+                <div className="flex-1 min-w-0 pt-1">
+                  <h1 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight">
                     {profile.display_name || 'ユーザー'}
                   </h1>
-
-                  {/* Bio */}
-                  {profile.bio && (
-                    <p className="text-gray-600 text-sm mb-4 whitespace-pre-wrap">
-                      {profile.bio}
-                    </p>
-                  )}
-
-                  {/* SNS Links */}
-                  {(snsLinks.length > 0 || customLinks.length > 0) && (
-                    <div className="flex flex-wrap items-center gap-3">
-                      {snsLinks.map((link, idx) => (
-                        <a
-                          key={idx}
-                          href={link.url!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
-                          title={link.label}
-                        >
-                          <link.icon className="w-5 h-5" />
-                        </a>
-                      ))}
-                      {customLinks.map((link, idx) => (
-                        <a
-                          key={`custom-${idx}`}
-                          href={link.url!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
-                  )}
                 </div>
+                {/* Settings (own profile only) - PC */}
+                {isOwnProfile && (
+                  <div className="flex-shrink-0 hidden sm:block">
+                    <Link
+                      to="/settings"
+                      className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                      title="設定"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </Link>
+                  </div>
+                )}
               </div>
+
+              {/* Bio */}
+              {profile.bio && (
+                <p className="text-gray-700 text-sm mb-4 whitespace-pre-wrap leading-relaxed">
+                  {profile.bio}
+                </p>
+              )}
+
+              {/* SNS Links */}
+              {(snsLinks.length > 0 || customLinks.length > 0) && (
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {snsLinks.map((link, idx) => (
+                    <a
+                      key={idx}
+                      href={link.url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+                      title={link.label}
+                    >
+                      <link.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </a>
+                  ))}
+                  {customLinks.map((link, idx) => (
+                    <a
+                      key={`custom-${idx}`}
+                      href={link.url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 text-gray-700 text-xs sm:text-sm rounded-full hover:bg-gray-200 transition"
+                    >
+                      <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Follow Button / Settings */}
+              {!isOwnProfile ? (
+                <>
+                  <div className="sm:hidden">
+                    <FollowButton targetUserId={userId} fullWidth />
+                  </div>
+                  <div className="hidden sm:block">
+                    <FollowButton targetUserId={userId} />
+                  </div>
+                </>
+              ) : (
+                <div className="sm:hidden">
+                  <Link
+                    to="/settings"
+                    className="flex items-center justify-center gap-2 w-full py-3 border border-gray-300 text-gray-700 rounded-full font-medium text-sm hover:bg-gray-50 transition"
+                  >
+                    <Settings className="w-4 h-4" />
+                    設定
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Articles Section */}
