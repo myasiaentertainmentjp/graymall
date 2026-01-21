@@ -308,6 +308,11 @@ function generateHtml($meta) {
     <!-- Preload -->
     <link rel="preconnect" href="https://wjvccdnyhfdcmsrcjysc.supabase.co" />
 
+    <!-- Google Fonts: Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Assets -->
     {$cssTag}
   </head>
