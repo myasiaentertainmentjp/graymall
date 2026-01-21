@@ -99,6 +99,8 @@ export default function Home() {
         });
         setParentCategories(parents);
         setSubCategories(subs);
+        // デフォルトで全カテゴリを閉じた状態にする
+        setCollapsedCategories(new Set(parents.map(p => p.id)));
       }
 
       // Load published articles with author info
