@@ -54,7 +54,7 @@ function getArticleBySlug($slug) {
     $result = supabaseQuery('articles', [
         'slug' => 'eq.' . $slug,
         'status' => 'eq.published',
-        'select' => 'id,title,excerpt,cover_image_url,slug,author_id,published_at',
+        'select' => 'id,title,excerpt,cover_image_url,slug,author_id,published_at,primary_category_id',
         'limit' => 1,
     ]);
 
@@ -99,6 +99,18 @@ function e($str) {
 }
 
 /**
+ * カテゴリ情報を取得
+ */
+function getCategoryById($id) {
+    $result = supabaseQuery('categories', [
+        'id' => 'eq.' . $id,
+        'select' => 'id,name,slug',
+        'limit' => 1,
+    ]);
+    return !empty($result) && isset($result[0]) ? $result[0] : null;
+}
+
+/**
  * メタタグ情報を取得
  */
 function getMetaTags($uri) {
@@ -108,6 +120,8 @@ function getMetaTags($uri) {
         'ogType' => 'website',
         'ogImage' => DEFAULT_OGP_IMAGE,
         'canonicalUrl' => SITE_URL . $uri,
+        'jsonLd' => null,
+        'breadcrumbs' => null,
     ];
 
     // 記事ページ: /articles/{slug}
@@ -123,6 +137,60 @@ function getMetaTags($uri) {
             $meta['ogImage'] = $article['cover_image_url'] ?: DEFAULT_OGP_IMAGE;
             $meta['authorName'] = $authorName;
             $meta['publishedAt'] = $article['published_at'];
+
+            // カテゴリ情報を取得
+            $category = null;
+            if (!empty($article['primary_category_id'])) {
+                $category = getCategoryById($article['primary_category_id']);
+            }
+
+            // JSON-LD 構造化データ（Article）
+            $meta['jsonLd'] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'Article',
+                'headline' => $article['title'],
+                'description' => $meta['description'],
+                'image' => $meta['ogImage'],
+                'datePublished' => $article['published_at'],
+                'author' => [
+                    '@type' => 'Person',
+                    'name' => $authorName,
+                    'url' => SITE_URL . '/users/' . $article['author_id'],
+                ],
+                'publisher' => [
+                    '@type' => 'Organization',
+                    'name' => SITE_NAME,
+                    'url' => SITE_URL,
+                ],
+                'mainEntityOfPage' => [
+                    '@type' => 'WebPage',
+                    '@id' => $meta['canonicalUrl'],
+                ],
+            ];
+
+            // パンくずリスト構造化データ
+            $breadcrumbItems = [
+                ['name' => 'ホーム', 'url' => SITE_URL . '/'],
+            ];
+            if ($category) {
+                $breadcrumbItems[] = ['name' => $category['name'], 'url' => SITE_URL . '/articles?category=' . $category['slug']];
+            } else {
+                $breadcrumbItems[] = ['name' => '記事一覧', 'url' => SITE_URL . '/articles'];
+            }
+            $breadcrumbItems[] = ['name' => $article['title'], 'url' => $meta['canonicalUrl']];
+
+            $meta['breadcrumbs'] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => array_map(function($item, $index) {
+                    return [
+                        '@type' => 'ListItem',
+                        'position' => $index + 1,
+                        'name' => $item['name'],
+                        'item' => $item['url'],
+                    ];
+                }, $breadcrumbItems, array_keys($breadcrumbItems)),
+            ];
         }
     }
 
@@ -191,6 +259,17 @@ function generateHtml($meta) {
     <meta property="article:author" content="' . e($meta['authorName'] ?? '') . '" />';
     }
 
+    // JSON-LD 構造化データ
+    $jsonLdScript = '';
+    if (!empty($meta['jsonLd'])) {
+        $jsonLdScript .= '
+    <script type="application/ld+json">' . json_encode($meta['jsonLd'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+    if (!empty($meta['breadcrumbs'])) {
+        $jsonLdScript .= '
+    <script type="application/ld+json">' . json_encode($meta['breadcrumbs'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+
     return <<<HTML
 <!doctype html>
 <html lang="ja">
@@ -224,7 +303,7 @@ function generateHtml($meta) {
     <meta name="twitter:image" content="{$ogImage}" />
 
     <!-- Canonical -->
-    <link rel="canonical" href="{$canonicalUrl}" />
+    <link rel="canonical" href="{$canonicalUrl}" />{$jsonLdScript}
 
     <!-- Preload -->
     <link rel="preconnect" href="https://wjvccdnyhfdcmsrcjysc.supabase.co" />

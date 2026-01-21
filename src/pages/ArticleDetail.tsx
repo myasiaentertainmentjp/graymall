@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart, Home } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
 
@@ -445,6 +445,34 @@ export default function ArticleDetail() {
   return (
     <Layout>
       <article className="max-w-4xl mx-auto px-4 py-8">
+        {/* パンくずリスト */}
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6 flex-wrap">
+          <Link to="/" className="flex items-center gap-1 hover:text-gray-700 transition">
+            <Home className="w-4 h-4" />
+            <span>ホーム</span>
+          </Link>
+          <ChevronRight className="w-4 h-4 flex-shrink-0" />
+          {article.primary_category ? (
+            <>
+              <Link
+                to={`/articles?category=${article.primary_category.slug}`}
+                className="hover:text-gray-700 transition"
+              >
+                {article.primary_category.name}
+              </Link>
+              <ChevronRight className="w-4 h-4 flex-shrink-0" />
+            </>
+          ) : (
+            <>
+              <Link to="/articles" className="hover:text-gray-700 transition">
+                記事一覧
+              </Link>
+              <ChevronRight className="w-4 h-4 flex-shrink-0" />
+            </>
+          )}
+          <span className="text-gray-900 font-medium line-clamp-1">{article.title}</span>
+        </nav>
+
         {article.cover_image_url && (
           <img
             src={article.cover_image_url}
