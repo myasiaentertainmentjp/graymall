@@ -39,9 +39,6 @@
     } | null;
   };
 
-  // その他（非アダルト）の固定ID
-  const OTHER_NON_ADULT_ID = '11111111-1111-1111-1111-111111111107';
-
   export default function AdminReviewArticle() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -66,9 +63,6 @@
 
     // 選択中の親カテゴリに紐づく子カテゴリ一覧
     const childCategories = categories.filter((c) => c.parent_id === selectedPrimaryCategoryId);
-
-    // 「その他（非アダルト）」を選択中かどうか
-    const isOtherNonAdult = selectedPrimaryCategoryId === OTHER_NON_ADULT_ID;
 
     useEffect(() => {
       loadCategories();
@@ -155,12 +149,8 @@
     // 親カテゴリ変更時
     function handlePrimaryCategoryChange(categoryId: string) {
       setSelectedPrimaryCategoryId(categoryId);
-      // 子カテゴリをリセット（その他非アダルトの場合は不要）
-      if (categoryId === OTHER_NON_ADULT_ID) {
-        setSelectedSubCategoryId('');
-      } else {
-        setSelectedSubCategoryId('');
-      }
+      // 子カテゴリをリセット
+      setSelectedSubCategoryId('');
     }
 
     async function handleApprove() {
@@ -172,8 +162,8 @@
         return;
       }
 
-      // 「その他（非アダルト）」以外は子カテゴリ必須
-      if (!isOtherNonAdult && !selectedSubCategoryId) {
+      // 子カテゴリ必須（子カテゴリがある場合のみ）
+      if (childCategories.length > 0 && !selectedSubCategoryId) {
         alert('子カテゴリを選択してください');
         return;
       }
@@ -188,7 +178,7 @@
           published_at: new Date().toISOString(),
           admin_comment: null,
           primary_category_id: selectedPrimaryCategoryId,
-          sub_category_id: isOtherNonAdult ? null : selectedSubCategoryId,
+          sub_category_id: selectedSubCategoryId || null,
         })
         .eq('id', id);
 
@@ -354,9 +344,9 @@
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    子カテゴリ {!isOtherNonAdult && <span className="text-red-500">*</span>}
+                    子カテゴリ {childCategories.length > 0 && <span className="text-red-500">*</span>}
                   </label>
-                  {isOtherNonAdult ? (
+                  {childCategories.length === 0 && selectedPrimaryCategoryId ? (
                     <div className="w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-500">
                       （子カテゴリなし）
                     </div>
