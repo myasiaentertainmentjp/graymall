@@ -223,10 +223,12 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
             {article.title}
           </h3>
 
-          {/* Price */}
-          <div className="text-base font-bold text-gray-900 mb-2">
-            {article.price > 0 ? `¥${article.price.toLocaleString()}` : '¥0（無料）'}
-          </div>
+          {/* Price - only show for paid articles */}
+          {article.price > 0 && (
+            <div className="text-sm font-semibold text-emerald-600 mb-2">
+              ¥{article.price.toLocaleString()}
+            </div>
+          )}
 
           {/* Affiliate info - only show when affiliate is enabled */}
           {affiliateLabel && (

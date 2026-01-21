@@ -8,7 +8,7 @@ import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 60;
 
 type Category = {
   id: string;

@@ -161,15 +161,15 @@ button {
     font-size: 0.875rem;
     color: #6b7280;
     margin-top: 0.5rem;
-    padding-bottom: 1.5rem;
+    padding-bottom: 2.5rem;
   }
 
   .prose figure {
-    margin-bottom: 2rem !important;
+    margin-bottom: 2.5rem !important;
   }
 
   .prose figure:has(figcaption) {
-    margin-bottom: 2.5rem !important;
+    margin-bottom: 3.5rem !important;
   }
 
   /* Mobile: smaller max height */

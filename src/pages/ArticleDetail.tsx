@@ -639,45 +639,35 @@ export default function ArticleDetail() {
         <div className="mt-12 space-y-12">
           {/* アフィリエイト紹介バナー（購入者向け） */}
           {hasAccess && canAffiliate && (
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-200">
-              <div className="text-center mb-4">
-                <span className="inline-block bg-orange-500 text-white text-sm font-bold px-4 py-1 rounded-full">
-                  この記事を紹介して応援しよう!
-                </span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-800">
-                    <span className="text-orange-500 font-bold">¥</span>
-                    <span className="font-bold">金額の{article.affiliate_rate}%還元</span>
-                    <span className="text-gray-500 text-sm">
+            <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 mb-1">
+                    この記事を紹介すると <span className="text-emerald-600">{article.affiliate_rate}%還元</span>
+                    <span className="text-gray-500 text-xs ml-1">
                       (¥{Math.floor((article.price || 0) * 0.85 * (article.affiliate_rate || 0) / 100).toLocaleString()})
                     </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-800">
-                    <User className="w-4 h-4 text-orange-500" />
-                    <span>{article.affiliate_target === 'buyers' ? '購入者のみ紹介できる' : '誰でも紹介できる'}</span>
-                  </div>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {article.affiliate_target === 'buyers' ? '購入者のみ紹介可能' : '誰でも紹介可能'}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">紹介リンクをコピー</span>
-                  <button
-                    onClick={copyAffiliateLink}
-                    className="flex items-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition font-medium"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckCircle className="w-5 h-5" />
-                        <span>コピー済み</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        <span>コピー</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  onClick={copyAffiliateLink}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition font-medium"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      <span>コピー済み</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>紹介リンクをコピー</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           )}

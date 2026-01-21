@@ -28,7 +28,7 @@ export default function Home() {
   const [editorPickArticles, setEditorPickArticles] = useState<Article[]>([]);
   const [categoryArticles, setCategoryArticles] = useState<Record<string, Article[]>>({});
   const [loading, setLoading] = useState(true);
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadData();
@@ -99,8 +99,6 @@ export default function Home() {
         });
         setParentCategories(parents);
         setSubCategories(subs);
-        // デフォルトで全カテゴリを閉じた状態にする
-        setCollapsedCategories(new Set(parents.map(p => p.id)));
       }
 
       // Load published articles with author info
@@ -181,7 +179,7 @@ export default function Home() {
 
   // カテゴリ開閉トグル
   const toggleCategory = (categoryId: string) => {
-    setCollapsedCategories(prev => {
+    setExpandedCategories(prev => {
       const next = new Set(prev);
       if (next.has(categoryId)) {
         next.delete(categoryId);
@@ -192,13 +190,35 @@ export default function Home() {
     });
   };
 
+  // 選択されているカテゴリの親を展開
+  useEffect(() => {
+    if (!selectedCategory || parentCategories.length === 0) return;
+
+    // 選択されているのが親カテゴリか確認
+    const selectedParent = parentCategories.find(p => p.slug === selectedCategory);
+    if (selectedParent) {
+      setExpandedCategories(prev => new Set([...prev, selectedParent.id]));
+      return;
+    }
+
+    // 選択されているのが子カテゴリの場合、親を探す
+    for (const parent of parentCategories) {
+      const children = subCategories[parent.id] || [];
+      const isChildSelected = children.some(c => c.slug === selectedCategory);
+      if (isChildSelected) {
+        setExpandedCategories(prev => new Set([...prev, parent.id]));
+        break;
+      }
+    }
+  }, [selectedCategory, parentCategories, subCategories]);
+
   // note風カテゴリサイドバーコンポーネント
   const CategorySidebar = ({ className = '' }: { className?: string }) => (
     <aside className={className}>
       <div className="sticky top-20">
         <nav>
           {parentCategories.map(parent => {
-            const isCollapsed = collapsedCategories.has(parent.id);
+            const isExpanded = expandedCategories.has(parent.id);
             const children = subCategories[parent.id] || [];
             const hasChildren = children.length > 0;
 
@@ -222,14 +242,14 @@ export default function Home() {
                       className="p-2 text-gray-400 hover:text-gray-600 transition"
                     >
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                       />
                     </button>
                   )}
                 </div>
 
                 {/* 子カテゴリ */}
-                {hasChildren && !isCollapsed && (
+                {hasChildren && isExpanded && (
                   <div className="pb-3 space-y-1">
                     {children.map(sub => (
                       <Link
