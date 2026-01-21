@@ -369,6 +369,33 @@ export default function Home() {
               </section>
             )}
 
+            {/* Category Sections - 記事があるカテゴリのみ表示 */}
+            {parentCategories.map(category => {
+              const articles = categoryArticles[category.id] || [];
+              if (articles.length === 0) return null;
+
+              return (
+                <section key={category.id}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">{category.name}</h2>
+                    <Link
+                      to={`/articles?category=${category.slug}`}
+                      className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    >
+                      もっと見る <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                    {articles.map(article => (
+                      <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                        <ArticleCard article={article} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+
               </div>
             )}
           </div>
