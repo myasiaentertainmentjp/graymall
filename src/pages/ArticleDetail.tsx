@@ -1,5 +1,5 @@
 // src/pages/ArticleDetail.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -59,6 +59,58 @@ function cleanArticleHtml(html: string): string {
   });
 
   return result;
+}
+
+/**
+ * 記事コンテンツ表示コンポーネント（DOM操作で余白を強制統一）
+ */
+function ArticleContent({ html }: { html: string }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    // figcaptionの後の余白を強制的に統一
+    const figcaptions = contentRef.current.querySelectorAll('figcaption');
+    figcaptions.forEach(figcaption => {
+      (figcaption as HTMLElement).style.marginBottom = '2rem';
+
+      // figcaptionの次の要素のmargin-topを0に
+      const figure = figcaption.closest('figure');
+      if (figure && figure.nextElementSibling) {
+        (figure.nextElementSibling as HTMLElement).style.marginTop = '0';
+      }
+    });
+
+    // figcaptionがないfigureの後の余白
+    const figures = contentRef.current.querySelectorAll('figure');
+    figures.forEach(figure => {
+      if (!figure.querySelector('figcaption')) {
+        (figure as HTMLElement).style.marginBottom = '2rem';
+      } else {
+        (figure as HTMLElement).style.marginBottom = '0';
+      }
+
+      // figure後の空のpタグを削除
+      let next = figure.nextElementSibling;
+      while (next && next.tagName === 'P' && (!next.textContent || next.textContent.trim() === '' || next.innerHTML.trim() === '<br>' || next.innerHTML.trim() === '')) {
+        const toRemove = next;
+        next = next.nextElementSibling;
+        toRemove.remove();
+      }
+
+      // figure後の要素のmargin-topを0に
+      if (figure.nextElementSibling) {
+        (figure.nextElementSibling as HTMLElement).style.marginTop = '0';
+      }
+    });
+  }, [html]);
+
+  return (
+    <div className="prose prose-lg max-w-none" ref={contentRef}>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  );
 }
 
 export default function ArticleDetail() {
@@ -606,15 +658,11 @@ export default function ArticleDetail() {
           </div>
 
           {isFree || hasAccess ? (
-            <div className="prose prose-lg max-w-none">
-              <div dangerouslySetInnerHTML={{
-                __html: cleanArticleHtml(
-                  article.content
-                    .replace(/<!-- paid -->/g, '')
-                    .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
-                )
-              }} />
-            </div>
+            <ArticleContent html={cleanArticleHtml(
+              article.content
+                .replace(/<!-- paid -->/g, '')
+                .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
+            )} />
           ) : (
             <>
               <div className="prose prose-lg max-w-none mb-8">
