@@ -174,19 +174,30 @@ button {
     margin-bottom: 0 !important;
   }
 
-  /* 画像の後の空行・改行を無効化 */
+  /* 画像の後の空行・改行を完全に無効化 */
   .prose figure + p:empty,
   .prose figure + p > br:only-child,
   .prose img + p:empty,
-  .prose img + p > br:only-child {
-    display: none;
-  }
-
-  .prose figure + p:has(> br:only-child) {
+  .prose img + p > br:only-child,
+  .prose figure + br,
+  .prose img + br {
+    display: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 0 !important;
-    font-size: 0 !important;
+    height: 0 !important;
+  }
+
+  /* brだけを含むpタグを非表示 */
+  .prose figure + p:has(> br:only-child),
+  .prose img + p:has(> br:only-child) {
+    display: none !important;
+  }
+
+  /* figure直後のpタグの上マージンを削除 */
+  .prose figure + p,
+  .prose figure + h2,
+  .prose figure + h3 {
+    margin-top: 0 !important;
   }
 
   /* Mobile: smaller max height */
