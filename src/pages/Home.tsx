@@ -318,7 +318,7 @@ export default function Home() {
                 <div className="text-gray-600">読み込み中...</div>
               </div>
             ) : (
-              <div className="space-y-10">
+              <div className="space-y-8">
             {/* Following Articles - フォロー中のユーザーがいる場合のみ表示 */}
             {followingArticles.length > 0 && (
               <section>

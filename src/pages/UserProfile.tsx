@@ -137,9 +137,9 @@ export default function UserProfile() {
                     {profile.display_name || 'ユーザー'}
                   </h1>
                 </div>
-                {/* Settings (own profile only) - PC */}
-                {isOwnProfile && (
-                  <div className="flex-shrink-0 hidden sm:block">
+                {/* Follow Button (PC) / Settings (own profile only) - PC */}
+                <div className="flex-shrink-0 hidden sm:block">
+                  {isOwnProfile ? (
                     <Link
                       to="/settings"
                       className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
@@ -147,8 +147,10 @@ export default function UserProfile() {
                     >
                       <Settings className="w-5 h-5" />
                     </Link>
-                  </div>
-                )}
+                  ) : (
+                    <FollowButton targetUserId={userId} />
+                  )}
+                </div>
               </div>
 
               {/* Bio */}
@@ -188,18 +190,11 @@ export default function UserProfile() {
                 </div>
               )}
 
-              {/* Follow Button / Settings */}
-              {!isOwnProfile ? (
-                <>
-                  <div className="sm:hidden">
-                    <FollowButton targetUserId={userId} fullWidth />
-                  </div>
-                  <div className="hidden sm:block">
-                    <FollowButton targetUserId={userId} />
-                  </div>
-                </>
-              ) : (
-                <div className="sm:hidden">
+              {/* Follow Button / Settings - Mobile only */}
+              <div className="sm:hidden">
+                {!isOwnProfile ? (
+                  <FollowButton targetUserId={userId} fullWidth />
+                ) : (
                   <Link
                     to="/settings"
                     className="flex items-center justify-center gap-2 w-full py-3 border border-gray-300 text-gray-700 rounded-full font-medium text-sm hover:bg-gray-50 transition"
@@ -207,8 +202,8 @@ export default function UserProfile() {
                     <Settings className="w-4 h-4" />
                     設定
                   </Link>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Articles Section */}
