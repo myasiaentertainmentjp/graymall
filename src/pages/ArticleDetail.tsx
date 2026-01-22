@@ -24,6 +24,26 @@ type RelatedArticle = Database['public']['Tables']['articles']['Row'] & {
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
+/**
+ * 記事HTMLから画像後の空行を除去
+ */
+function cleanArticleHtml(html: string): string {
+  // figureやimg後の空のpタグを除去
+  return html
+    // <figure>...</figure>の後の空pタグ
+    .replace(/<\/figure>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '</figure>')
+    // <figure>...</figure>の後の複数の空pタグ
+    .replace(/<\/figure>(\s*<p>\s*(<br\s*\/?>)?\s*<\/p>)+/gi, '</figure>')
+    // figcaptionの後の空pタグ
+    .replace(/<\/figcaption>\s*<\/figure>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '</figcaption></figure>')
+    // imgタグ後の空pタグ（figureで囲まれていない場合）
+    .replace(/(<img[^>]*>)\s*<\/p>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '$1</p>')
+    // &nbsp;だけのpタグも除去
+    .replace(/<p>\s*(&nbsp;)+\s*<\/p>/gi, '')
+    // 連続する空のpタグ
+    .replace(/(<p>\s*(<br\s*\/?>)?\s*<\/p>\s*){2,}/gi, '');
+}
+
 export default function ArticleDetail() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
@@ -571,23 +591,27 @@ export default function ArticleDetail() {
           {isFree || hasAccess ? (
             <div className="prose prose-lg max-w-none">
               <div dangerouslySetInnerHTML={{
-                __html: article.content
-                  .replace(/<!-- paid -->/g, '')
-                  .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
+                __html: cleanArticleHtml(
+                  article.content
+                    .replace(/<!-- paid -->/g, '')
+                    .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
+                )
               }} />
             </div>
           ) : (
             <>
               <div className="prose prose-lg max-w-none mb-8">
-                <div dangerouslySetInnerHTML={{ __html: article.excerpt }} />
+                <div dangerouslySetInnerHTML={{ __html: cleanArticleHtml(article.excerpt) }} />
               </div>
 
               {(article.content.includes('<!-- paid -->') || article.content.includes('<!-- PAYWALL_BOUNDARY -->')) && (
                 <div className="prose prose-lg max-w-none mb-8">
                   <div dangerouslySetInnerHTML={{
-                    __html: article.content
-                      .split('<!-- paid -->')[0]
-                      .split('<!-- PAYWALL_BOUNDARY -->')[0]
+                    __html: cleanArticleHtml(
+                      article.content
+                        .split('<!-- paid -->')[0]
+                        .split('<!-- PAYWALL_BOUNDARY -->')[0]
+                    )
                   }} />
                 </div>
               )}
