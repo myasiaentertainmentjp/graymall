@@ -724,7 +724,7 @@ export default function ArticleDetail() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {authorArticles.map((art) => (
-                  <ArticleCard key={art.id} article={art} />
+                  <ArticleCard key={art.id} article={art} hideTime />
                 ))}
               </div>
             </div>
@@ -757,7 +757,7 @@ export default function ArticleDetail() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {relatedArticles.map((art) => (
-                  <ArticleCard key={art.id} article={art} />
+                  <ArticleCard key={art.id} article={art} hideTime />
                 ))}
               </div>
             </div>

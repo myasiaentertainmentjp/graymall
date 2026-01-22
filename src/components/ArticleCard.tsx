@@ -72,9 +72,10 @@ function getCategoryColor(slug: string | undefined): string {
 interface ArticleCardProps {
   article: Article;
   rank?: number; // Optional ranking number
+  hideTime?: boolean; // Hide time display
 }
 
-export default function ArticleCard({ article, rank }: ArticleCardProps) {
+export default function ArticleCard({ article, rank, hideTime }: ArticleCardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -255,7 +256,7 @@ export default function ArticleCard({ article, rank }: ArticleCardProps) {
               </div>
               <span className="truncate">{label}</span>
             </Link>
-            <span className="flex-shrink-0">{timeAgo}</span>
+            {!hideTime && <span className="flex-shrink-0">{timeAgo}</span>}
           </div>
 
           {/* Like button - note style */}
