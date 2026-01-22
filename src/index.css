@@ -161,42 +161,31 @@ button {
     font-size: 0.875rem;
     color: #6b7280;
     margin-top: 0.5rem;
-    margin-bottom: 0;
+    margin-bottom: 2rem !important;
   }
 
   /* 画像・figureの下余白を一律固定 */
-  .prose img,
-  .prose figure {
+  .prose img {
     margin-bottom: 2rem !important;
+  }
+
+  .prose figure {
+    margin-bottom: 0 !important;
   }
 
   .prose figure img {
     margin-bottom: 0 !important;
   }
 
-  /* 画像の後の空行・改行を完全に無効化 */
-  .prose figure + p:empty,
-  .prose figure + p > br:only-child,
-  .prose img + p:empty,
-  .prose img + p > br:only-child,
-  .prose figure + br,
-  .prose img + br {
-    display: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 0 !important;
+  /* figcaptionがない場合のfigure */
+  .prose figure:not(:has(figcaption)) {
+    margin-bottom: 2rem !important;
   }
 
-  /* brだけを含むpタグを非表示 */
-  .prose figure + p:has(> br:only-child),
-  .prose img + p:has(> br:only-child) {
-    display: none !important;
-  }
-
-  /* figure直後のpタグの上マージンを削除 */
-  .prose figure + p,
-  .prose figure + h2,
-  .prose figure + h3 {
+  /* 全ての要素のマージンをリセット（figure内以外） */
+  .prose figure + *,
+  .prose figure + * + *,
+  .prose figure + * + * + * {
     margin-top: 0 !important;
   }
 
