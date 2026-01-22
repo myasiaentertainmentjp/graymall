@@ -28,20 +28,37 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
  * 記事HTMLから画像後の空行を除去
  */
 function cleanArticleHtml(html: string): string {
-  // figureやimg後の空のpタグを除去
-  return html
-    // <figure>...</figure>の後の空pタグ
-    .replace(/<\/figure>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '</figure>')
-    // <figure>...</figure>の後の複数の空pタグ
-    .replace(/<\/figure>(\s*<p>\s*(<br\s*\/?>)?\s*<\/p>)+/gi, '</figure>')
-    // figcaptionの後の空pタグ
-    .replace(/<\/figcaption>\s*<\/figure>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '</figcaption></figure>')
-    // imgタグ後の空pタグ（figureで囲まれていない場合）
-    .replace(/(<img[^>]*>)\s*<\/p>\s*<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '$1</p>')
-    // &nbsp;だけのpタグも除去
-    .replace(/<p>\s*(&nbsp;)+\s*<\/p>/gi, '')
-    // 連続する空のpタグ
-    .replace(/(<p>\s*(<br\s*\/?>)?\s*<\/p>\s*){2,}/gi, '');
+  let result = html;
+
+  // 空のpタグのパターン（様々なバリエーション）
+  const emptyPPatterns = [
+    /<p>\s*<\/p>/gi,
+    /<p>\s*<br\s*\/?>\s*<\/p>/gi,
+    /<p>\s*(&nbsp;)+\s*<\/p>/gi,
+    /<p>\s*&nbsp;\s*<\/p>/gi,
+    /<p><br><\/p>/gi,
+    /<p>\s+<\/p>/gi,
+  ];
+
+  // figure/figcaptionの後の空pタグを全て除去
+  emptyPPatterns.forEach(pattern => {
+    result = result.replace(new RegExp(`<\\/figure>\\s*${pattern.source}`, 'gi'), '</figure>');
+    result = result.replace(new RegExp(`<\\/figcaption>\\s*<\\/figure>\\s*${pattern.source}`, 'gi'), '</figcaption></figure>');
+  });
+
+  // 複数回実行して連続する空pタグを除去
+  for (let i = 0; i < 3; i++) {
+    emptyPPatterns.forEach(pattern => {
+      result = result.replace(new RegExp(`<\\/figure>\\s*${pattern.source}`, 'gi'), '</figure>');
+    });
+  }
+
+  // 全ての空pタグを除去（画像後に限らず）
+  emptyPPatterns.forEach(pattern => {
+    result = result.replace(pattern, '');
+  });
+
+  return result;
 }
 
 export default function ArticleDetail() {
