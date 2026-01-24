@@ -265,7 +265,7 @@ export default function Home() {
         {/* PC: 2カラムレイアウト（左サイドバー + メインコンテンツ） */}
         <div className="lg:flex lg:gap-8">
           {/* 左サイドバー（PCのみ） */}
-          <aside className="hidden lg:block lg:w-44 flex-shrink-0">
+          <aside className="hidden lg:block lg:w-56 flex-shrink-0">
             <div className="sticky top-20">
               <nav>
                 <Link
@@ -331,7 +331,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {popularArticles.slice(0, 8).map((article) => (
-                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                    <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                       <ArticleCard article={article} />
                     </div>
                   ))}
@@ -350,7 +350,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {newArticles.map((article) => (
-                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                    <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                       <ArticleCard article={article} />
                     </div>
                   ))}
@@ -366,7 +366,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {editorPickArticles.map((article) => (
-                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                    <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                       <ArticleCard article={article} />
                     </div>
                   ))}
@@ -382,7 +382,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {recommendedArticles.map((article) => (
-                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                    <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                       <ArticleCard article={article} />
                     </div>
                   ))}
@@ -401,7 +401,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {followingArticles.map((article) => (
-                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                    <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                       <ArticleCard article={article} />
                     </div>
                   ))}
@@ -423,7 +423,7 @@ export default function Home() {
                   </div>
                   <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                     {arts.map((article) => (
-                      <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
                         <ArticleCard article={article} />
                       </div>
                     ))}
