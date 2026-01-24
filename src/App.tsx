@@ -1,8 +1,9 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate, useSearchParams, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Loader2 } from 'lucide-react';
 
 // ページ遷移時にスクロール位置をトップに戻すコンポーネント
 function ScrollToTop() {
@@ -15,62 +16,75 @@ function ScrollToTop() {
   return null;
 }
 
-  import Home from './pages/Home';
-  import SignIn from './pages/SignIn';
-  import SignUp from './pages/SignUp';
-  import ForgotPassword from './pages/ForgotPassword';
-  import ArticleList from './pages/ArticleList';
-  import ArticleDetail from './pages/ArticleDetail';
-  import MyArticles from './pages/MyArticles';
-  import Editor from './pages/Editor';
-  import SalesManagement from './pages/SalesManagement';
-  import AdminDashboard from './pages/AdminDashboard';
-  import AdminReviewArticle from './pages/AdminReviewArticle';
-  import AdminHomepageManager from './pages/AdminHomepageManager';
-  import AdminArticleEdit from './pages/AdminArticleEdit';
-  import Profile from './pages/Profile';
-import UserProfile from './pages/UserProfile';
-import PreviewArticle from './pages/PreviewArticle';
-import PublishConfirm from './pages/PublishConfirm';
-import PaymentSettingsPage from './pages/PaymentSettingsPage';
-import CardRegistrationPage from './pages/CardRegistrationPage';
-import Settings from './pages/Settings';
-import SubscriptionPage from './pages/SubscriptionPage';
-import ArticleSettings from './pages/ArticleSettings';
-import WithdrawalPage from './pages/WithdrawalPage';
-import LikedArticles from './pages/LikedArticles';
-import PurchasedArticles from './pages/PurchasedArticles';
-import FavoriteArticles from './pages/FavoriteArticles';
-import RecentArticles from './pages/RecentArticles';
-import FollowingUsers from './pages/FollowingUsers';
+// ローディング表示
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+    </div>
+  );
+}
 
-// 法務・補助ページ
-import TermsPage from './pages/terms';
-import PrivacyPage from './pages/privacy';
-import LawPage from './pages/law';
-import GuidelinesPage from './pages/guidelines';
-import PaymentsInfoPage from './pages/payments';
-import FAQPage from './pages/faq';
-import ContactPage from './pages/contact';
-import CompanyPage from './pages/company';
+// 優先度高：即座に読み込み（初回アクセスが多いページ）
+import Home from './pages/Home';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import ArticleList from './pages/ArticleList';
+import ArticleDetail from './pages/ArticleDetail';
 
-  // /write からのリダイレクト用コンポーネント
-  function WriteRedirect() {
-    const [searchParams] = useSearchParams();
-    const id = searchParams.get('id');
+// 遅延読み込み：必要時にロード
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const MyArticles = lazy(() => import('./pages/MyArticles'));
+const Editor = lazy(() => import('./pages/Editor'));
+const SalesManagement = lazy(() => import('./pages/SalesManagement'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminReviewArticle = lazy(() => import('./pages/AdminReviewArticle'));
+const AdminHomepageManager = lazy(() => import('./pages/AdminHomepageManager'));
+const AdminArticleEdit = lazy(() => import('./pages/AdminArticleEdit'));
+const Profile = lazy(() => import('./pages/Profile'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+const PreviewArticle = lazy(() => import('./pages/PreviewArticle'));
+const PublishConfirm = lazy(() => import('./pages/PublishConfirm'));
+const PaymentSettingsPage = lazy(() => import('./pages/PaymentSettingsPage'));
+const CardRegistrationPage = lazy(() => import('./pages/CardRegistrationPage'));
+const Settings = lazy(() => import('./pages/Settings'));
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
+const ArticleSettings = lazy(() => import('./pages/ArticleSettings'));
+const WithdrawalPage = lazy(() => import('./pages/WithdrawalPage'));
+const LikedArticles = lazy(() => import('./pages/LikedArticles'));
+const PurchasedArticles = lazy(() => import('./pages/PurchasedArticles'));
+const FavoriteArticles = lazy(() => import('./pages/FavoriteArticles'));
+const RecentArticles = lazy(() => import('./pages/RecentArticles'));
+const FollowingUsers = lazy(() => import('./pages/FollowingUsers'));
 
-    if (id) {
-      return <Navigate to={`/editor/${id}`} replace />;
-    }
-    return <Navigate to="/editor/new" replace />;
+// 法務・補助ページ（遅延読み込み）
+const TermsPage = lazy(() => import('./pages/terms'));
+const PrivacyPage = lazy(() => import('./pages/privacy'));
+const LawPage = lazy(() => import('./pages/law'));
+const GuidelinesPage = lazy(() => import('./pages/guidelines'));
+const PaymentsInfoPage = lazy(() => import('./pages/payments'));
+const FAQPage = lazy(() => import('./pages/faq'));
+const ContactPage = lazy(() => import('./pages/contact'));
+const CompanyPage = lazy(() => import('./pages/company'));
+
+// /write からのリダイレクト用コンポーネント
+function WriteRedirect() {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get('id');
+
+  if (id) {
+    return <Navigate to={`/editor/${id}`} replace />;
   }
+  return <Navigate to="/editor/new" replace />;
+}
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ScrollToTop />
-        <Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -300,9 +314,10 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/company" element={<CompanyPage />} />
           </Routes>
-        </Router>
-      </AuthProvider>
-    );
-  }
+        </Suspense>
+      </Router>
+    </AuthProvider>
+  );
+}
 
-  export default App;
+export default App;
