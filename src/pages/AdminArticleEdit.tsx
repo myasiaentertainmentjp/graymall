@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Eye, Edit3 } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
 import type { Database } from '../lib/database.types';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];
+
+type TabType = 'edit' | 'preview';
 
 export default function AdminArticleEdit() {
   const { id } = useParams();
@@ -19,6 +21,7 @@ export default function AdminArticleEdit() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('edit');
 
   // フォーム状態
   const [title, setTitle] = useState('');
@@ -151,18 +154,45 @@ export default function AdminArticleEdit() {
             </button>
             <h1 className="text-lg font-bold">記事編集（管理者）</h1>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            保存
-          </button>
+          <div className="flex items-center gap-3">
+            {/* タブ切替 */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('edit')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition ${
+                  activeTab === 'edit'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Edit3 className="w-4 h-4" />
+                編集
+              </button>
+              <button
+                onClick={() => setActiveTab('preview')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition ${
+                  activeTab === 'preview'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Eye className="w-4 h-4" />
+                プレビュー
+              </button>
+            </div>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              保存
+            </button>
+          </div>
         </div>
       </div>
 
@@ -184,186 +214,218 @@ export default function AdminArticleEdit() {
 
       {/* メインコンテンツ */}
       <div className="max-w-5xl mx-auto px-4 py-6">
-        <div className="grid gap-6">
-          {/* 基本情報 */}
-          <section className="bg-white rounded-xl border p-6">
-            <h2 className="text-lg font-bold mb-4">基本情報</h2>
+        {activeTab === 'edit' ? (
+          <div className="grid gap-6">
+            {/* 基本情報 */}
+            <section className="bg-white rounded-xl border p-6">
+              <h2 className="text-lg font-bold mb-4">基本情報</h2>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  タイトル
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    タイトル
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    概要（excerpt）
+                  </label>
+                  <textarea
+                    value={excerpt}
+                    onChange={(e) => setExcerpt(e.target.value)}
+                    rows={3}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    カテゴリ
+                  </label>
+                  <select
+                    value={primaryCategoryId || ''}
+                    onChange={(e) => setPrimaryCategoryId(e.target.value || null)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">未設定</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            {/* 本文 */}
+            <section className="bg-white rounded-xl border p-6">
+              <h2 className="text-lg font-bold mb-4">本文</h2>
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <RichTextEditor
+                  key={article?.id}
+                  value={content}
+                  onChange={setContent}
+                  placeholder="本文を入力..."
+                  className="min-h-[400px]"
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                ※ 有料部分は本文中に「--- 有料 ---」などの区切りを入れてください。
+              </p>
+            </section>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  概要（excerpt）
-                </label>
-                <textarea
-                  value={excerpt}
-                  onChange={(e) => setExcerpt(e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+            {/* 価格設定 */}
+            <section className="bg-white rounded-xl border p-6">
+              <h2 className="text-lg font-bold mb-4">価格設定</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    価格（円）
+                  </label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    min={0}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">0円の場合は無料記事</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hasPartialPaywall"
+                    checked={hasPartialPaywall}
+                    onChange={(e) => setHasPartialPaywall(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="hasPartialPaywall" className="text-sm text-gray-700">
+                    途中から有料（部分ペイウォール）
+                  </label>
+                </div>
+                {hasPartialPaywall && (
+                  <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                    本文中の &lt;!-- paywall --&gt; コメント以降が有料部分になります。
+                    このコメントがない場合は全体が有料になります。
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* アフィリエイト設定 */}
+            <section className="bg-white rounded-xl border p-6">
+              <h2 className="text-lg font-bold mb-4">アフィリエイト設定</h2>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="affiliateEnabled"
+                    checked={affiliateEnabled}
+                    onChange={(e) => setAffiliateEnabled(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="affiliateEnabled" className="text-sm text-gray-700">
+                    アフィリエイトを有効にする
+                  </label>
+                </div>
+
+                {affiliateEnabled && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        対象者
+                      </label>
+                      <select
+                        value={affiliateTarget || ''}
+                        onChange={(e) => setAffiliateTarget(e.target.value as 'all' | 'buyers' | null)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="all">全員</option>
+                        <option value="buyers">購入者のみ</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        アフィリエイト報酬率（%）
+                      </label>
+                      <input
+                        type="number"
+                        value={affiliateRate || ''}
+                        onChange={(e) => setAffiliateRate(e.target.value ? Number(e.target.value) : null)}
+                        min={0}
+                        max={100}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        紹介者に支払われる報酬の割合（0〜100%）
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+
+            {/* 記事情報 */}
+            <section className="bg-gray-100 rounded-xl p-6 text-sm text-gray-600">
+              <h2 className="font-bold mb-2">記事情報</h2>
+              <dl className="grid grid-cols-2 gap-2">
+                <dt>記事ID:</dt>
+                <dd className="font-mono">{article?.id}</dd>
+                <dt>スラッグ:</dt>
+                <dd className="font-mono">{article?.slug}</dd>
+                <dt>ステータス:</dt>
+                <dd>{article?.status}</dd>
+                <dt>作成日:</dt>
+                <dd>{article?.created_at ? new Date(article.created_at).toLocaleString() : '-'}</dd>
+                <dt>公開日:</dt>
+                <dd>{article?.published_at ? new Date(article.published_at).toLocaleString() : '-'}</dd>
+              </dl>
+            </section>
+          </div>
+        ) : (
+          /* プレビュー表示 */
+          <div className="bg-white rounded-xl border">
+            <div className="max-w-3xl mx-auto px-6 py-8">
+              {/* タイトル */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+                {title || '（タイトル未設定）'}
+              </h1>
+
+              {/* メタ情報 */}
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-8 pb-6 border-b">
+                <span>価格: {price > 0 ? `¥${price.toLocaleString()}` : '無料'}</span>
+                {hasPartialPaywall && <span className="text-orange-600">部分有料</span>}
+                {affiliateEnabled && <span className="text-emerald-600">アフィリエイト有効</span>}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  カテゴリ
-                </label>
-                <select
-                  value={primaryCategoryId || ''}
-                  onChange={(e) => setPrimaryCategoryId(e.target.value || null)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">未設定</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </section>
-
-          {/* 本文 */}
-          <section className="bg-white rounded-xl border p-6">
-            <h2 className="text-lg font-bold mb-4">本文</h2>
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <RichTextEditor
-                key={article?.id}
-                value={content}
-                onChange={setContent}
-                placeholder="本文を入力..."
-                className="min-h-[400px]"
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              ※ 有料部分は本文中に「--- 有料 ---」などの区切りを入れてください。
-            </p>
-          </section>
-
-          {/* 価格設定 */}
-          <section className="bg-white rounded-xl border p-6">
-            <h2 className="text-lg font-bold mb-4">価格設定</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  価格（円）
-                </label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  min={0}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">0円の場合は無料記事</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="hasPartialPaywall"
-                  checked={hasPartialPaywall}
-                  onChange={(e) => setHasPartialPaywall(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="hasPartialPaywall" className="text-sm text-gray-700">
-                  途中から有料（部分ペイウォール）
-                </label>
-              </div>
-              {hasPartialPaywall && (
-                <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                  本文中の &lt;!-- paywall --&gt; コメント以降が有料部分になります。
-                  このコメントがない場合は全体が有料になります。
-                </p>
+              {/* 概要 */}
+              {excerpt && (
+                <div className="bg-gray-50 rounded-lg p-4 mb-8 text-gray-700">
+                  <p className="text-sm font-medium text-gray-500 mb-2">概要</p>
+                  <div dangerouslySetInnerHTML={{ __html: excerpt }} />
+                </div>
               )}
+
+              {/* 本文 */}
+              <article className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-img:rounded-lg prose-img:my-6">
+                <div dangerouslySetInnerHTML={{ __html: content || '<p class="text-gray-400">本文がありません</p>' }} />
+              </article>
             </div>
-          </section>
-
-          {/* アフィリエイト設定 */}
-          <section className="bg-white rounded-xl border p-6">
-            <h2 className="text-lg font-bold mb-4">アフィリエイト設定</h2>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="affiliateEnabled"
-                  checked={affiliateEnabled}
-                  onChange={(e) => setAffiliateEnabled(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="affiliateEnabled" className="text-sm text-gray-700">
-                  アフィリエイトを有効にする
-                </label>
-              </div>
-
-              {affiliateEnabled && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      対象者
-                    </label>
-                    <select
-                      value={affiliateTarget || ''}
-                      onChange={(e) => setAffiliateTarget(e.target.value as 'all' | 'buyers' | null)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">選択してください</option>
-                      <option value="all">全員</option>
-                      <option value="buyers">購入者のみ</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      アフィリエイト報酬率（%）
-                    </label>
-                    <input
-                      type="number"
-                      value={affiliateRate || ''}
-                      onChange={(e) => setAffiliateRate(e.target.value ? Number(e.target.value) : null)}
-                      min={0}
-                      max={100}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      紹介者に支払われる報酬の割合（0〜100%）
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-          </section>
-
-          {/* 記事情報 */}
-          <section className="bg-gray-100 rounded-xl p-6 text-sm text-gray-600">
-            <h2 className="font-bold mb-2">記事情報</h2>
-            <dl className="grid grid-cols-2 gap-2">
-              <dt>記事ID:</dt>
-              <dd className="font-mono">{article?.id}</dd>
-              <dt>スラッグ:</dt>
-              <dd className="font-mono">{article?.slug}</dd>
-              <dt>ステータス:</dt>
-              <dd>{article?.status}</dd>
-              <dt>作成日:</dt>
-              <dd>{article?.created_at ? new Date(article.created_at).toLocaleString() : '-'}</dd>
-              <dt>公開日:</dt>
-              <dd>{article?.published_at ? new Date(article.published_at).toLocaleString() : '-'}</dd>
-            </dl>
-          </section>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
