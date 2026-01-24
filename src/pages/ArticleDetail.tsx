@@ -708,7 +708,7 @@ export default function ArticleDetail() {
             </Link>
 
             {/* アフィリエイト共有ボタン（アフィリエイト有効の場合） */}
-            {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
+            {canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
               <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-white">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -719,29 +719,45 @@ export default function ArticleDetail() {
                     報酬 {article.affiliate_rate}%
                   </span>
                 </div>
-                <button
-                  onClick={copyAffiliateLink}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition text-sm font-medium ${
-                    copied
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      リンクをコピーしました
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4" />
-                      紹介リンクをコピー
-                    </>
-                  )}
-                </button>
-                <p className="text-xs text-gray-400 text-center mt-2">
-                  紹介経由で購入されると ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} の報酬
-                </p>
+                {user ? (
+                  <>
+                    <button
+                      onClick={copyAffiliateLink}
+                      className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition text-sm font-medium ${
+                        copied
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                          : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          リンクをコピーしました
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          紹介リンクをコピー
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-gray-400 text-center mt-2">
+                      紹介経由で購入されると ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} の報酬
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/signup"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 transition text-sm font-medium"
+                    >
+                      無料登録して紹介リンクを取得
+                    </Link>
+                    <p className="text-xs text-gray-400 text-center mt-2">
+                      紹介経由で購入されると ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} の報酬が得られます
+                    </p>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -819,7 +835,7 @@ export default function ArticleDetail() {
         {/* 記事下コンテンツ */}
         <div className="mt-12 space-y-12">
           {/* アフィリエイト紹介バナー（アフィリエイト有効の場合） */}
-          {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
+          {canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
             <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -830,22 +846,31 @@ export default function ArticleDetail() {
                     {article.affiliate_target === 'buyers' ? '購入者のみ紹介可能' : '誰でも紹介可能'}
                   </p>
                 </div>
-                <button
-                  onClick={copyAffiliateLink}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition font-medium"
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      <span>コピー済み</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4" />
-                      <span>紹介リンクをコピー</span>
-                    </>
-                  )}
-                </button>
+                {user ? (
+                  <button
+                    onClick={copyAffiliateLink}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition font-medium"
+                  >
+                    {copied ? (
+                      <>
+                        <CheckCircle className="w-4 h-4" />
+                        <span>コピー済み</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span>紹介リンクをコピー</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 transition font-medium"
+                  >
+                    無料登録して紹介リンクを取得
+                  </Link>
+                )}
               </div>
             </div>
           )}
