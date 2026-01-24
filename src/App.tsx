@@ -1,9 +1,22 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
+
+// React Query クライアント設定
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5分間はキャッシュを新鮮とみなす
+      gcTime: 1000 * 60 * 30,   // 30分間キャッシュを保持
+      refetchOnWindowFocus: false, // ウィンドウフォーカス時の再取得を無効化
+      retry: 1, // 失敗時は1回だけリトライ
+    },
+  },
+});
 
 // ページ遷移時にスクロール位置をトップに戻すコンポーネント
 function ScrollToTop() {
@@ -80,11 +93,12 @@ function WriteRedirect() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <ScrollToTop />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <ScrollToTop />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -313,10 +327,11 @@ function App() {
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/company" element={<CompanyPage />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AuthProvider>
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
