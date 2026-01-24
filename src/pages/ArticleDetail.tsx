@@ -589,7 +589,8 @@ export default function ArticleDetail() {
             </button>
           </div>
 
-          <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            {/* 著者情報 */}
             <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
               <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-lg font-medium overflow-hidden">
                 {article.users?.avatar_url ? (
@@ -609,39 +610,29 @@ export default function ArticleDetail() {
             </Link>
 
             {/* アフィリエイト共有ボタン（アフィリエイト有効の場合） */}
-            {/* affiliate_target: 'all'=誰でも紹介可能, 'buyers'=購入者のみ */}
             {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
-              <div className="relative">
+              <div className="mt-4">
                 <button
-                  onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"
+                  onClick={copyAffiliateLink}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 transition shadow-sm"
                 >
-                  <Share2 className="w-4 h-4" />
-                  <span>紹介して¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()}（{article.affiliate_rate}%）報酬</span>
+                  {copied ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-medium">コピーしました！</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-5 h-5" />
+                      <span className="font-medium">
+                        紹介して ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} ({article.affiliate_rate}%) の報酬をGET
+                      </span>
+                    </>
+                  )}
                 </button>
-                {showShareMenu && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-10">
-                    <p className="text-sm text-gray-600 mb-3">
-                      このリンクで購入されると¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()}（{article.affiliate_rate}%）の報酬が得られます
-                    </p>
-                    <button
-                      onClick={copyAffiliateLink}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                    >
-                      {copied ? (
-                        <>
-                          <CheckCircle className="w-4 h-4" />
-                          <span>コピーしました</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          <span>リンクをコピー</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  {article.affiliate_target === 'buyers' ? '購入者のみ紹介可能' : 'このリンクで購入されると報酬が得られます'}
+                </p>
               </div>
             )}
           </div>
