@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart, Home } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart, Home, Clock, List, Twitter, Facebook, MessageCircle } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
 
@@ -59,6 +59,56 @@ function cleanArticleHtml(html: string): string {
   });
 
   return result;
+}
+
+/**
+ * 読了時間を計算（日本語: 約500文字/分）
+ */
+function calculateReadingTime(html: string): number {
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+  const text = doc.body.textContent || '';
+  const charCount = text.replace(/\s+/g, '').length;
+  const minutes = Math.ceil(charCount / 500);
+  return Math.max(1, minutes);
+}
+
+/**
+ * HTMLから目次を生成
+ */
+type TocItem = { id: string; text: string; level: number };
+
+function generateTableOfContents(html: string): TocItem[] {
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+  const headings = doc.querySelectorAll('h2, h3');
+  const toc: TocItem[] = [];
+
+  headings.forEach((heading, index) => {
+    const text = heading.textContent?.trim() || '';
+    if (text) {
+      const id = `heading-${index}`;
+      toc.push({
+        id,
+        text,
+        level: heading.tagName === 'H2' ? 2 : 3,
+      });
+    }
+  });
+
+  return toc;
+}
+
+/**
+ * 記事HTMLに見出しIDを付与
+ */
+function addHeadingIds(html: string): string {
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+  const headings = doc.querySelectorAll('h2, h3');
+
+  headings.forEach((heading, index) => {
+    heading.id = `heading-${index}`;
+  });
+
+  return doc.body.innerHTML;
 }
 
 /**
@@ -559,11 +609,18 @@ export default function ArticleDetail() {
         )}
 
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-          {article.primary_category && (
-            <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full mb-4">
-              {article.primary_category.name}
+          {/* カテゴリ・読了時間 */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {article.primary_category && (
+              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+                {article.primary_category.name}
+              </span>
+            )}
+            <span className="flex items-center gap-1 text-sm text-gray-500">
+              <Clock className="w-4 h-4" />
+              {calculateReadingTime(article.content)}分で読める
             </span>
-          )}
+          </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
 
@@ -637,12 +694,39 @@ export default function ArticleDetail() {
             )}
           </div>
 
+          {/* 目次（見出しが2つ以上ある場合のみ表示） */}
+          {(() => {
+            const toc = generateTableOfContents(article.content);
+            if (toc.length < 2) return null;
+            return (
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                  <List className="w-4 h-4" />
+                  目次
+                </div>
+                <nav className="space-y-1">
+                  {toc.map((item) => (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      className={`block text-sm text-gray-600 hover:text-gray-900 transition ${
+                        item.level === 3 ? 'pl-4' : ''
+                      }`}
+                    >
+                      {item.text}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            );
+          })()}
+
           {isFree || hasAccess ? (
-            <ArticleContent html={cleanArticleHtml(
+            <ArticleContent html={addHeadingIds(cleanArticleHtml(
               article.content
                 .replace(/<!-- paid -->/g, '')
                 .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
-            )} />
+            ))} />
           ) : (
             <>
               <div className="prose prose-lg max-w-none mb-8">
@@ -737,6 +821,46 @@ export default function ArticleDetail() {
               </div>
             </div>
           )}
+
+          {/* SNSシェアボタン */}
+          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <p className="text-sm font-medium text-gray-700 mb-3">この記事をシェア</p>
+            <div className="flex gap-3">
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
+              >
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a
+                href={`https://line.me/R/msg/text/?${encodeURIComponent(article.title + '\n' + window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('URLをコピーしました');
+                }}
+                className="flex items-center justify-center w-10 h-10 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
+              >
+                <Copy className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
 
           {/* 著者プロフィール */}
           <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">

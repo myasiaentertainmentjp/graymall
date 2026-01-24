@@ -493,7 +493,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          type: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed'
+          type: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed' | 'new_follower' | 'article_liked' | 'article_purchased'
           title: string
           message: string
           metadata: Json
@@ -503,7 +503,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          type: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed'
+          type: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed' | 'new_follower' | 'article_liked' | 'article_purchased'
           title: string
           message: string
           metadata?: Json
@@ -513,7 +513,7 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          type?: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed'
+          type?: 'purchase_complete' | 'withdrawal_requested' | 'withdrawal_completed' | 'withdrawal_failed' | 'new_follower' | 'article_liked' | 'article_purchased'
           title?: string
           message?: string
           metadata?: Json

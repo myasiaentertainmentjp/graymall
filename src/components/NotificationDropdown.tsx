@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Check, DollarSign, ShoppingCart, AlertCircle } from 'lucide-react';
+import { Bell, Check, DollarSign, ShoppingCart, AlertCircle, UserPlus, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../lib/database.types';
 
@@ -10,6 +10,9 @@ const notificationIcons: Record<Notification['type'], React.ReactNode> = {
   withdrawal_requested: <DollarSign className="w-4 h-4 text-blue-600" />,
   withdrawal_completed: <Check className="w-4 h-4 text-green-600" />,
   withdrawal_failed: <AlertCircle className="w-4 h-4 text-red-600" />,
+  new_follower: <UserPlus className="w-4 h-4 text-purple-600" />,
+  article_liked: <Heart className="w-4 h-4 text-pink-500" />,
+  article_purchased: <ShoppingCart className="w-4 h-4 text-green-600" />,
 };
 
 export default function NotificationDropdown() {

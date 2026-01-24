@@ -33,6 +33,7 @@ const SORT_OPTIONS: { value: SortType; label: string }[] = [
 export default function ArticleList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get('category');
+  const searchQuery = searchParams.get('q');
   const sortParam = searchParams.get('sort') as SortType | null;
   const currentSort: SortType = sortParam === 'popular' ? 'popular' : 'new';
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
@@ -48,6 +49,7 @@ export default function ArticleList() {
 
   // ページタイトルを決定
   const getPageTitle = () => {
+    if (searchQuery) return `「${searchQuery}」の検索結果`;
     if (category) return category.name;
     if (currentSort === 'popular') return '人気の記事';
     return '新着記事';
@@ -59,7 +61,7 @@ export default function ArticleList() {
 
   useEffect(() => {
     loadArticles();
-  }, [categorySlug, currentSort, currentPage]);
+  }, [categorySlug, searchQuery, currentSort, currentPage]);
 
   const loadCategories = async () => {
     const { data } = await supabase
@@ -108,6 +110,12 @@ export default function ArticleList() {
         `, { count: 'exact' })
         .eq('status', 'published')
         .eq('is_archived', false);
+
+      // 検索クエリで絞り込み（タイトル、概要、本文）
+      if (searchQuery) {
+        const searchPattern = `%${searchQuery}%`;
+        query = query.or(`title.ilike.${searchPattern},excerpt.ilike.${searchPattern},content.ilike.${searchPattern}`);
+      }
 
       // カテゴリで絞り込み（primary_category_id または sub_category_id で一致）
       if (categoryId) {
@@ -289,13 +297,30 @@ export default function ArticleList() {
               </div>
             )}
 
+            {/* 検索結果の場合、検索ワードとクリアボタンを表示 */}
+            {searchQuery && (
+              <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+                <span>{totalCount}件の記事が見つかりました</span>
+                <Link
+                  to="/articles"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  検索をクリア
+                </Link>
+              </div>
+            )}
+
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-gray-600">読み込み中...</div>
               </div>
             ) : articles.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                {category ? 'このカテゴリにはまだ記事がありません' : 'まだ公開記事がありません'}
+                {searchQuery
+                  ? `「${searchQuery}」に一致する記事が見つかりませんでした`
+                  : category
+                  ? 'このカテゴリにはまだ記事がありません'
+                  : 'まだ公開記事がありません'}
               </div>
             ) : (
               <>

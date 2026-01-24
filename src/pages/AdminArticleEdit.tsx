@@ -1,8 +1,9 @@
 // src/pages/AdminArticleEdit.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import RichTextEditor from '../components/RichTextEditor';
 import type { Database } from '../lib/database.types';
 
 type Article = Database['public']['Tables']['articles']['Row'];
@@ -11,7 +12,6 @@ type Category = Database['public']['Tables']['categories']['Row'];
 export default function AdminArticleEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const editorRef = useRef<HTMLDivElement>(null);
 
   const [article, setArticle] = useState<Article | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -236,16 +236,17 @@ export default function AdminArticleEdit() {
 
           {/* 本文 */}
           <section className="bg-white rounded-xl border p-6">
-            <h2 className="text-lg font-bold mb-4">本文（HTML）</h2>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={20}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="HTMLコンテンツ..."
-            />
+            <h2 className="text-lg font-bold mb-4">本文</h2>
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <RichTextEditor
+                value={content}
+                onChange={setContent}
+                placeholder="本文を入力..."
+                className="min-h-[400px]"
+              />
+            </div>
             <p className="text-xs text-gray-500 mt-2">
-              ※ HTMLタグを直接編集できます。有料部分は &lt;!-- paywall --&gt; コメントで区切られます。
+              ※ 有料部分は本文中に「--- 有料 ---」などの区切りを入れてください。
             </p>
           </section>
 
