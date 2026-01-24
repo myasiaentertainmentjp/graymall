@@ -193,7 +193,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
   };
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden hover:shadow-md transition group">
+    <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden hover:shadow-md dark:hover:shadow-gray-900/50 transition group">
       <Link to={`/articles/${article.slug}`} className="block">
         {/* Thumbnail */}
         <div className="relative aspect-[16/9] bg-gray-100 overflow-hidden">
@@ -201,6 +201,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
             <img
               src={article.cover_image_url}
               alt={article.title}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
@@ -220,7 +221,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
         {/* Content */}
         <div className="p-3">
           {/* Title */}
-          <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
+          <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 mb-2 min-h-[2.5rem]">
             {article.title}
           </h3>
 
@@ -239,7 +240,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
           )}
 
           {/* Author & time */}
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
             <Link
               to={`/users/${article.author_id}`}
               onClick={(e) => e.stopPropagation()}
@@ -247,7 +248,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
             >
               <div className="w-5 h-5 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                  <img src={avatarUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[10px] font-medium text-gray-500">
                     {authorInitial(label)}

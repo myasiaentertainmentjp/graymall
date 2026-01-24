@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import Layout from '../components/Layout';
-import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown, Wallet, ImageIcon } from 'lucide-react';
+import { User, Lock, CreditCard, Link as LinkIcon, ShoppingBag, Crown, Wallet, ImageIcon, Bell } from 'lucide-react';
+import { isNotificationSupported, getNotificationPermission, requestNotificationPermission } from '../lib/browserNotifications';
 
 type PurchasedArticle = {
   id: string;
@@ -33,7 +34,8 @@ export default function Settings() {
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'profile' | 'sns' | 'account' | 'purchases'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'sns' | 'account' | 'purchases' | 'notifications'>('profile');
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
 
   // Purchased articles
   const [purchasedArticles, setPurchasedArticles] = useState<PurchasedArticle[]>([]);
@@ -74,6 +76,18 @@ export default function Settings() {
       loadPurchasedArticles();
     }
   }, [activeTab, user]);
+
+  // Check notification permission
+  useEffect(() => {
+    if (isNotificationSupported()) {
+      setNotificationPermission(getNotificationPermission());
+    }
+  }, []);
+
+  const handleRequestNotificationPermission = async () => {
+    const permission = await requestNotificationPermission();
+    setNotificationPermission(permission);
+  };
 
   const loadPurchasedArticles = async () => {
     if (!user) return;
@@ -247,6 +261,7 @@ export default function Settings() {
   const tabs = [
     { id: 'profile' as const, label: 'プロフィール', icon: User },
     { id: 'sns' as const, label: 'SNSリンク', icon: LinkIcon },
+    { id: 'notifications' as const, label: '通知', icon: Bell },
     { id: 'account' as const, label: 'アカウント', icon: Lock },
     { id: 'purchases' as const, label: '購入履歴', icon: ShoppingBag },
   ];
@@ -580,6 +595,55 @@ export default function Settings() {
               >
                 口座を設定
               </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Notifications Tab */}
+        {activeTab === 'notifications' && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">通知設定</h2>
+
+            <div className="space-y-6">
+              {/* Browser Notifications */}
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div>
+                  <h3 className="font-medium text-gray-900">ブラウザ通知</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    新しいフォロワーや記事へのいいねなどをブラウザ通知で受け取ります
+                  </p>
+                </div>
+                <div>
+                  {!isNotificationSupported() ? (
+                    <span className="text-sm text-gray-400">このブラウザは非対応です</span>
+                  ) : notificationPermission === 'granted' ? (
+                    <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+                      有効
+                    </span>
+                  ) : notificationPermission === 'denied' ? (
+                    <span className="text-sm text-gray-400">ブラウザ設定で許可してください</span>
+                  ) : (
+                    <button
+                      onClick={handleRequestNotificationPermission}
+                      className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition"
+                    >
+                      通知を許可
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Notification Types Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-2">通知される内容</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>・新しいフォロワー</li>
+                  <li>・記事へのいいね</li>
+                  <li>・記事の購入</li>
+                  <li>・新しいコメント</li>
+                  <li>・出金の完了</li>
+                </ul>
+              </div>
             </div>
           </div>
         )}

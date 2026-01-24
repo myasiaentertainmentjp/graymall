@@ -59,6 +59,9 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [autoSaving, setAutoSaving] = useState(false);
+    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const lastSavedContentRef = useRef<string>('');
 
     const [title, setTitle] = useState<string>('');
     const [content, setContent] = useState<string>('');
@@ -383,9 +386,38 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
     async function saveDraft() {
       const result = await upsertArticle('draft');
       if (result) {
+        setLastSavedAt(new Date());
+        lastSavedContentRef.current = JSON.stringify({ title, content, paidContent });
         alert('下書き保存されました');
       }
     }
+
+    // 自動保存（30秒ごと）
+    async function autoSave() {
+      const currentContent = JSON.stringify({ title, content, paidContent });
+      if (currentContent === lastSavedContentRef.current) return; // 変更なし
+      if (!title.trim() && !content.trim()) return; // 空の場合は保存しない
+
+      setAutoSaving(true);
+      const result = await upsertArticle('draft');
+      setAutoSaving(false);
+
+      if (result) {
+        setLastSavedAt(new Date());
+        lastSavedContentRef.current = currentContent;
+      }
+    }
+
+    // 自動保存のタイマー
+    useEffect(() => {
+      const timer = setInterval(() => {
+        if (!saving && !autoSaving && status === 'draft') {
+          autoSave();
+        }
+      }, 30000); // 30秒
+
+      return () => clearInterval(timer);
+    }, [title, content, paidContent, saving, autoSaving, status]);
 
     function openPreview() {
       const previewData = {
@@ -513,6 +545,17 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
               <ChevronLeft className="w-4 h-4" />
               <span className="hidden sm:inline">戻る</span>
             </button>
+
+            {/* 自動保存ステータス */}
+            {(autoSaving || lastSavedAt) && (
+              <div className="hidden sm:block text-xs text-gray-400">
+                {autoSaving ? (
+                  '自動保存中...'
+                ) : lastSavedAt ? (
+                  `${lastSavedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} 保存済み`
+                ) : null}
+              </div>
+            )}
 
             {/* PC用ボタン */}
             <div className="hidden sm:flex items-center gap-2">

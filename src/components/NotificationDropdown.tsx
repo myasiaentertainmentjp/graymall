@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, Check, DollarSign, ShoppingCart, AlertCircle, UserPlus, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../lib/database.types';
+import { showBrowserNotification, getNotificationMessage, getNotificationPermission } from '../lib/browserNotifications';
 
 type Notification = Database['public']['Tables']['notifications']['Row'];
 
@@ -39,6 +40,20 @@ export default function NotificationDropdown() {
           const newNotification = payload.new as Notification;
           setNotifications((prev) => [newNotification, ...prev]);
           setUnreadCount((prev) => prev + 1);
+
+          // ブラウザ通知を表示
+          if (getNotificationPermission() === 'granted') {
+            const { title, body } = getNotificationMessage(newNotification.type, newNotification.data);
+            showBrowserNotification(title, {
+              body,
+              tag: newNotification.id,
+              onClick: () => {
+                if (newNotification.link) {
+                  window.location.href = newNotification.link;
+                }
+              },
+            });
+          }
         }
       )
       .subscribe();

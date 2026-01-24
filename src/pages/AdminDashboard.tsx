@@ -1,7 +1,7 @@
 // src/pages/AdminDashboard.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ChevronRight, LayoutDashboard, FileText, Home, CheckCircle, Tag } from 'lucide-react';
+import { ChevronRight, FileText, Home, CheckCircle, Tag, Users, BookOpen, DollarSign, TrendingUp, CheckSquare, Square } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
   type Article = {
@@ -48,6 +48,13 @@ import { supabase } from '../lib/supabase';
     article_id: string;
   };
 
+  type Statistics = {
+    totalUsers: number;
+    totalArticles: number;
+    pendingReviews: number;
+    totalRevenue: number;
+  };
+
   export default function AdminDashboard() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'pending' | 'published'>('pending');
@@ -59,6 +66,9 @@ import { supabase } from '../lib/supabase';
     const [loading, setLoading] = useState(true);
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
     const [savingCategory, setSavingCategory] = useState(false);
+    const [statistics, setStatistics] = useState<Statistics>({ totalUsers: 0, totalArticles: 0, pendingReviews: 0, totalRevenue: 0 });
+    const [selectedArticles, setSelectedArticles] = useState<Set<string>>(new Set());
+    const [bulkCategoryId, setBulkCategoryId] = useState<string>('');
 
     useEffect(() => {
       let alive = true;
@@ -136,6 +146,22 @@ import { supabase } from '../lib/supabase';
         if (!alive) return;
         setSectionArticles((sectionArticlesData || []) as SectionArticle[]);
 
+        // Load statistics
+        const [usersResult, articlesResult, purchasesResult] = await Promise.all([
+          supabase.from('users').select('id', { count: 'exact', head: true }),
+          supabase.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+          supabase.from('purchases').select('amount'),
+        ]);
+
+        if (!alive) return;
+        const totalRevenue = purchasesResult.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+        setStatistics({
+          totalUsers: usersResult.count || 0,
+          totalArticles: articlesResult.count || 0,
+          pendingReviews: (data || []).length,
+          totalRevenue,
+        });
+
         setLoading(false);
       }
 
@@ -203,10 +229,140 @@ import { supabase } from '../lib/supabase';
       return categories.filter(c => c.parent_id === parentId);
     }
 
+    // 一括選択
+    function toggleSelectArticle(articleId: string) {
+      setSelectedArticles(prev => {
+        const next = new Set(prev);
+        if (next.has(articleId)) {
+          next.delete(articleId);
+        } else {
+          next.add(articleId);
+        }
+        return next;
+      });
+    }
+
+    function toggleSelectAll() {
+      if (selectedArticles.size === publishedArticles.length) {
+        setSelectedArticles(new Set());
+      } else {
+        setSelectedArticles(new Set(publishedArticles.map(a => a.id)));
+      }
+    }
+
+    async function handleBulkCategoryChange() {
+      if (selectedArticles.size === 0) return;
+      if (!bulkCategoryId) {
+        alert('カテゴリを選択してください');
+        return;
+      }
+
+      setSavingCategory(true);
+      try {
+        const { error } = await supabase
+          .from('articles')
+          .update({
+            primary_category_id: bulkCategoryId,
+            sub_category_id: null,
+          })
+          .in('id', Array.from(selectedArticles));
+
+        if (error) throw error;
+
+        setPublishedArticles(prev =>
+          prev.map(a =>
+            selectedArticles.has(a.id)
+              ? { ...a, primary_category_id: bulkCategoryId, sub_category_id: null }
+              : a
+          )
+        );
+        setSelectedArticles(new Set());
+        setBulkCategoryId('');
+        alert(`${selectedArticles.size}件の記事のカテゴリを更新しました`);
+      } catch (err) {
+        console.error('Error bulk updating categories:', err);
+        alert('カテゴリの一括更新に失敗しました');
+      } finally {
+        setSavingCategory(false);
+      }
+    }
+
+    async function handleBulkArchive() {
+      if (selectedArticles.size === 0) return;
+      if (!confirm(`${selectedArticles.size}件の記事をアーカイブしますか？`)) return;
+
+      setSavingCategory(true);
+      try {
+        const { error } = await supabase
+          .from('articles')
+          .update({ is_archived: true })
+          .in('id', Array.from(selectedArticles));
+
+        if (error) throw error;
+
+        setPublishedArticles(prev => prev.filter(a => !selectedArticles.has(a.id)));
+        setSelectedArticles(new Set());
+        alert(`${selectedArticles.size}件の記事をアーカイブしました`);
+      } catch (err) {
+        console.error('Error archiving articles:', err);
+        alert('アーカイブに失敗しました');
+      } finally {
+        setSavingCategory(false);
+      }
+    }
+
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto max-w-5xl px-4 py-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">管理画面</h1>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{statistics.totalUsers.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500">登録ユーザー</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BookOpen className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{statistics.totalArticles.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500">公開記事</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <FileText className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{statistics.pendingReviews}</div>
+                  <div className="text-xs text-gray-500">審査待ち</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">¥{statistics.totalRevenue.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500">総売上</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Admin Navigation */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -284,7 +440,62 @@ import { supabase } from '../lib/supabase';
 
           {activeTab === 'published' && (
             <>
-              <div className="text-lg font-bold mb-4">公開済み記事一覧</div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-lg font-bold">公開済み記事一覧</div>
+                {publishedArticles.length > 0 && (
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    {selectedArticles.size === publishedArticles.length ? (
+                      <><CheckSquare className="w-4 h-4" /> 選択解除</>
+                    ) : (
+                      <><Square className="w-4 h-4" /> 全て選択</>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Bulk Operations Toolbar */}
+              {selectedArticles.size > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 flex flex-wrap items-center gap-3">
+                  <span className="text-sm text-blue-800 font-medium">
+                    {selectedArticles.size}件選択中
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={bulkCategoryId}
+                      onChange={(e) => setBulkCategoryId(e.target.value)}
+                      className="text-sm border border-gray-300 rounded px-2 py-1"
+                    >
+                      <option value="">カテゴリを選択</option>
+                      {getParentCategories().map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleBulkCategoryChange}
+                      disabled={savingCategory || !bulkCategoryId}
+                      className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      一括変更
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleBulkArchive}
+                    disabled={savingCategory}
+                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 disabled:opacity-50"
+                  >
+                    一括アーカイブ
+                  </button>
+                  <button
+                    onClick={() => setSelectedArticles(new Set())}
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              )}
 
               {loading ? (
                 <div className="text-sm text-gray-500">Loading...</div>
@@ -299,9 +510,20 @@ import { supabase } from '../lib/supabase';
                     return (
                       <div
                         key={a.id}
-                        className="p-4 hover:bg-gray-50"
+                        className={`p-4 hover:bg-gray-50 ${selectedArticles.has(a.id) ? 'bg-blue-50' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleSelectArticle(a.id)}
+                            className="flex-shrink-0 mt-1"
+                          >
+                            {selectedArticles.has(a.id) ? (
+                              <CheckSquare className="w-5 h-5 text-blue-600" />
+                            ) : (
+                              <Square className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                            )}
+                          </button>
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold text-gray-900 truncate">{a.title}</div>
                             <div className="text-xs text-gray-500 mt-1">
