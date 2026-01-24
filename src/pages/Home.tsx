@@ -232,7 +232,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* モバイル: カテゴリ横スクロール */}
         <div className="lg:hidden mb-6 -mx-4 px-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -265,15 +265,15 @@ export default function Home() {
         {/* PC: 2カラムレイアウト（左サイドバー + メインコンテンツ） */}
         <div className="lg:flex lg:gap-8">
           {/* 左サイドバー（PCのみ） */}
-          <aside className="hidden lg:block lg:w-56 flex-shrink-0">
+          <aside className="hidden lg:block lg:w-44 flex-shrink-0">
             <div className="sticky top-20">
-              <nav className="space-y-1">
+              <nav>
                 <Link
                   to="/"
-                  className={`block px-4 py-2.5 text-sm rounded-lg transition ${
+                  className={`block px-2 py-2 text-sm transition ${
                     !selectedCategory
-                      ? 'bg-gray-900 text-white font-medium'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   すべて
@@ -282,10 +282,10 @@ export default function Home() {
                   <Link
                     key={cat.id}
                     to={`/?category=${cat.slug}`}
-                    className={`block px-4 py-2.5 text-sm rounded-lg transition ${
+                    className={`block px-2 py-2 text-sm transition ${
                       selectedCategory === cat.slug
-                        ? 'bg-gray-900 text-white font-medium'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                   >
                     {cat.name}
@@ -329,9 +329,11 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {popularArticles.slice(0, 8).map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -346,9 +348,11 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {newArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -357,10 +361,14 @@ export default function Home() {
             {/* 編集部おすすめ */}
             {editorPickArticles.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">編集部おすすめ</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">編集部おすすめ</h2>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {editorPickArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -369,10 +377,14 @@ export default function Home() {
             {/* あなたへのおすすめ */}
             {user && recommendedArticles.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">あなたへのおすすめ</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">あなたへのおすすめ</h2>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {recommendedArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -387,9 +399,11 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {followingArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                      <ArticleCard article={article} />
+                    </div>
                   ))}
                 </div>
               </section>
@@ -407,9 +421,11 @@ export default function Home() {
                       もっと見る <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                     {arts.map((article) => (
-                      <ArticleCard key={article.id} article={article} />
+                      <div key={article.id} className="flex-shrink-0 w-36 sm:w-40 lg:w-44">
+                        <ArticleCard article={article} />
+                      </div>
                     ))}
                   </div>
                 </section>
