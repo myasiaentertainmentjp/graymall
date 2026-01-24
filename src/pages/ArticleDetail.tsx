@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, User, Heart, Home, Clock, List, Twitter, Facebook, MessageCircle } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Twitter, Facebook, MessageCircle, Link2 } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
 
@@ -62,13 +62,13 @@ function cleanArticleHtml(html: string): string {
 }
 
 /**
- * 読了時間を計算（日本語: 約500文字/分）
+ * 読了時間を計算（日本語: 約800文字/分 - 一般的な速読ペース）
  */
 function calculateReadingTime(html: string): number {
   const doc = new DOMParser().parseFromString(html || '', 'text/html');
   const text = doc.body.textContent || '';
   const charCount = text.replace(/\s+/g, '').length;
-  const minutes = Math.ceil(charCount / 500);
+  const minutes = Math.ceil(charCount / 800);
   return Math.max(1, minutes);
 }
 
@@ -109,6 +109,47 @@ function addHeadingIds(html: string): string {
   });
 
   return doc.body.innerHTML;
+}
+
+/**
+ * 目次コンポーネント（デフォルトで閉じている）
+ */
+function TableOfContents({ content }: { content: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const toc = generateTableOfContents(content);
+
+  if (toc.length < 2) return null;
+
+  return (
+    <div className="border border-gray-200 rounded-lg mb-6 overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
+      >
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <List className="w-4 h-4" />
+          目次
+          <span className="text-xs text-gray-400 font-normal">({toc.length})</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && (
+        <nav className="px-4 py-3 space-y-1 border-t border-gray-200">
+          {toc.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`block text-sm text-gray-600 hover:text-gray-900 transition py-1 ${
+                item.level === 3 ? 'pl-4' : ''
+              }`}
+            >
+              {item.text}
+            </a>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -668,58 +709,45 @@ export default function ArticleDetail() {
 
             {/* アフィリエイト共有ボタン（アフィリエイト有効の場合） */}
             {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
-              <div className="mt-4">
+              <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Link2 className="w-4 h-4" />
+                    <span>この記事を紹介する</span>
+                  </div>
+                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
+                    報酬 {article.affiliate_rate}%
+                  </span>
+                </div>
                 <button
                   onClick={copyAffiliateLink}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:from-emerald-600 hover:to-green-600 transition shadow-sm"
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition text-sm font-medium ${
+                    copied
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
                   {copied ? (
                     <>
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-medium">コピーしました！</span>
+                      <CheckCircle className="w-4 h-4" />
+                      リンクをコピーしました
                     </>
                   ) : (
                     <>
-                      <Share2 className="w-5 h-5" />
-                      <span className="font-medium">
-                        紹介して ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} ({article.affiliate_rate}%) の報酬をGET
-                      </span>
+                      <Copy className="w-4 h-4" />
+                      紹介リンクをコピー
                     </>
                   )}
                 </button>
-                <p className="text-xs text-gray-500 text-center mt-2">
-                  {article.affiliate_target === 'buyers' ? '購入者のみ紹介可能' : 'このリンクで購入されると報酬が得られます'}
+                <p className="text-xs text-gray-400 text-center mt-2">
+                  紹介経由で購入されると ¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()} の報酬
                 </p>
               </div>
             )}
           </div>
 
           {/* 目次（見出しが2つ以上ある場合のみ表示） */}
-          {(() => {
-            const toc = generateTableOfContents(article.content);
-            if (toc.length < 2) return null;
-            return (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                  <List className="w-4 h-4" />
-                  目次
-                </div>
-                <nav className="space-y-1">
-                  {toc.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className={`block text-sm text-gray-600 hover:text-gray-900 transition ${
-                        item.level === 3 ? 'pl-4' : ''
-                      }`}
-                    >
-                      {item.text}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            );
-          })()}
+          <TableOfContents content={article.content} />
 
           {isFree || hasAccess ? (
             <ArticleContent html={addHeadingIds(cleanArticleHtml(
