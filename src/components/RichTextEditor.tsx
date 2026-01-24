@@ -25,14 +25,14 @@ export default function RichTextEditor({
   className = '',
 }: RichTextEditorProps) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const lastValueRef = useRef<string>(value);
-  const [counts, setCounts] = useState<{ chars: number; images: number }>({ chars: 0, images: 0 });
+  const isInternalChange = useRef(false);
+  const [counts, setCounts] = useState<{ chars: number; images: number }>(() => countFromHtml(value));
 
   const emitChange = useCallback(() => {
     const el = ref.current;
     if (!el) return;
     const html = el.innerHTML;
-    lastValueRef.current = html;
+    isInternalChange.current = true;
 
     const next = countFromHtml(html);
     setCounts(next);
@@ -40,14 +40,20 @@ export default function RichTextEditor({
     onChange(html);
   }, [onChange]);
 
+  // 外部からvalueが変更された場合にinnerHTMLを更新
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    if (value !== lastValueRef.current && value !== el.innerHTML) {
-      el.innerHTML = value || '';
-      lastValueRef.current = value || '';
+    // 内部での変更の場合はスキップ
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
 
+    // 外部からの変更を反映
+    if (el.innerHTML !== value) {
+      el.innerHTML = value || '';
       const next = countFromHtml(value || '');
       setCounts(next);
     }

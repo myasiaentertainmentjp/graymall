@@ -239,6 +239,7 @@ export default function AdminArticleEdit() {
             <h2 className="text-lg font-bold mb-4">本文</h2>
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <RichTextEditor
+                key={article?.id}
                 value={content}
                 onChange={setContent}
                 placeholder="本文を入力..."
