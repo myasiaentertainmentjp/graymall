@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -14,15 +14,9 @@ export default function ProtectedRoute({
   requirePublisher = false,
 }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth();
-
-  console.log('[ProtectedRoute] Checking access...');
-  console.log('[ProtectedRoute] Loading:', loading);
-  console.log('[ProtectedRoute] User:', user?.email || 'Not authenticated');
-  console.log('[ProtectedRoute] Require admin:', requireAdmin);
-  console.log('[ProtectedRoute] Require publisher:', requirePublisher);
+  const location = useLocation();
 
   if (loading) {
-    console.log('[ProtectedRoute] Still loading, showing loading screen');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-gray-600">読み込み中...</div>
@@ -31,20 +25,18 @@ export default function ProtectedRoute({
   }
 
   if (!user) {
-    console.log('[ProtectedRoute] ✗ No user, redirecting to /signin');
-    return <Navigate to="/signin" />;
+    // ログイン後に元のページに戻れるようにリダイレクトURLを渡す
+    const returnUrl = location.pathname + location.search;
+    return <Navigate to={`/signin?redirect=${encodeURIComponent(returnUrl)}`} replace />;
   }
 
   if (requireAdmin && !profile?.is_admin) {
-    console.log('[ProtectedRoute] ✗ Admin required but user is not admin, redirecting to /');
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   if (requirePublisher && !profile?.can_publish) {
-    console.log('[ProtectedRoute] ✗ Publisher required but user cannot publish, redirecting to /');
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
-  console.log('[ProtectedRoute] ✓ Access granted');
   return <>{children}</>;
 }

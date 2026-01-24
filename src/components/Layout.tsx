@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Menu, X, Search, PenSquare, ChevronDown } from 'lucide-react';
 import Footer from './Footer';
@@ -12,8 +12,14 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // ログイン後のリダイレクト用URL
+  const currentPath = location.pathname + location.search;
+  const loginUrl = currentPath !== '/' ? `/signin?redirect=${encodeURIComponent(currentPath)}` : '/signin';
+  const signupUrl = currentPath !== '/' ? `/signup?redirect=${encodeURIComponent(currentPath)}` : '/signup';
 
   const handleSignOut = async () => {
     await signOut();
@@ -156,10 +162,10 @@ export default function Layout({ children }: LayoutProps) {
                 </>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link to="/signin" className="px-4 py-2 text-gray-700 hover:text-gray-900 text-sm font-medium">
+                  <Link to={loginUrl} className="px-4 py-2 text-gray-700 hover:text-gray-900 text-sm font-medium">
                     ログイン
                   </Link>
-                  <Link to="/signup" className="px-4 py-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition text-sm font-medium">
+                  <Link to={signupUrl} className="px-4 py-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition text-sm font-medium">
                     新規登録
                   </Link>
                 </div>

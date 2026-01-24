@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { MessageCircle, Trash2, Edit2, X, Check, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 interface Comment {
   id: string;
@@ -33,6 +33,7 @@ export default function ArticleComments({
   hasPurchased,
 }: ArticleCommentsProps) {
   const { user } = useAuth();
+  const location = useLocation();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -45,6 +46,7 @@ export default function ArticleComments({
   const INITIAL_DISPLAY = 5;
   const isFreeArticle = articlePrice === 0;
   const canComment = user && (isFreeArticle || hasPurchased);
+  const loginUrl = `/signin?redirect=${encodeURIComponent(location.pathname)}`;
 
   // コメント読み込み
   useEffect(() => {
@@ -218,7 +220,7 @@ export default function ArticleComments({
         )
       ) : (
         <div className="mb-6 p-4 bg-gray-50 rounded-xl text-center text-sm text-gray-600">
-          コメントするには<Link to="/signin" className="text-gray-900 font-medium hover:underline">ログイン</Link>してください。
+          コメントするには<Link to={loginUrl} className="text-gray-900 font-medium hover:underline">ログイン</Link>してください。
         </div>
       )}
 
