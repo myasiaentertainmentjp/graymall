@@ -614,8 +614,8 @@ export default function ArticleDetail() {
     <Layout>
       <article className="max-w-4xl mx-auto px-4 py-8">
         {/* パンくずリスト */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6 flex-wrap">
-          <Link to="/" className="flex items-center gap-1 hover:text-gray-700 transition">
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6 overflow-hidden">
+          <Link to="/" className="flex items-center gap-1 hover:text-gray-700 transition flex-shrink-0">
             <Home className="w-4 h-4" />
             <span>ホーム</span>
           </Link>
@@ -624,7 +624,7 @@ export default function ArticleDetail() {
             <>
               <Link
                 to={`/articles?category=${article.primary_category.slug}`}
-                className="hover:text-gray-700 transition"
+                className="hover:text-gray-700 transition flex-shrink-0"
               >
                 {article.primary_category.name}
               </Link>
@@ -632,13 +632,13 @@ export default function ArticleDetail() {
             </>
           ) : (
             <>
-              <Link to="/articles" className="hover:text-gray-700 transition">
+              <Link to="/articles" className="hover:text-gray-700 transition flex-shrink-0">
                 記事一覧
               </Link>
               <ChevronRight className="w-4 h-4 flex-shrink-0" />
             </>
           )}
-          <span className="text-gray-900 font-medium line-clamp-1">{article.title}</span>
+          <span className="text-gray-900 truncate">{article.title}</span>
         </nav>
 
         {article.cover_image_url && (
