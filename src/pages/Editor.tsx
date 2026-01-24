@@ -1,7 +1,7 @@
 // src/pages/Editor.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Eye, Save, Send, MoreHorizontal, Trash2, X, List, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Save, Send, MoreHorizontal, Trash2, List, Settings } from 'lucide-react';
 
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -665,10 +665,10 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
                     <button
                       type="button"
                       onClick={() => setLeftSidebarOpen(false)}
-                      className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
-                      title="閉じる"
+                      className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                      title="サイドバーを閉じる"
                     >
-                      <X className="w-4 h-4" />
+                      <ChevronLeft className="w-4 h-4" />
                     </button>
                   </div>
                   <TableOfContentsPanel
@@ -749,10 +749,10 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
                     <button
                       type="button"
                       onClick={() => setRightSidebarOpen(false)}
-                      className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
-                      title="閉じる"
+                      className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                      title="サイドバーを閉じる"
                     >
-                      <X className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
 
