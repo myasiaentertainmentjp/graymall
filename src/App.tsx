@@ -27,6 +27,7 @@ function ScrollToTop() {
   import AdminDashboard from './pages/AdminDashboard';
   import AdminReviewArticle from './pages/AdminReviewArticle';
   import AdminHomepageManager from './pages/AdminHomepageManager';
+  import AdminArticleEdit from './pages/AdminArticleEdit';
   import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
 import PreviewArticle from './pages/PreviewArticle';
@@ -202,6 +203,15 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminHomepageManager />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/article/:id"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminArticleEdit />
                 </ProtectedRoute>
               }
             />

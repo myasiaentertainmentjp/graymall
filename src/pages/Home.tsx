@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Database } from '../lib/database.types';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -21,14 +21,13 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get('category');
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
-  const [subCategories, setSubCategories] = useState<Record<string, Category[]>>({});
   const [followingArticles, setFollowingArticles] = useState<Article[]>([]);
   const [popularArticles, setPopularArticles] = useState<Article[]>([]);
   const [newArticles, setNewArticles] = useState<Article[]>([]);
   const [editorPickArticles, setEditorPickArticles] = useState<Article[]>([]);
+  const [recommendedArticles, setRecommendedArticles] = useState<Article[]>([]);
   const [categoryArticles, setCategoryArticles] = useState<Record<string, Article[]>>({});
   const [loading, setLoading] = useState(true);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadData();
@@ -85,20 +84,15 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // Load categories
+      // Load categories (親カテゴリのみ)
       const { data: cats } = await supabase
         .from('categories')
         .select('*')
+        .is('parent_id', null)
         .order('sort_order');
 
       if (cats) {
-        const parents = cats.filter(c => !c.parent_id);
-        const subs: Record<string, Category[]> = {};
-        parents.forEach(p => {
-          subs[p.id] = cats.filter(c => c.parent_id === p.id);
-        });
-        setParentCategories(parents);
-        setSubCategories(subs);
+        setParentCategories(cats);
       }
 
       // Load published articles with author info
@@ -177,98 +171,117 @@ export default function Home() {
     }
   };
 
-  // カテゴリ開閉トグル
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(categoryId)) {
-        next.delete(categoryId);
-      } else {
-        next.add(categoryId);
+  // あなたへのおすすめ記事を取得
+  useEffect(() => {
+    if (user) {
+      loadRecommendedArticles();
+    } else {
+      setRecommendedArticles([]);
+    }
+  }, [user]);
+
+  const loadRecommendedArticles = async () => {
+    if (!user) return;
+
+    try {
+      // 1. ユーザーのイイネ記事のカテゴリを取得
+      const { data: likedArticles } = await supabase
+        .from('article_likes')
+        .select('article_id, articles!inner(primary_category_id)')
+        .eq('user_id', user.id)
+        .limit(50);
+
+      // 2. ユーザーのお気に入り記事のカテゴリを取得
+      const { data: favoritedArticles } = await supabase
+        .from('article_favorites')
+        .select('article_id, articles!inner(primary_category_id)')
+        .eq('user_id', user.id)
+        .limit(50);
+
+      // 3. ユーザーの閲覧履歴のカテゴリを取得
+      const { data: viewedArticles } = await supabase
+        .from('article_views')
+        .select('article_id, articles!inner(primary_category_id)')
+        .eq('user_id', user.id)
+        .order('viewed_at', { ascending: false })
+        .limit(30);
+
+      // カテゴリ出現頻度を集計
+      const categoryCount: Record<string, number> = {};
+      const interactedArticleIds = new Set<string>();
+
+      const processArticles = (items: any[] | null, weight: number) => {
+        if (!items) return;
+        items.forEach(item => {
+          interactedArticleIds.add(item.article_id);
+          const catId = item.articles?.primary_category_id;
+          if (catId) {
+            categoryCount[catId] = (categoryCount[catId] || 0) + weight;
+          }
+        });
+      };
+
+      processArticles(likedArticles, 3);      // イイネは重み3
+      processArticles(favoritedArticles, 3);  // お気に入りも重み3
+      processArticles(viewedArticles, 1);     // 閲覧は重み1
+
+      // 頻度でソートして上位カテゴリを取得
+      const topCategories = Object.entries(categoryCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([catId]) => catId);
+
+      if (topCategories.length === 0) {
+        setRecommendedArticles([]);
+        return;
       }
-      return next;
-    });
+
+      // 4. 上位カテゴリの記事を取得（既にインタラクションした記事を除外）
+      const { data: recommended } = await supabase
+        .from('articles')
+        .select(`
+          *,
+          users:author_id (display_name, email, avatar_url),
+          primary_category:primary_category_id (id, name, slug),
+          sub_category:sub_category_id (id, name, slug)
+        `)
+        .in('primary_category_id', topCategories)
+        .eq('status', 'published')
+        .eq('is_archived', false)
+        .order('published_at', { ascending: false })
+        .limit(20);
+
+      if (recommended) {
+        // インタラクション済みの記事を除外して最大8件
+        const filtered = recommended
+          .filter(a => !interactedArticleIds.has(a.id))
+          .slice(0, 8);
+        setRecommendedArticles(filtered as Article[]);
+      }
+    } catch (err) {
+      console.error('Error loading recommended articles:', err);
+    }
   };
 
-  // 選択されているカテゴリの親を展開
-  useEffect(() => {
-    if (!selectedCategory || parentCategories.length === 0) return;
-
-    // 選択されているのが親カテゴリか確認
-    const selectedParent = parentCategories.find(p => p.slug === selectedCategory);
-    if (selectedParent) {
-      setExpandedCategories(prev => new Set([...prev, selectedParent.id]));
-      return;
-    }
-
-    // 選択されているのが子カテゴリの場合、親を探す
-    for (const parent of parentCategories) {
-      const children = subCategories[parent.id] || [];
-      const isChildSelected = children.some(c => c.slug === selectedCategory);
-      if (isChildSelected) {
-        setExpandedCategories(prev => new Set([...prev, parent.id]));
-        break;
-      }
-    }
-  }, [selectedCategory, parentCategories, subCategories]);
-
-  // note風カテゴリサイドバーコンポーネント
+  // カテゴリサイドバーコンポーネント（大カテゴリのみ）
   const CategorySidebar = ({ className = '' }: { className?: string }) => (
     <aside className={className}>
       <div className="sticky top-20">
         <nav>
-          {parentCategories.map(parent => {
-            const isExpanded = expandedCategories.has(parent.id);
-            const children = subCategories[parent.id] || [];
-            const hasChildren = children.length > 0;
-
-            return (
-              <div key={parent.id} className="border-b border-gray-100 last:border-b-0">
-                {/* 親カテゴリ */}
-                <div className="flex items-center">
-                  <Link
-                    to={`/articles?category=${parent.slug}`}
-                    className={`flex-1 py-3 text-base font-medium transition ${
-                      selectedCategory === parent.slug
-                        ? 'text-gray-900'
-                        : 'text-gray-700 hover:text-gray-900'
-                    }`}
-                  >
-                    {parent.name}
-                  </Link>
-                  {hasChildren && (
-                    <button
-                      onClick={() => toggleCategory(parent.id)}
-                      className="p-2 text-gray-400 hover:text-gray-600 transition"
-                    >
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      />
-                    </button>
-                  )}
-                </div>
-
-                {/* 子カテゴリ */}
-                {hasChildren && isExpanded && (
-                  <div className="pb-3 space-y-1">
-                    {children.map(sub => (
-                      <Link
-                        key={sub.id}
-                        to={`/articles?category=${sub.slug}`}
-                        className={`block py-1.5 text-sm transition ${
-                          selectedCategory === sub.slug
-                            ? 'text-gray-900 bg-gray-100 -mx-2 px-2 rounded'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        {sub.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {parentCategories.map(parent => (
+            <div key={parent.id} className="border-b border-gray-100 last:border-b-0">
+              <Link
+                to={`/articles?category=${parent.slug}`}
+                className={`block py-3 text-base font-medium transition ${
+                  selectedCategory === parent.slug
+                    ? 'text-gray-900'
+                    : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                {parent.name}
+              </Link>
+            </div>
+          ))}
         </nav>
       </div>
     </aside>
@@ -319,22 +332,6 @@ export default function Home() {
               </div>
             ) : (
               <div className="space-y-8">
-            {/* Following Articles - フォロー中のユーザーがいる場合のみ表示 */}
-            {followingArticles.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">フォロー中</h2>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
-                  {followingArticles.map(article => (
-                    <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
-                      <ArticleCard article={article} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* Popular Articles */}
             <section>
               <div className="flex items-center justify-between mb-4">
@@ -383,6 +380,38 @@ export default function Home() {
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
                   {editorPickArticles.slice(0, 6).map(article => (
+                    <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                      <ArticleCard article={article} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* あなたへのおすすめ - ログインユーザーのみ */}
+            {recommendedArticles.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">あなたへのおすすめ</h2>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {recommendedArticles.slice(0, 6).map(article => (
+                    <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
+                      <ArticleCard article={article} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* フォロー中 - フォローしているユーザーの記事がある場合のみ表示 */}
+            {followingArticles.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">フォロー中</h2>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                  {followingArticles.map(article => (
                     <div key={article.id} className="flex-shrink-0 w-[160px] sm:w-[200px]">
                       <ArticleCard article={article} />
                     </div>

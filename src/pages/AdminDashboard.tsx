@@ -294,7 +294,6 @@ import { supabase } from '../lib/supabase';
                 <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white">
                   {publishedArticles.map((a) => {
                     const parentCat = getCategoryName(a.primary_category_id);
-                    const subCat = getCategoryName(a.sub_category_id);
                     const sections = getArticleSections(a.id);
 
                     return (
@@ -317,7 +316,6 @@ import { supabase } from '../lib/supabase';
                                 <CategoryEditor
                                   article={a}
                                   parentCategories={getParentCategories()}
-                                  getSubCategories={getSubCategories}
                                   onSave={handleCategoryChange}
                                   onCancel={() => setEditingCategoryId(null)}
                                   saving={savingCategory}
@@ -328,13 +326,7 @@ import { supabase } from '../lib/supabase';
                                     <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
                                       {parentCat}
                                     </span>
-                                  ) : null}
-                                  {subCat ? (
-                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                                      {subCat}
-                                    </span>
-                                  ) : null}
-                                  {!parentCat && !subCat && (
+                                  ) : (
                                     <span className="text-xs text-gray-400">未設定</span>
                                   )}
                                   <button
@@ -362,8 +354,16 @@ import { supabase } from '../lib/supabase';
                             </div>
                           </div>
 
-                          <div className="text-sm text-gray-700 whitespace-nowrap">
-                            {a.price ? `${a.price.toLocaleString()}円` : '無料'}
+                          <div className="flex items-center gap-3">
+                            <div className="text-sm text-gray-700 whitespace-nowrap">
+                              {a.price ? `${a.price.toLocaleString()}円` : '無料'}
+                            </div>
+                            <Link
+                              to={`/admin/article/${a.id}`}
+                              className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition"
+                            >
+                              編集
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -378,60 +378,38 @@ import { supabase } from '../lib/supabase';
     );
   }
 
-  // Category Editor Component
+  // Category Editor Component (大カテゴリのみ)
   function CategoryEditor({
     article,
     parentCategories,
-    getSubCategories,
     onSave,
     onCancel,
     saving,
   }: {
     article: PublishedArticle;
     parentCategories: Category[];
-    getSubCategories: (parentId: string) => Category[];
     onSave: (articleId: string, primaryCategoryId: string | null, subCategoryId: string | null) => void;
     onCancel: () => void;
     saving: boolean;
   }) {
     const [primaryId, setPrimaryId] = useState(article.primary_category_id || '');
-    const [subId, setSubId] = useState(article.sub_category_id || '');
-
-    const subCategories = primaryId ? getSubCategories(primaryId) : [];
 
     return (
       <div className="flex items-center gap-2 flex-wrap">
         <select
           value={primaryId}
-          onChange={(e) => {
-            setPrimaryId(e.target.value);
-            setSubId(''); // Reset sub when parent changes
-          }}
+          onChange={(e) => setPrimaryId(e.target.value)}
           className="text-xs border border-gray-300 rounded px-2 py-1"
           disabled={saving}
         >
-          <option value="">親カテゴリを選択</option>
+          <option value="">カテゴリを選択</option>
           {parentCategories.map(c => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
 
-        {subCategories.length > 0 && (
-          <select
-            value={subId}
-            onChange={(e) => setSubId(e.target.value)}
-            className="text-xs border border-gray-300 rounded px-2 py-1"
-            disabled={saving}
-          >
-            <option value="">サブカテゴリを選択</option>
-            {subCategories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        )}
-
         <button
-          onClick={() => onSave(article.id, primaryId || null, subId || null)}
+          onClick={() => onSave(article.id, primaryId || null, null)}
           disabled={saving}
           className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
         >

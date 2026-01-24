@@ -138,9 +138,12 @@ button {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Article content images - constrain size and center */
-  .prose img,
-  .prose figure {
+  /* ========================================
+     記事内画像のスタイル（シンプル版）
+     ======================================== */
+
+  /* 基本：全ての画像に統一スタイル */
+  .article-content img {
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -150,65 +153,38 @@ button {
     height: auto;
     object-fit: contain;
     border-radius: 0.75rem;
+    margin-bottom: 2rem;
   }
 
-  .prose figure img {
-    max-height: 500px;
+  /* figure内の画像は下余白なし（figureかfigcaptionで制御） */
+  .article-content figure img {
+    margin-bottom: 0;
   }
 
-  .prose figcaption {
+  /* figure基本スタイル */
+  .article-content figure {
+    display: block;
+    margin: 0 auto 2rem auto;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  /* figcaptionがある場合はfigureの余白を消してfigcaptionに余白 */
+  .article-content figure:has(figcaption) {
+    margin-bottom: 0;
+  }
+
+  .article-content figcaption {
     text-align: center;
     font-size: 0.875rem;
     color: #6b7280;
     margin-top: 0.5rem;
-    margin-bottom: 2rem !important;
-  }
-
-  /* 画像・figureの下余白を一律固定 */
-  .prose img {
-    margin-bottom: 2rem !important;
-  }
-
-  .prose figure {
-    margin-bottom: 0 !important;
-  }
-
-  .prose figure img {
-    margin-bottom: 0 !important;
-  }
-
-  /* figcaptionがない場合のfigure */
-  .prose figure:not(:has(figcaption)) {
-    margin-bottom: 2rem !important;
-  }
-
-  /* 全ての要素のマージンをリセット（figure内以外） */
-  .prose figure + *,
-  .prose figure + * + *,
-  .prose figure + * + * + * {
-    margin-top: 0 !important;
+    margin-bottom: 2rem;
   }
 
   /* Mobile: smaller max height */
   @media (max-width: 768px) {
-    .prose img,
-    .prose figure img {
-      max-height: 350px;
-    }
-  }
-
-  /* Ensure images with data-gm-image are also constrained */
-  .prose figure[data-gm-image] {
-    text-align: center;
-  }
-
-  .prose figure[data-gm-image] img {
-    display: inline-block;
-    max-height: 500px;
-  }
-
-  @media (max-width: 768px) {
-    .prose figure[data-gm-image] img {
+    .article-content img {
       max-height: 350px;
     }
   }

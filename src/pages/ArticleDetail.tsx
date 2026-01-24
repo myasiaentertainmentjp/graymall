@@ -62,52 +62,12 @@ function cleanArticleHtml(html: string): string {
 }
 
 /**
- * 記事コンテンツ表示コンポーネント（DOM操作で余白を強制統一）
+ * 記事コンテンツ表示コンポーネント
+ * CSSで余白を制御するのでシンプルに
  */
 function ArticleContent({ html }: { html: string }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!contentRef.current) return;
-
-    // figcaptionの後の余白を強制的に統一
-    const figcaptions = contentRef.current.querySelectorAll('figcaption');
-    figcaptions.forEach(figcaption => {
-      (figcaption as HTMLElement).style.marginBottom = '2rem';
-
-      // figcaptionの次の要素のmargin-topを0に
-      const figure = figcaption.closest('figure');
-      if (figure && figure.nextElementSibling) {
-        (figure.nextElementSibling as HTMLElement).style.marginTop = '0';
-      }
-    });
-
-    // figcaptionがないfigureの後の余白
-    const figures = contentRef.current.querySelectorAll('figure');
-    figures.forEach(figure => {
-      if (!figure.querySelector('figcaption')) {
-        (figure as HTMLElement).style.marginBottom = '2rem';
-      } else {
-        (figure as HTMLElement).style.marginBottom = '0';
-      }
-
-      // figure後の空のpタグを削除
-      let next = figure.nextElementSibling;
-      while (next && next.tagName === 'P' && (!next.textContent || next.textContent.trim() === '' || next.innerHTML.trim() === '<br>' || next.innerHTML.trim() === '')) {
-        const toRemove = next;
-        next = next.nextElementSibling;
-        toRemove.remove();
-      }
-
-      // figure後の要素のmargin-topを0に
-      if (figure.nextElementSibling) {
-        (figure.nextElementSibling as HTMLElement).style.marginTop = '0';
-      }
-    });
-  }, [html]);
-
   return (
-    <div className="prose prose-lg max-w-none" ref={contentRef}>
+    <div className="prose prose-lg max-w-none article-content">
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
@@ -212,6 +172,34 @@ export default function ArticleDetail() {
 
     loadFavoriteCount();
   }, [article?.id]);
+
+  // 閲覧履歴を記録（ログインユーザーのみ）
+  useEffect(() => {
+    if (!user || !article) return;
+
+    const recordView = async () => {
+      try {
+        // UPSERTで閲覧履歴を記録（重複時はviewed_atを更新）
+        await supabase
+          .from('article_views')
+          .upsert(
+            {
+              user_id: user.id,
+              article_id: article.id,
+              viewed_at: new Date().toISOString(),
+            },
+            {
+              onConflict: 'user_id,article_id',
+            }
+          );
+      } catch (err) {
+        // 閲覧履歴の記録失敗は無視（UXに影響しない）
+        console.error('Failed to record article view:', err);
+      }
+    };
+
+    recordView();
+  }, [user, article?.id]);
 
   // ユーザーがいいね済みかチェック（会員）
   useEffect(() => {
@@ -577,7 +565,7 @@ export default function ArticleDetail() {
             </span>
           )}
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{article.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
 
           {/* いいねボタン（noteスタイル） */}
           <div className="flex items-center gap-3 mb-6">
@@ -628,12 +616,12 @@ export default function ArticleDetail() {
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"
                 >
                   <Share2 className="w-4 h-4" />
-                  <span>紹介して{article.affiliate_rate}%報酬</span>
+                  <span>紹介して¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()}（{article.affiliate_rate}%）報酬</span>
                 </button>
                 {showShareMenu && (
                   <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-10">
                     <p className="text-sm text-gray-600 mb-3">
-                      このリンクで購入されると{article.affiliate_rate}%の報酬が得られます
+                      このリンクで購入されると¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()}（{article.affiliate_rate}%）の報酬が得られます
                     </p>
                     <button
                       onClick={copyAffiliateLink}
@@ -726,16 +714,13 @@ export default function ArticleDetail() {
 
         {/* 記事下コンテンツ */}
         <div className="mt-12 space-y-12">
-          {/* アフィリエイト紹介バナー（購入者向け） */}
-          {hasAccess && canAffiliate && (
+          {/* アフィリエイト紹介バナー（ログインユーザー・購入者向け） */}
+          {user && hasAccess && canAffiliate && (
             <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-900 mb-1">
-                    この記事を紹介すると <span className="text-emerald-600">{article.affiliate_rate}%還元</span>
-                    <span className="text-gray-500 text-xs ml-1">
-                      (¥{Math.floor((article.price || 0) * 0.85 * (article.affiliate_rate || 0) / 100).toLocaleString()})
-                    </span>
+                    この記事を紹介すると <span className="text-emerald-600">¥{Math.floor((article.price || 0) * (article.affiliate_rate || 0) / 100).toLocaleString()}（{article.affiliate_rate}%）還元</span>
                   </p>
                   <p className="text-xs text-gray-500">
                     {article.affiliate_target === 'buyers' ? '購入者のみ紹介可能' : '誰でも紹介可能'}
