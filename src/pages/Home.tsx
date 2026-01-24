@@ -233,8 +233,8 @@ export default function Home() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {/* カテゴリ横スクロール */}
-        <div className="mb-6 -mx-4 px-4">
+        {/* モバイル: カテゴリ横スクロール */}
+        <div className="lg:hidden mb-6 -mx-4 px-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Link
               to="/"
@@ -262,6 +262,41 @@ export default function Home() {
           </div>
         </div>
 
+        {/* PC: 2カラムレイアウト（左サイドバー + メインコンテンツ） */}
+        <div className="lg:flex lg:gap-8">
+          {/* 左サイドバー（PCのみ） */}
+          <aside className="hidden lg:block lg:w-56 flex-shrink-0">
+            <div className="sticky top-20">
+              <nav className="space-y-1">
+                <Link
+                  to="/"
+                  className={`block px-4 py-2.5 text-sm rounded-lg transition ${
+                    !selectedCategory
+                      ? 'bg-gray-900 text-white font-medium'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  すべて
+                </Link>
+                {parentCategories.map(cat => (
+                  <Link
+                    key={cat.id}
+                    to={`/?category=${cat.slug}`}
+                    className={`block px-4 py-2.5 text-sm rounded-lg transition ${
+                      selectedCategory === cat.slug
+                        ? 'bg-gray-900 text-white font-medium'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </aside>
+
+          {/* メインコンテンツ */}
+          <div className="flex-1 min-w-0">
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="text-gray-600">読み込み中...</div>
@@ -275,7 +310,7 @@ export default function Home() {
             {filteredArticles.length === 0 ? (
               <p className="text-gray-500">まだ記事がありません</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredArticles.map((article) => (
                   <ArticleCard key={article.id} article={article} />
                 ))}
@@ -294,7 +329,7 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                   {popularArticles.slice(0, 8).map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -311,7 +346,7 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                   {newArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -323,7 +358,7 @@ export default function Home() {
             {editorPickArticles.length > 0 && (
               <section>
                 <h2 className="text-lg font-bold text-gray-900 mb-4">編集部おすすめ</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                   {editorPickArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -335,7 +370,7 @@ export default function Home() {
             {user && recommendedArticles.length > 0 && (
               <section>
                 <h2 className="text-lg font-bold text-gray-900 mb-4">あなたへのおすすめ</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                   {recommendedArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -352,7 +387,7 @@ export default function Home() {
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                   {followingArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -372,7 +407,7 @@ export default function Home() {
                       もっと見る <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                     {arts.map((article) => (
                       <ArticleCard key={article.id} article={article} />
                     ))}
@@ -382,6 +417,8 @@ export default function Home() {
             })}
           </div>
         )}
+          </div>
+        </div>
       </div>
     </Layout>
   );
