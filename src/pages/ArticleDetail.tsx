@@ -608,8 +608,9 @@ export default function ArticleDetail() {
               </div>
             </Link>
 
-            {/* アフィリエイト共有ボタン（購入済みかつアフィリエイト有効の場合） */}
-            {user && hasAccess && canAffiliate && (
+            {/* アフィリエイト共有ボタン（アフィリエイト有効の場合） */}
+            {/* affiliate_target: 'all'=誰でも紹介可能, 'buyers'=購入者のみ */}
+            {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
@@ -714,8 +715,8 @@ export default function ArticleDetail() {
 
         {/* 記事下コンテンツ */}
         <div className="mt-12 space-y-12">
-          {/* アフィリエイト紹介バナー（ログインユーザー・購入者向け） */}
-          {user && hasAccess && canAffiliate && (
+          {/* アフィリエイト紹介バナー（アフィリエイト有効の場合） */}
+          {user && canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
             <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
