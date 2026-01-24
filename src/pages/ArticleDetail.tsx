@@ -8,7 +8,7 @@ import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Twitter, Facebook, MessageCircle, Link2 } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Facebook, Link2 } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
 
@@ -854,36 +854,60 @@ export default function ArticleDetail() {
           <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
             <p className="text-sm font-medium text-gray-700 mb-3">この記事をシェア</p>
             <div className="flex gap-3">
+              {/* X (Twitter) */}
               <a
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(window.location.href)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition"
+                title="Xでシェア"
               >
-                <Twitter className="w-5 h-5" />
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
               </a>
+              {/* Facebook */}
               <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
+                title="Facebookでシェア"
               >
                 <Facebook className="w-5 h-5" />
               </a>
+              {/* LINE */}
               <a
                 href={`https://line.me/R/msg/text/?${encodeURIComponent(article.title + '\n' + window.location.href)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+                className="flex items-center justify-center w-10 h-10 bg-[#06C755] text-white rounded-full hover:brightness-95 transition"
+                title="LINEでシェア"
               >
-                <MessageCircle className="w-5 h-5" />
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.349 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+                </svg>
               </a>
+              {/* はてなブックマーク */}
+              <a
+                href={`https://b.hatena.ne.jp/entry/s/${window.location.href.replace(/^https?:\/\//, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-10 h-10 bg-[#00A4DE] text-white rounded-full hover:brightness-95 transition"
+                title="はてなブックマークに追加"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.47 0C22.42 0 24 1.58 24 3.53v16.94c0 1.95-1.58 3.53-3.53 3.53H3.53C1.58 24 0 22.42 0 20.47V3.53C0 1.58 1.58 0 3.53 0h16.94zm-3.705 14.47c-.78 0-1.41.63-1.41 1.41s.63 1.414 1.41 1.414 1.41-.634 1.41-1.414-.63-1.41-1.41-1.41zm.255-9.884h-2.296v9.882h2.296V4.586zm-5.255 5.08c.66-.33 1.044-.99 1.044-1.79 0-1.27-1.065-2.16-2.595-2.16H6.78v9.75h3.615c1.665 0 2.835-.93 2.835-2.34 0-1.02-.54-1.8-1.41-2.085zm-1.86 3.195H9.03v-1.875h.96c.69 0 1.125.39 1.125.96 0 .555-.435.915-1.125.915zm-.21-4.275H9.03V6.99h.87c.615 0 .99.36.99.855 0 .48-.375.84-.99.84z"/>
+                </svg>
+              </a>
+              {/* URLコピー */}
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
                   alert('URLをコピーしました');
                 }}
                 className="flex items-center justify-center w-10 h-10 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
+                title="URLをコピー"
               >
                 <Copy className="w-5 h-5" />
               </button>
