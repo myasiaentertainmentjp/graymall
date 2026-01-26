@@ -121,12 +121,12 @@ function TableOfContents({ content }: { content: string }) {
   if (toc.length < 2) return null;
 
   return (
-    <div className="border border-gray-200 rounded-lg mb-6 overflow-hidden">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg mb-6 overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
+        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
       >
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
           <List className="w-4 h-4" />
           目次
           <span className="text-xs text-gray-400 font-normal">({toc.length})</span>
@@ -134,12 +134,12 @@ function TableOfContents({ content }: { content: string }) {
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <nav className="px-4 py-3 space-y-1 border-t border-gray-200">
+        <nav className="px-4 py-3 space-y-1 border-t border-gray-200 dark:border-gray-700">
           {toc.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
-              className={`block text-sm text-gray-600 hover:text-gray-900 transition py-1 ${
+              className={`block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition py-1 ${
                 item.level === 3 ? 'pl-4' : ''
               }`}
             >
@@ -575,8 +575,8 @@ export default function ArticleDetail() {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">記事が見つかりません</h1>
-          <p className="text-gray-600">この記事は存在しないか、まだ公開されていません。</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">記事が見つかりません</h1>
+          <p className="text-gray-600 dark:text-gray-400">この記事は存在しないか、まだ公開されていません。</p>
         </div>
       </Layout>
     );
@@ -649,7 +649,7 @@ export default function ArticleDetail() {
           />
         )}
 
-        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 md:p-8">
           {/* カテゴリ・読了時間 */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {article.primary_category && (
@@ -663,7 +663,7 @@ export default function ArticleDetail() {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">{article.title}</h1>
 
           {/* いいねボタン（noteスタイル） */}
           <div className="flex items-center gap-3 mb-6">
@@ -698,7 +698,7 @@ export default function ArticleDetail() {
                 )}
               </div>
               <div>
-                <div className="font-medium text-gray-900">
+                <div className="font-medium text-gray-900 dark:text-white">
                   {article.users?.display_name || article.users?.email?.split('@')[0]}
                 </div>
                 <div className="text-sm text-gray-600">
@@ -836,7 +836,7 @@ export default function ArticleDetail() {
         <div className="mt-12 space-y-12">
           {/* アフィリエイト紹介バナー（アフィリエイト有効の場合） */}
           {canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
-            <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-900 mb-1">
@@ -876,8 +876,8 @@ export default function ArticleDetail() {
           )}
 
           {/* SNSシェアボタン */}
-          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
-            <p className="text-sm font-medium text-gray-700 mb-3">この記事をシェア</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">この記事をシェア</p>
             <div className="flex gap-3">
               {/* X (Twitter) */}
               <a
@@ -940,7 +940,7 @@ export default function ArticleDetail() {
           </div>
 
           {/* 著者プロフィール */}
-          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-3 sm:gap-4">
               <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
@@ -956,7 +956,7 @@ export default function ArticleDetail() {
               <div className="flex-1 min-w-0">
                 <Link
                   to={`/users/${article.author_id}`}
-                  className="font-bold text-base sm:text-lg text-gray-900 hover:text-gray-700 line-clamp-1 block"
+                  className="font-bold text-base sm:text-lg text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 line-clamp-1 block"
                 >
                   {article.users?.display_name || article.users?.email?.split('@')[0]}
                 </Link>
@@ -978,7 +978,7 @@ export default function ArticleDetail() {
           {authorArticles.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   {article.users?.display_name || '著者'}の他の記事
                 </h3>
                 <Link
@@ -1009,7 +1009,7 @@ export default function ArticleDetail() {
           {relatedArticles.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   関連記事
                 </h3>
                 {article.primary_category && (

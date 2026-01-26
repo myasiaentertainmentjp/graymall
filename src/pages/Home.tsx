@@ -299,7 +299,7 @@ export default function Home() {
           {/* メインコンテンツ */}
           <div className="flex-1 min-w-0">
         {isLoading ? (
-          <div className="space-y-10">
+          <div className="space-y-6 sm:space-y-10">
             <section>
               <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse" />
               <SkeletonRow count={6} />
@@ -327,7 +327,7 @@ export default function Home() {
           </div>
         ) : (
           /* 通常表示 */
-          <div className="space-y-10">
+          <div className="space-y-6 sm:space-y-10">
             {/* 人気の記事 */}
             {popularArticles.length > 0 && (
               <section>
