@@ -504,6 +504,8 @@
     const [listMenuOpen, setListMenuOpen] = useState(false);
     const [alignMenuOpen, setAlignMenuOpen] = useState(false);
     const [bubbleHeadingMenuOpen, setBubbleHeadingMenuOpen] = useState(false);
+    const [isInTable, setIsInTable] = useState(false);
+    const [tableMenuOpen, setTableMenuOpen] = useState(false);
 
     const [linkPopover, setLinkPopover] = useState<LinkPopoverState>({
       visible: false,
@@ -605,7 +607,34 @@
 
       const { selection } = editor.state;
       const { from, to, empty } = selection;
+      const isInTable = editor.isActive('table');
 
+      // テーブル内の場合: 選択がなくても（クリックしただけでも）ツールバーを表示
+      if (isInTable) {
+        try {
+          const coords = editor.view.coordsAtPos(from);
+          const containerRect = containerRef.current.getBoundingClientRect();
+
+          const menuHeight = 44;
+          const offset = 12;
+          let top = coords.top - containerRect.top - menuHeight - offset;
+
+          if (top < 0) {
+            top = coords.bottom - containerRect.top + offset;
+          }
+
+          setFloatingToolbar({
+            visible: true,
+            top: Math.max(0, top),
+            left: Math.max(120, Math.min(coords.left - containerRect.left, containerRect.width - 120)),
+          });
+        } catch {
+          setFloatingToolbar({ visible: false, top: 0, left: 0 });
+        }
+        return;
+      }
+
+      // テーブル外: 選択がない場合はツールバーを隠す
       if (empty) {
         setFloatingToolbar({ visible: false, top: 0, left: 0 });
         setBubbleHeadingMenuOpen(false);
@@ -641,6 +670,8 @@
       (editor: Editor, containerRef: React.RefObject<HTMLDivElement | null>) => {
         updatePlusButtonPosition(editor, containerRef);
         updateFloatingToolbar(editor, containerRef);
+        // テーブル内かどうかを更新（モバイル用）
+        setIsInTable(editor.isActive('table'));
       },
       [updatePlusButtonPosition, updateFloatingToolbar],
     );
@@ -1528,6 +1559,77 @@
 
     const renderMobileToolbar = () => {
       if (!isMobile) return null;
+
+      // テーブル内の場合は専用ツールバーを表示
+      if (isInTable && currentEditor) {
+        return (
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
+            <div className="flex items-center px-2 py-2 gap-1 overflow-x-auto">
+              <span className="flex-shrink-0 text-xs text-gray-500 px-2">表編集</span>
+              <div className="w-px h-6 bg-gray-200 mx-1" />
+
+              {/* 行操作 */}
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().addRowBefore().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+              >
+                <RowsIcon className="w-4 h-4" />↑行
+              </button>
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().addRowAfter().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+              >
+                <RowsIcon className="w-4 h-4" />↓行
+              </button>
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().deleteRow().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
+              >
+                行削除
+              </button>
+
+              <div className="w-px h-6 bg-gray-200 mx-1" />
+
+              {/* 列操作 */}
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().addColumnBefore().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+              >
+                <Columns className="w-4 h-4" />←列
+              </button>
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().addColumnAfter().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+              >
+                <Columns className="w-4 h-4" />→列
+              </button>
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().deleteColumn().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
+              >
+                列削除
+              </button>
+
+              <div className="w-px h-6 bg-gray-200 mx-1" />
+
+              {/* 表削除 */}
+              <button
+                type="button"
+                {...handleMobileAction(() => currentEditor.chain().focus().deleteTable().run())}
+                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
+              >
+                <Trash2 className="w-4 h-4" />表削除
+              </button>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb" style={{ overflow: 'visible' }}>

@@ -3,14 +3,14 @@ export default function SkeletonCard() {
   return (
     <div className="animate-pulse">
       {/* サムネイル */}
-      <div className="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-lg mb-3" />
+      <div className="aspect-[4/3] bg-gray-200 rounded-lg mb-3" />
       {/* タイトル */}
-      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
-      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3" />
+      <div className="h-4 bg-gray-200 rounded mb-2" />
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
       {/* 著者・日付 */}
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full" />
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20" />
+        <div className="w-6 h-6 bg-gray-200 rounded-full" />
+        <div className="h-3 bg-gray-200 rounded w-20" />
       </div>
     </div>
   );

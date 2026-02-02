@@ -270,8 +270,8 @@ export default function Home() {
                   to="/"
                   className={`block px-2 py-3 text-lg transition ${
                     !selectedCategory
-                      ? 'text-gray-900 dark:text-white font-medium'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   すべて
@@ -282,8 +282,8 @@ export default function Home() {
                     to={`/?category=${cat.slug}`}
                     className={`block px-2 py-3 text-lg transition ${
                       selectedCategory === cat.slug
-                        ? 'text-gray-900 dark:text-white font-medium'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                   >
                     {cat.name}
@@ -329,7 +329,7 @@ export default function Home() {
             {popularArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">人気の記事</h2>
+                  <h2 className="text-lg font-bold text-gray-900">人気の記事</h2>
                   <Link to="/articles?sort=popular" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -348,7 +348,7 @@ export default function Home() {
             {newArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">新着記事</h2>
+                  <h2 className="text-lg font-bold text-gray-900">新着記事</h2>
                   <Link to="/articles" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -367,7 +367,7 @@ export default function Home() {
             {editorPickArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">編集部おすすめ</h2>
+                  <h2 className="text-lg font-bold text-gray-900">編集部おすすめ</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {editorPickArticles.map((article) => (
@@ -383,7 +383,7 @@ export default function Home() {
             {user && recommendedArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">あなたへのおすすめ</h2>
+                  <h2 className="text-lg font-bold text-gray-900">あなたへのおすすめ</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {recommendedArticles.map((article) => (
@@ -399,7 +399,7 @@ export default function Home() {
             {user && followingArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">フォロー中</h2>
+                  <h2 className="text-lg font-bold text-gray-900">フォロー中</h2>
                   <Link to="/me/following" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -421,7 +421,7 @@ export default function Home() {
               return (
                 <section key={cat.id}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">{cat.name}</h2>
+                    <h2 className="text-lg font-bold text-gray-900">{cat.name}</h2>
                     <Link to={`/articles?category=${cat.slug}`} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
                       もっと見る <ChevronRight className="w-4 h-4" />
                     </Link>

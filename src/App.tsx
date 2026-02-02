@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useSearchParams, useL
 import { useEffect, Suspense, lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 
@@ -96,12 +95,11 @@ function WriteRedirect() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Router>
-          <ScrollToTop />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
+      <AuthProvider>
+        <Router>
+        <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
@@ -331,11 +329,10 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/affiliate-guide" element={<AffiliateGuidePage />} />
-            </Routes>
-          </Suspense>
-          </Router>
-        </AuthProvider>
-      </ThemeProvider>
+          </Routes>
+        </Suspense>
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
