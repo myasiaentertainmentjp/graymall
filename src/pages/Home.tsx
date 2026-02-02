@@ -207,7 +207,7 @@ export default function Home() {
         .map(id => allArticles.find(a => a.id === id))
         .filter(Boolean) as Article[];
     }
-    return allArticles.slice(0, 4);
+    return allArticles.slice(0, 8);
   }, [allArticles, sectionMap]);
 
   const categoryArticles = useMemo(() => {
@@ -215,7 +215,7 @@ export default function Home() {
     parentCategories.filter(c => !c.parent_id).forEach(cat => {
       catArts[cat.id] = allArticles
         .filter(a => a.primary_category_id === cat.id)
-        .slice(0, 4);
+        .slice(0, 8);
     });
     return catArts;
   }, [allArticles, parentCategories]);
