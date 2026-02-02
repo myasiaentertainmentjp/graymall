@@ -13,13 +13,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // ローカルストレージから取得、なければシステム設定を確認
+    // ローカルストレージから取得、なければライトモードをデフォルトに
+    // （システム設定に関わらず常にライトモード）
     const stored = localStorage.getItem('theme') as Theme;
     if (stored) return stored;
-
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
     return 'light';
   });
 
