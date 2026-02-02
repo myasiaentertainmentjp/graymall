@@ -38,6 +38,8 @@
     ExternalLink,
     Trash2,
     Table2,
+    RowsIcon,
+    Columns,
   } from 'lucide-react';
 
   import { supabase } from '../lib/supabase';
@@ -1315,6 +1317,85 @@
       const isCode = currentEditor.isActive('codeBlock');
       const isH2 = currentEditor.isActive('heading', { level: 2 });
       const isH3 = currentEditor.isActive('heading', { level: 3 });
+      const isTable = currentEditor.isActive('table');
+
+      // テーブル内の場合は専用ツールバーを表示
+      if (isTable) {
+        return (
+          <div
+            className="absolute z-40 bg-slate-900 rounded-xl shadow-lg px-2 py-1.5 flex items-center gap-0.5"
+            style={{ top: floatingToolbar.top, left: floatingToolbar.left, transform: 'translateX(-50%)' }}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addRowBefore().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
+              title="上に行を追加"
+            >
+              <RowsIcon className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">↑</span>
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addRowAfter().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
+              title="下に行を追加"
+            >
+              <RowsIcon className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">↓</span>
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteRow().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800"
+              title="行を削除"
+            >
+              <span className="text-xs text-red-400">行削除</span>
+            </button>
+
+            <div className="w-px h-5 bg-slate-600 mx-1" />
+
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addColumnBefore().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
+              title="左に列を追加"
+            >
+              <Columns className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">←</span>
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addColumnAfter().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
+              title="右に列を追加"
+            >
+              <Columns className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">→</span>
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteColumn().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800"
+              title="列を削除"
+            >
+              <span className="text-xs text-red-400">列削除</span>
+            </button>
+
+            <div className="w-px h-5 bg-slate-600 mx-1" />
+
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteTable().run(); }}
+              className="p-2 rounded-lg hover:bg-slate-800"
+              title="表を削除"
+            >
+              <Trash2 className="w-4 h-4 text-red-400" />
+            </button>
+          </div>
+        );
+      }
 
       return (
         <div
