@@ -8,6 +8,9 @@
   import Link from '@tiptap/extension-link';
   import TextAlign from '@tiptap/extension-text-align';
   import Table from '@tiptap/extension-table';
+  import TableRow from '@tiptap/extension-table-row';
+  import TableHeader from '@tiptap/extension-table-header';
+  import TableCell from '@tiptap/extension-table-cell';
   import {
     Plus,
     Image as ImageIcon,
@@ -34,6 +37,7 @@
     X,
     ExternalLink,
     Trash2,
+    Table2,
   } from 'lucide-react';
 
   import { supabase } from '../lib/supabase';
@@ -450,6 +454,9 @@
           class: 'border-collapse w-full',
         },
       }),
+      TableRow,
+      TableHeader,
+      TableCell,
       BlockquoteWithSource,
       ImageWithCaption,
     ];
@@ -1114,6 +1121,7 @@
           case 'quote': currentEditor?.chain().focus().toggleBlockquote().run(); break;
           case 'code': currentEditor?.chain().focus().toggleCodeBlock().run(); break;
           case 'hr': currentEditor?.chain().focus().setHorizontalRule().run(); break;
+          case 'table': currentEditor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); break;
           case 'image': openImagePicker(); break;
           case 'file': openFilePicker(); break;
           case 'bold': currentEditor?.chain().focus().toggleBold().run(); break;
@@ -1164,6 +1172,7 @@
       { key: 'quote', icon: Quote, label: '引用', size: 'w-5 h-5' },
       { key: 'code', icon: Code, label: 'コードブロック', size: 'w-5 h-5' },
       { key: 'hr', icon: Minus, label: '区切り線', size: 'w-5 h-5' },
+      { key: 'table', icon: Table2, label: '表（テーブル）', size: 'w-5 h-5' },
       { key: 'image', icon: ImageIcon, label: '画像', size: 'w-5 h-5' },
       { key: 'file', icon: FileText, label: 'ファイル', size: 'w-5 h-5' },
       { key: 'paid', icon: DollarSign, label: paidEnabled ? '有料エリア削除' : '有料エリア挿入', size: 'w-5 h-5' },
