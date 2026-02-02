@@ -158,7 +158,7 @@ function TableOfContents({ content }: { content: string }) {
  */
 function ArticleContent({ html }: { html: string }) {
   return (
-    <div className="prose prose-lg max-w-none article-content">
+    <div className="prose md:prose-lg max-w-none article-content">
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
@@ -778,12 +778,12 @@ export default function ArticleDetail() {
             ))} />
           ) : (
             <>
-              <div className="prose prose-lg max-w-none mb-8">
+              <div className="prose md:prose-lg max-w-none mb-8">
                 <div dangerouslySetInnerHTML={{ __html: cleanArticleHtml(article.excerpt) }} />
               </div>
 
               {(article.content.includes('<!-- paid -->') || article.content.includes('<!-- PAYWALL_BOUNDARY -->')) && (
-                <div className="prose prose-lg max-w-none mb-8">
+                <div className="prose md:prose-lg max-w-none mb-8">
                   <div dangerouslySetInnerHTML={{
                     __html: cleanArticleHtml(
                       article.content
