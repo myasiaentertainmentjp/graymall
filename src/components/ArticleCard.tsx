@@ -221,18 +221,22 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
         </div>
 
         {/* Content */}
-        <div className="p-3">
+        <div className="p-3 flex flex-col">
           {/* Title */}
           <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 mb-2 min-h-[2.5rem]">
             {article.title}
           </h3>
 
-          {/* Price - only show for paid articles */}
-          {article.price > 0 && (
-            <div className="text-sm font-semibold text-emerald-600 mb-2">
-              ¥{article.price.toLocaleString()}
-            </div>
-          )}
+          {/* Price & Affiliate - fixed height area */}
+          <div className="h-6 mb-2">
+            {article.price > 0 ? (
+              <div className="text-sm font-semibold text-emerald-600">
+                ¥{article.price.toLocaleString()}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-400">無料</div>
+            )}
+          </div>
 
           {/* Affiliate info - only show when affiliate is enabled */}
           {affiliateLabel && (
@@ -242,7 +246,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
           )}
 
           {/* Author & time */}
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3 mt-auto">
             <Link
               to={`/users/${article.author_id}`}
               onClick={(e) => e.stopPropagation()}

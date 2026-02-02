@@ -123,6 +123,41 @@ button {
     padding-bottom: 1rem;
   }
 
+  /* ProseMirror テーブルスタイル（エディター内） */
+  .ProseMirror table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+    table-layout: fixed;
+  }
+
+  .ProseMirror th,
+  .ProseMirror td {
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1rem;
+    vertical-align: top;
+    min-width: 100px;
+  }
+
+  .ProseMirror th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .ProseMirror td {
+    background-color: #fff;
+  }
+
+  /* 選択されたセルのハイライト */
+  .ProseMirror .selectedCell {
+    background-color: #dbeafe;
+  }
+
+  .ProseMirror th.selectedCell {
+    background-color: #bfdbfe;
+  }
+
   /* Hide scrollbar for mobile toolbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
