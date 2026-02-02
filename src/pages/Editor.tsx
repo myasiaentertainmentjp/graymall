@@ -738,35 +738,34 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
               </div>
             </div>
 
+            {/* 固定サイドバー展開ボタン（閉じている時のみ表示） */}
+            {!leftSidebarOpen && (
+              <button
+                type="button"
+                onClick={() => setLeftSidebarOpen(true)}
+                className="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 w-6 h-12 items-center justify-center bg-white border border-l-0 border-gray-200 rounded-r-lg shadow-sm hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition"
+                title="目次を表示"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+            {!rightSidebarOpen && (
+              <button
+                type="button"
+                onClick={() => setRightSidebarOpen(true)}
+                className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 w-6 h-12 items-center justify-center bg-white border border-r-0 border-gray-200 rounded-l-lg shadow-sm hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition"
+                title="設定を表示"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            )}
+
             {/* メインエディタ - サイドバーの開閉に応じて幅を調整 */}
             <div className={`col-span-12 ${
               leftSidebarOpen && rightSidebarOpen ? 'lg:col-span-6' :
               leftSidebarOpen || rightSidebarOpen ? 'lg:col-span-9' :
               'lg:col-span-12'
             }`}>
-              {/* サイドバー再表示ボタン */}
-              <div className="hidden lg:flex gap-2 mb-4">
-                {!leftSidebarOpen && (
-                  <button
-                    type="button"
-                    onClick={() => setLeftSidebarOpen(true)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50"
-                  >
-                    <List className="w-4 h-4" />
-                    目次を表示
-                  </button>
-                )}
-                {!rightSidebarOpen && (
-                  <button
-                    type="button"
-                    onClick={() => setRightSidebarOpen(true)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50"
-                  >
-                    <Settings className="w-4 h-4" />
-                    設定を表示
-                  </button>
-                )}
-              </div>
 
               <div className="bg-white p-4">
                 <textarea
