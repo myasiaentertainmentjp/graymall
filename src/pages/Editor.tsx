@@ -743,20 +743,20 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
               <button
                 type="button"
                 onClick={() => setLeftSidebarOpen(true)}
-                className="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 w-6 h-12 items-center justify-center bg-white border border-l-0 border-gray-200 rounded-r-lg shadow-sm hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition"
+                className="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 w-8 h-14 items-center justify-center bg-gray-900 rounded-r-lg shadow-lg hover:bg-gray-800 text-white transition"
                 title="目次を表示"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             )}
             {!rightSidebarOpen && (
               <button
                 type="button"
                 onClick={() => setRightSidebarOpen(true)}
-                className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 w-6 h-12 items-center justify-center bg-white border border-r-0 border-gray-200 rounded-l-lg shadow-sm hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition"
+                className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 w-8 h-14 items-center justify-center bg-gray-900 rounded-l-lg shadow-lg hover:bg-gray-800 text-white transition"
                 title="設定を表示"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
             )}
 
