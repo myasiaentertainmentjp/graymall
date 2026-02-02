@@ -38,8 +38,6 @@
     ExternalLink,
     Trash2,
     Table2,
-    RowsIcon,
-    Columns,
   } from 'lucide-react';
 
   import { supabase } from '../lib/supabase';
@@ -1350,79 +1348,31 @@
       const isH3 = currentEditor.isActive('heading', { level: 3 });
       const isTable = currentEditor.isActive('table');
 
-      // テーブル内の場合は専用ツールバーを表示
+      // テーブル内の場合は専用ツールバーを表示（シンプルに+ボタンのみ）
       if (isTable) {
         return (
           <div
-            className="absolute z-40 bg-slate-900 rounded-xl shadow-lg px-2 py-1.5 flex items-center gap-0.5"
+            className="absolute z-40 bg-slate-900 rounded-xl shadow-lg px-3 py-2 flex items-center gap-2"
             style={{ top: floatingToolbar.top, left: floatingToolbar.left, transform: 'translateX(-50%)' }}
             onMouseDown={(e) => e.preventDefault()}
           >
             <button
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addRowBefore().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
-              title="上に行を追加"
-            >
-              <RowsIcon className="w-4 h-4 text-white" />
-              <span className="text-xs text-white">↑</span>
-            </button>
-            <button
-              type="button"
               onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addRowAfter().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
-              title="下に行を追加"
+              className="px-3 py-1.5 rounded-lg hover:bg-slate-700 flex items-center gap-1.5 text-white text-sm"
+              title="行を追加"
             >
-              <RowsIcon className="w-4 h-4 text-white" />
-              <span className="text-xs text-white">↓</span>
-            </button>
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteRow().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800"
-              title="行を削除"
-            >
-              <span className="text-xs text-red-400">行削除</span>
-            </button>
-
-            <div className="w-px h-5 bg-slate-600 mx-1" />
-
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addColumnBefore().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
-              title="左に列を追加"
-            >
-              <Columns className="w-4 h-4 text-white" />
-              <span className="text-xs text-white">←</span>
+              <Plus className="w-4 h-4" />
+              <span>行</span>
             </button>
             <button
               type="button"
               onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().addColumnAfter().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800 flex items-center gap-1"
-              title="右に列を追加"
+              className="px-3 py-1.5 rounded-lg hover:bg-slate-700 flex items-center gap-1.5 text-white text-sm"
+              title="列を追加"
             >
-              <Columns className="w-4 h-4 text-white" />
-              <span className="text-xs text-white">→</span>
-            </button>
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteColumn().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800"
-              title="列を削除"
-            >
-              <span className="text-xs text-red-400">列削除</span>
-            </button>
-
-            <div className="w-px h-5 bg-slate-600 mx-1" />
-
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().deleteTable().run(); }}
-              className="p-2 rounded-lg hover:bg-slate-800"
-              title="表を削除"
-            >
-              <Trash2 className="w-4 h-4 text-red-400" />
+              <Plus className="w-4 h-4" />
+              <span>列</span>
             </button>
           </div>
         );
@@ -1560,71 +1510,27 @@
     const renderMobileToolbar = () => {
       if (!isMobile) return null;
 
-      // テーブル内の場合は専用ツールバーを表示
+      // テーブル内の場合は専用ツールバーを表示（シンプルに+ボタンのみ）
       if (isInTable && currentEditor) {
         return (
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
-            <div className="flex items-center px-2 py-2 gap-1 overflow-x-auto">
-              <span className="flex-shrink-0 text-xs text-gray-500 px-2">表編集</span>
-              <div className="w-px h-6 bg-gray-200 mx-1" />
-
-              {/* 行操作 */}
-              <button
-                type="button"
-                {...handleMobileAction(() => currentEditor.chain().focus().addRowBefore().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
-              >
-                <RowsIcon className="w-4 h-4" />↑行
-              </button>
+            <div className="flex items-center justify-center px-4 py-3 gap-4">
+              <span className="text-sm text-gray-500">表編集</span>
               <button
                 type="button"
                 {...handleMobileAction(() => currentEditor.chain().focus().addRowAfter().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+                className="h-10 px-4 rounded-lg bg-gray-100 active:bg-gray-200 flex items-center gap-2 text-sm text-gray-700"
               >
-                <RowsIcon className="w-4 h-4" />↓行
-              </button>
-              <button
-                type="button"
-                {...handleMobileAction(() => currentEditor.chain().focus().deleteRow().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
-              >
-                行削除
-              </button>
-
-              <div className="w-px h-6 bg-gray-200 mx-1" />
-
-              {/* 列操作 */}
-              <button
-                type="button"
-                {...handleMobileAction(() => currentEditor.chain().focus().addColumnBefore().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
-              >
-                <Columns className="w-4 h-4" />←列
+                <Plus className="w-4 h-4" />
+                <span>行を追加</span>
               </button>
               <button
                 type="button"
                 {...handleMobileAction(() => currentEditor.chain().focus().addColumnAfter().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-gray-700"
+                className="h-10 px-4 rounded-lg bg-gray-100 active:bg-gray-200 flex items-center gap-2 text-sm text-gray-700"
               >
-                <Columns className="w-4 h-4" />→列
-              </button>
-              <button
-                type="button"
-                {...handleMobileAction(() => currentEditor.chain().focus().deleteColumn().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
-              >
-                列削除
-              </button>
-
-              <div className="w-px h-6 bg-gray-200 mx-1" />
-
-              {/* 表削除 */}
-              <button
-                type="button"
-                {...handleMobileAction(() => currentEditor.chain().focus().deleteTable().run())}
-                className="flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200 text-sm text-red-600"
-              >
-                <Trash2 className="w-4 h-4" />表削除
+                <Plus className="w-4 h-4" />
+                <span>列を追加</span>
               </button>
             </div>
           </div>

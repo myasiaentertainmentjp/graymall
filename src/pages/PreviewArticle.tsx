@@ -197,7 +197,7 @@
             }
           `}</style>
 
-          <div className="mt-8 prose prose-slate max-w-none preview-content">
+          <div className="mt-8 prose prose-slate max-w-none preview-content article-content">
             <div dangerouslySetInnerHTML={{ __html: data.content || '' }} />
           </div>
 
@@ -212,7 +212,7 @@
                 <div className="flex-1 border-t-2 border-dashed border-gray-300" />
               </div>
 
-              <div className="prose prose-slate max-w-none preview-content">
+              <div className="prose prose-slate max-w-none preview-content article-content">
                 <div dangerouslySetInnerHTML={{ __html: data.paidContent || '' }} />
               </div>
             </>
