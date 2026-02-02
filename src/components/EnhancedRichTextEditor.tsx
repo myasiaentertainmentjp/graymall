@@ -1348,28 +1348,8 @@
       const isH3 = currentEditor.isActive('heading', { level: 3 });
       const isTable = currentEditor.isActive('table');
 
-      // テーブル内の場合は専用ツールバーを表示（シンプルに+ボタンのみ）
+      // テーブル内の場合は専用ツールバーを表示
       if (isTable) {
-        // テーブルから抜ける処理
-        const exitTable = () => {
-          // テーブルの後ろに移動
-          const { state } = currentEditor;
-          const { $from } = state.selection;
-          // テーブルノードを探して、その後ろに移動
-          let depth = $from.depth;
-          while (depth > 0) {
-            const node = $from.node(depth);
-            if (node.type.name === 'table') {
-              const after = $from.after(depth);
-              currentEditor.chain().focus().setTextSelection(after).run();
-              return;
-            }
-            depth--;
-          }
-          // 見つからない場合は末尾に移動
-          currentEditor.chain().focus('end').run();
-        };
-
         return (
           <div
             className="absolute z-40 bg-slate-900 rounded-xl shadow-lg px-3 py-2 flex items-center gap-2"
@@ -1378,11 +1358,11 @@
           >
             <button
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); exitTable(); }}
+              onMouseDown={(e) => { e.preventDefault(); currentEditor.chain().focus().undo().run(); }}
               className="p-1.5 rounded-lg hover:bg-slate-700 text-white"
-              title="表から出る"
+              title="元に戻す"
             >
-              <X className="w-4 h-4" />
+              <Undo className="w-4 h-4" />
             </button>
             <div className="w-px h-5 bg-slate-600" />
             <button
@@ -1539,34 +1519,17 @@
     const renderMobileToolbar = () => {
       if (!isMobile) return null;
 
-      // テーブル内の場合は専用ツールバーを表示（シンプルに+ボタンのみ）
+      // テーブル内の場合は専用ツールバーを表示
       if (isInTable && currentEditor) {
-        // テーブルから抜ける処理
-        const exitTable = () => {
-          const { state } = currentEditor;
-          const { $from } = state.selection;
-          let depth = $from.depth;
-          while (depth > 0) {
-            const node = $from.node(depth);
-            if (node.type.name === 'table') {
-              const after = $from.after(depth);
-              currentEditor.chain().focus().setTextSelection(after).run();
-              return;
-            }
-            depth--;
-          }
-          currentEditor.chain().focus('end').run();
-        };
-
         return (
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
             <div className="flex items-center justify-center px-4 py-3 gap-3">
               <button
                 type="button"
-                {...handleMobileAction(exitTable)}
+                {...handleMobileAction(() => currentEditor.chain().focus().undo().run())}
                 className="h-10 px-4 rounded-lg bg-gray-100 active:bg-gray-200 flex items-center gap-2 text-sm text-gray-700"
               >
-                <X className="w-4 h-4" />
+                <Undo className="w-4 h-4" />
                 <span>戻る</span>
               </button>
               <button
