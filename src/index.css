@@ -252,89 +252,132 @@ button {
 
   /* ========================================
      記事内テーブル（表）のスタイル
-     ChatGPTからコピペした表も綺麗に表示
+     Claude AIからコピペした表も綺麗に表示
      ======================================== */
+
+  /* テーブルコンテナ（横スクロール対応） */
+  .article-content .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 1.5rem 0 2rem;
+  }
 
   .article-content table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    font-size: 0.9375rem;
-    line-height: 1.6;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0 2rem;
   }
 
   .article-content thead {
-    background-color: #f9fafb;
+    background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
   }
 
   .article-content th {
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
     text-align: left;
-    font-weight: 600;
-    color: #374151;
-    border-bottom: 2px solid #e5e7eb;
-    white-space: nowrap;
+    font-weight: 700;
+    color: #1f2937;
+    border-bottom: 2px solid #d1d5db;
+    border-right: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+  }
+
+  .article-content th:last-child {
+    border-right: none;
   }
 
   .article-content td {
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid #e5e7eb;
-    color: #4b5563;
+    border-right: 1px solid #e5e7eb;
+    color: #374151;
+    vertical-align: top;
+  }
+
+  .article-content td:last-child {
+    border-right: none;
+  }
+
+  /* 最後の行は下線なし */
+  .article-content tbody tr:last-child td {
+    border-bottom: none;
   }
 
   .article-content tbody tr:hover {
-    background-color: #f9fafb;
+    background-color: #f8fafc;
   }
 
   /* 交互の行に薄い背景色 */
   .article-content tbody tr:nth-child(even) {
-    background-color: #fafafa;
+    background-color: #fafbfc;
   }
 
   .article-content tbody tr:nth-child(even):hover {
-    background-color: #f3f4f6;
+    background-color: #f1f5f9;
   }
 
-  /* モバイル対応：横スクロール可能に */
+  /* セル内のリスト対応 */
+  .article-content td ul,
+  .article-content td ol {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .article-content td li {
+    margin: 0.25rem 0;
+  }
+
+  /* モバイル対応 */
   @media (max-width: 640px) {
     .article-content table {
+      font-size: 0.8125rem;
       display: block;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
       white-space: nowrap;
     }
 
     .article-content th,
     .article-content td {
-      padding: 0.625rem 0.75rem;
-      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
     }
   }
 
   /* ダークモード対応 */
+  .dark .article-content table {
+    border-color: #374151;
+  }
+
   .dark .article-content thead {
-    background-color: #374151;
+    background: linear-gradient(to bottom, #1f2937, #111827);
   }
 
   .dark .article-content th {
-    color: #f3f4f6;
+    color: #f9fafb;
     border-bottom-color: #4b5563;
+    border-right-color: #374151;
   }
 
   .dark .article-content td {
-    color: #d1d5db;
-    border-bottom-color: #4b5563;
+    color: #e5e7eb;
+    border-bottom-color: #374151;
+    border-right-color: #374151;
   }
 
   .dark .article-content tbody tr:hover {
-    background-color: #374151;
-  }
-
-  .dark .article-content tbody tr:nth-child(even) {
     background-color: #1f2937;
   }
 
+  .dark .article-content tbody tr:nth-child(even) {
+    background-color: #111827;
+  }
+
   .dark .article-content tbody tr:nth-child(even):hover {
-    background-color: #374151;
+    background-color: #1f2937;
   }
