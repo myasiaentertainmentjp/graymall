@@ -7,6 +7,7 @@
   import Placeholder from '@tiptap/extension-placeholder';
   import Link from '@tiptap/extension-link';
   import TextAlign from '@tiptap/extension-text-align';
+  import Table from '@tiptap/extension-table';
   import {
     Plus,
     Image as ImageIcon,
@@ -443,6 +444,12 @@
         },
       }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Table.configure({
+        resizable: false,
+        HTMLAttributes: {
+          class: 'border-collapse w-full',
+        },
+      }),
       BlockquoteWithSource,
       ImageWithCaption,
     ];
