@@ -1,0 +1,340 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   高級感・信頼感のあるタイポグラフィ設定
+   ======================================== */
+
+/* ベースのタイポグラフィ */
+html {
+  font-feature-settings: "palt" 1; /* プロポーショナルメトリクス */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  letter-spacing: 0.02em; /* 文字間隔を少し広げる */
+  line-height: 1.8; /* 行間を広げてゆとりのある印象 */
+  color: #1C1917; /* ウォームグレー900 */
+}
+
+/* 見出しの調整 */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  font-feature-settings: "palt" 1;
+}
+
+/* 本文テキストの調整 */
+p {
+  line-height: 1.9;
+}
+
+/* 小さいテキストは少し詰める */
+.text-xs, .text-sm {
+  letter-spacing: 0.01em;
+}
+
+/* リンクのトランジション */
+a {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+/* ボタンの調整 */
+button {
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+/* カードなどのホバーエフェクト */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   エディタスタイル
+   ======================================== */
+
+.ProseMirror {
+    outline: none;
+  }
+
+  .ProseMirror ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .ProseMirror ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .ProseMirror li {
+    margin: 0.25rem 0;
+  }
+
+  /* H2/H3 styling */
+  .ProseMirror h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .ProseMirror h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* H2/H3 Placeholders */
+  .ProseMirror h2.is-empty::before {
+    content: '隕句�縺�2';
+    color: #9ca3af;
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+
+  .ProseMirror h3.is-empty::before {
+    content: '隕句�縺�3';
+    color: #9ca3af;
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+
+  /* ProseMirror figure/caption spacing */
+  .ProseMirror figure {
+    margin-bottom: 2rem;
+  }
+
+  .ProseMirror figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
+  /* Hide scrollbar for mobile toolbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for iOS */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* ========================================
+     記事内画像のスタイル（シンプル版）
+     ======================================== */
+
+  /* 基本：全ての画像に統一スタイル */
+  .article-content img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  /* figure内の画像は下余白なし（figureかfigcaptionで制御） */
+  .article-content figure img {
+    margin-bottom: 0;
+  }
+
+  /* figure基本スタイル */
+  .article-content figure {
+    display: block;
+    margin: 0 auto 2rem auto;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  /* figcaptionがある場合はfigureの余白を消してfigcaptionに余白 */
+  .article-content figure:has(figcaption) {
+    margin-bottom: 0;
+  }
+
+  .article-content figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Mobile: smaller max height */
+  @media (max-width: 768px) {
+    .article-content img {
+      max-height: 350px;
+    }
+  }
+
+  /* Reduce heading margins in article content */
+  .prose {
+    line-height: 1.9;
+    letter-spacing: 0.02em;
+  }
+
+  .prose h2 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .prose h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .prose h2 + p,
+  .prose h3 + p {
+    margin-top: 0;
+  }
+
+  .prose p {
+    margin-bottom: 1.5rem;
+  }
+
+  .prose blockquote {
+    border-left-color: #D6D3D1;
+    color: #57534E;
+    font-style: normal;
+  }
+
+  /* Like button animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @keyframes heart-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-heart-pop {
+    animation: heart-pop 0.3s ease-out;
+  }
+
+  /* ========================================
+     記事内テーブル（表）のスタイル
+     ChatGPTからコピペした表も綺麗に表示
+     ======================================== */
+
+  .article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .article-content thead {
+    background-color: #f9fafb;
+  }
+
+  .article-content th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  .article-content td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+  }
+
+  .article-content tbody tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* 交互の行に薄い背景色 */
+  .article-content tbody tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  .article-content tbody tr:nth-child(even):hover {
+    background-color: #f3f4f6;
+  }
+
+  /* モバイル対応：横スクロール可能に */
+  @media (max-width: 640px) {
+    .article-content table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+    }
+
+    .article-content th,
+    .article-content td {
+      padding: 0.625rem 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* ダークモード対応 */
+  .dark .article-content thead {
+    background-color: #374151;
+  }
+
+  .dark .article-content th {
+    color: #f3f4f6;
+    border-bottom-color: #4b5563;
+  }
+
+  .dark .article-content td {
+    color: #d1d5db;
+    border-bottom-color: #4b5563;
+  }
+
+  .dark .article-content tbody tr:hover {
+    background-color: #374151;
+  }
+
+  .dark .article-content tbody tr:nth-child(even) {
+    background-color: #1f2937;
+  }
+
+  .dark .article-content tbody tr:nth-child(even):hover {
+    background-color: #374151;
+  }
