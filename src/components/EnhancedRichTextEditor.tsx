@@ -503,7 +503,6 @@
     const [alignMenuOpen, setAlignMenuOpen] = useState(false);
     const [bubbleHeadingMenuOpen, setBubbleHeadingMenuOpen] = useState(false);
     const [isInTable, setIsInTable] = useState(false);
-    const [tableMenuOpen, setTableMenuOpen] = useState(false);
 
     const [linkPopover, setLinkPopover] = useState<LinkPopoverState>({
       visible: false,
