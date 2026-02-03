@@ -259,7 +259,7 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
             >
               <div className="w-5 h-5 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  <img src={avatarUrl} alt={`${label}のアイコン`} loading="lazy" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[10px] font-medium text-gray-500">
                     {authorInitial(label)}
@@ -277,6 +277,8 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
               onClick={toggleFavorite}
               disabled={favoriteLoading}
               className="flex items-center gap-1 group/like"
+              aria-label={isLiked ? 'いいねを取り消す' : 'いいねする'}
+              aria-pressed={isLiked}
             >
               <Heart
                 className={`w-4 h-4 transition ${

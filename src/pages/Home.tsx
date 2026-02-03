@@ -43,21 +43,32 @@ async function fetchArticles() {
 }
 
 async function fetchHomepageSections() {
+  // N+1クエリを回避: 2クエリで完結
   const { data: sections } = await supabase
     .from('homepage_sections')
-    .select('*')
+    .select('id, section_key')
     .eq('is_active', true);
 
+  if (!sections || sections.length === 0) return {};
+
+  const sectionIds = sections.map(s => s.id);
+
+  // 全セクションの記事を1クエリで取得
+  const { data: allSectionArticles } = await supabase
+    .from('homepage_section_articles')
+    .select('section_id, article_id')
+    .in('section_id', sectionIds)
+    .order('display_order');
+
+  // セクションごとにグループ化
   const sectionMap: Record<string, string[]> = {};
-  if (sections) {
-    for (const section of sections) {
-      const { data: sectionArticles } = await supabase
-        .from('homepage_section_articles')
-        .select('article_id')
-        .eq('section_id', section.id)
-        .order('display_order');
-      if (sectionArticles) {
-        sectionMap[section.section_key] = sectionArticles.map(sa => sa.article_id);
+  if (allSectionArticles) {
+    const sectionIdToKey = Object.fromEntries(sections.map(s => [s.id, s.section_key]));
+    for (const sa of allSectionArticles) {
+      const key = sectionIdToKey[sa.section_id];
+      if (key) {
+        if (!sectionMap[key]) sectionMap[key] = [];
+        sectionMap[key].push(sa.article_id);
       }
     }
   }

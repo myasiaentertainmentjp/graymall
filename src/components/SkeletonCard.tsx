@@ -27,3 +27,40 @@ export function SkeletonRow({ count = 6 }: { count?: number }) {
     </div>
   );
 }
+
+// 記事詳細ページ用スケルトン
+export function SkeletonArticleDetail() {
+  return (
+    <div className="animate-pulse">
+      {/* パンくずリスト */}
+      <div className="h-4 bg-gray-200 rounded w-48 mb-6" />
+
+      {/* タイトル */}
+      <div className="h-8 bg-gray-200 rounded w-full mb-2" />
+      <div className="h-8 bg-gray-200 rounded w-3/4 mb-6" />
+
+      {/* メタ情報 */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-10 h-10 bg-gray-200 rounded-full" />
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-24" />
+          <div className="h-3 bg-gray-200 rounded w-32" />
+        </div>
+      </div>
+
+      {/* アイキャッチ画像 */}
+      <div className="aspect-[16/9] bg-gray-200 rounded-2xl mb-8" />
+
+      {/* 本文 */}
+      <div className="space-y-4">
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-5/6" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-4/5" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-3/4" />
+      </div>
+    </div>
+  );
+}

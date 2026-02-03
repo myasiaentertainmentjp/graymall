@@ -36,7 +36,15 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      {/* アクセシビリティ: スキップリンク */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-gray-900 focus:text-white focus:rounded-lg focus:outline-none"
+      >
+        本文へスキップ
+      </a>
+
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50" role="banner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Left: Logo */}
@@ -276,7 +284,7 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </header>
 
-      <main className="bg-white">{children}</main>
+      <main id="main-content" className="bg-white" role="main">{children}</main>
 
       <Footer />
     </div>

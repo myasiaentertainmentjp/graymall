@@ -7,6 +7,7 @@ import { checkArticleAccess } from '../lib/articleAccess';
 import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
+import { SkeletonArticleDetail } from '../components/SkeletonCard';
 import type { Database } from '../lib/database.types';
 import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Facebook, Link2 } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
@@ -564,8 +565,8 @@ export default function ArticleDetail() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <SkeletonArticleDetail />
         </div>
       </Layout>
     );

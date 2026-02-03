@@ -283,6 +283,10 @@ function generateHtml($meta) {
     })(window,document,'script','dataLayer','GTM-NR4W6W6V');</script>
     <!-- End Google Tag Manager -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1f2937" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{$title}</title>
     <meta name="description" content="{$description}" />

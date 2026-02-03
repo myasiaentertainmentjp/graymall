@@ -80,6 +80,7 @@ const FAQPage = lazy(() => import('./pages/faq'));
 const ContactPage = lazy(() => import('./pages/contact'));
 const CompanyPage = lazy(() => import('./pages/company'));
 const AffiliateGuidePage = lazy(() => import('./pages/affiliate-guide'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // /write からのリダイレクト用コンポーネント
 function WriteRedirect() {
@@ -329,6 +330,9 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/affiliate-guide" element={<AffiliateGuidePage />} />
+
+            {/* 404 - 存在しないページ */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
         </Router>
