@@ -222,7 +222,7 @@ export default function UserProfile() {
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {articles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <ArticleCard key={article.id} article={article} skipDbQuery />
                   ))}
                 </div>
               )}

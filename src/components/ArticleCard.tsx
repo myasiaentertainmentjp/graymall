@@ -75,9 +75,11 @@ interface ArticleCardProps {
   article: Article;
   rank?: number; // Optional ranking number
   hideTime?: boolean; // Hide time display
+  priority?: boolean; // Priority loading for above-fold images
+  skipDbQuery?: boolean; // Skip DB queries for faster loading
 }
 
-export default function ArticleCard({ article, rank, hideTime }: ArticleCardProps) {
+export default function ArticleCard({ article, rank, hideTime, priority, skipDbQuery }: ArticleCardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -95,17 +97,19 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
   const fakeFavoriteCount = (article as any).fake_favorite_count || 0;
   const totalFavoriteCount = fakeFavoriteCount + realFavoriteCount + anonLikeCount;
 
-  // Load real favorite count (for all users)
+  // Load favorite count
   useEffect(() => {
     const loadFavoriteCount = async () => {
-      const { count } = await supabase
-        .from('article_favorites')
-        .select('*', { count: 'exact', head: true })
-        .eq('article_id', article.id);
+      // DBクエリはスキップ可能（一覧表示の高速化用）
+      if (!skipDbQuery) {
+        const { count } = await supabase
+          .from('article_favorites')
+          .select('*', { count: 'exact', head: true })
+          .eq('article_id', article.id);
+        setRealFavoriteCount(count || 0);
+      }
 
-      setRealFavoriteCount(count || 0);
-
-      // 匿名いいね数
+      // 匿名いいね数（localStorageから読み込み）
       const anonLikes = JSON.parse(localStorage.getItem('anon_likes') || '{}');
       setAnonLikeCount(anonLikes[`count_${article.id}`] || 0);
 
@@ -115,11 +119,11 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
     };
 
     loadFavoriteCount();
-  }, [article.id]);
+  }, [article.id, skipDbQuery]);
 
   // Check if favorited (for logged-in user)
   useEffect(() => {
-    if (!user) return;
+    if (!user || skipDbQuery) return;
 
     const checkFavorite = async () => {
       const { data } = await supabase
@@ -133,7 +137,7 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
     };
 
     checkFavorite();
-  }, [user, article.id]);
+  }, [user, article.id, skipDbQuery]);
 
   // いいね済み判定（会員 or 非会員）
   const isLiked = user ? isFavorite : hasAnonLiked;
@@ -203,7 +207,8 @@ export default function ArticleCard({ article, rank, hideTime }: ArticleCardProp
             <img
               src={article.cover_image_url}
               alt={article.title}
-              loading="lazy"
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : undefined}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (

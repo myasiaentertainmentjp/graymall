@@ -322,10 +322,12 @@ export default function ArticleList() {
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {articles.map((article) => (
+                  {articles.map((article, index) => (
                     <ArticleCard
                       key={article.id}
                       article={article}
+                      priority={index < 4}
+                      skipDbQuery
                     />
                   ))}
                 </div>

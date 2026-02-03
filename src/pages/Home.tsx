@@ -317,7 +317,7 @@ export default function Home() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
+                  <ArticleCard key={article.id} article={article} skipDbQuery />
                 ))}
               </div>
             )}
@@ -335,9 +335,9 @@ export default function Home() {
                   </Link>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
-                  {popularArticles.slice(0, 8).map((article) => (
+                  {popularArticles.slice(0, 8).map((article, index) => (
                     <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                      <ArticleCard article={article} />
+                      <ArticleCard article={article} priority={index < 4} skipDbQuery />
                     </div>
                   ))}
                 </div>
@@ -356,7 +356,7 @@ export default function Home() {
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {newArticles.map((article) => (
                     <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                      <ArticleCard article={article} />
+                      <ArticleCard article={article} skipDbQuery />
                     </div>
                   ))}
                 </div>
@@ -372,7 +372,7 @@ export default function Home() {
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {editorPickArticles.map((article) => (
                     <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                      <ArticleCard article={article} />
+                      <ArticleCard article={article} skipDbQuery />
                     </div>
                   ))}
                 </div>
@@ -388,7 +388,7 @@ export default function Home() {
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {recommendedArticles.map((article) => (
                     <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                      <ArticleCard article={article} />
+                      <ArticleCard article={article} skipDbQuery />
                     </div>
                   ))}
                 </div>
@@ -407,7 +407,7 @@ export default function Home() {
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {followingArticles.map((article) => (
                     <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                      <ArticleCard article={article} />
+                      <ArticleCard article={article} skipDbQuery />
                     </div>
                   ))}
                 </div>
@@ -429,7 +429,7 @@ export default function Home() {
                   <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                     {arts.map((article) => (
                       <div key={article.id} className="flex-shrink-0 w-48 sm:w-56 lg:w-64">
-                        <ArticleCard article={article} />
+                        <ArticleCard article={article} skipDbQuery />
                       </div>
                     ))}
                   </div>

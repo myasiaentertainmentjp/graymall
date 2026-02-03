@@ -58,7 +58,7 @@ import { useEffect, useState } from 'react';
             <div className="text-center py-12 text-gray-500">購入した記事はありません</div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {articles.map(article => (<ArticleCard key={article.id} article={article} />))}
+              {articles.map(article => (<ArticleCard key={article.id} article={article} skipDbQuery />))}
             </div>
           )}
         </div>
