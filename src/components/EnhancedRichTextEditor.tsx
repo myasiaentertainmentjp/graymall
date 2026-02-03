@@ -11,6 +11,8 @@
   import { TableRow } from '@tiptap/extension-table-row';
   import { TableHeader } from '@tiptap/extension-table-header';
   import { TableCell } from '@tiptap/extension-table-cell';
+  import { TextStyle } from '@tiptap/extension-text-style';
+  import { Color } from '@tiptap/extension-color';
   import {
     Plus,
     Image as ImageIcon,
@@ -437,6 +439,8 @@
     return [
       StarterKit.configure({ blockquote: false }),
       Placeholder.configure({ placeholder }),
+      TextStyle,
+      Color,
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -1156,6 +1160,15 @@
           case 'file': openFilePicker(); break;
           case 'bold': currentEditor?.chain().focus().toggleBold().run(); break;
           case 'strike': currentEditor?.chain().focus().toggleStrike().run(); break;
+          case 'red': {
+            const isCurrentlyRed = currentEditor?.isActive('textStyle', { color: '#dc2626' });
+            if (isCurrentlyRed) {
+              currentEditor?.chain().focus().unsetColor().run();
+            } else {
+              currentEditor?.chain().focus().setColor('#dc2626').run();
+            }
+            break;
+          }
           case 'align-left': currentEditor?.chain().focus().setTextAlign('left').run(); break;
           case 'align-center': currentEditor?.chain().focus().setTextAlign('center').run(); break;
           case 'align-right': currentEditor?.chain().focus().setTextAlign('right').run(); break;
@@ -1346,6 +1359,7 @@
       const isH2 = currentEditor.isActive('heading', { level: 2 });
       const isH3 = currentEditor.isActive('heading', { level: 3 });
       const isTable = currentEditor.isActive('table');
+      const isRed = currentEditor.isActive('textStyle', { color: '#dc2626' });
 
       // テーブル内の場合は専用ツールバーを表示
       if (isTable) {
@@ -1408,6 +1422,22 @@
             title="取り消し線"
           >
             <Strikethrough className="w-4 h-4 text-white" />
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              if (isRed) {
+                currentEditor.chain().focus().unsetColor().run();
+              } else {
+                currentEditor.chain().focus().setColor('#dc2626').run();
+              }
+            }}
+            className={`p-2 rounded-lg ${isRed ? 'bg-slate-700' : 'hover:bg-slate-800'}`}
+            title="赤文字"
+          >
+            <span className="w-4 h-4 flex items-center justify-center text-white font-bold text-sm" style={{ borderBottom: '2px solid #dc2626' }}>A</span>
           </button>
 
           <button
@@ -1627,6 +1657,14 @@
               className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${currentEditor?.isActive('strike') ? 'bg-gray-200' : 'hover:bg-gray-100 active:bg-gray-200'}`}
             >
               <Strikethrough className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <button
+              type="button"
+              {...handleMobileAction(() => insertBlock('red'))}
+              className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${currentEditor?.isActive('textStyle', { color: '#dc2626' }) ? 'bg-gray-200' : 'hover:bg-gray-100 active:bg-gray-200'}`}
+            >
+              <span className="w-5 h-5 flex items-center justify-center text-gray-700 font-bold text-sm" style={{ borderBottom: '2px solid #dc2626' }}>A</span>
             </button>
 
             <div className="relative flex-shrink-0">
