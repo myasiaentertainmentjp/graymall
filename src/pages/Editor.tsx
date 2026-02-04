@@ -86,6 +86,9 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
     // SP用メニュー表示状態
     const [spMenuOpen, setSpMenuOpen] = useState(false);
 
+    // SP用設定ドロワー表示状態
+    const [spSettingsOpen, setSpSettingsOpen] = useState(false);
+
     // サイドバーの表示状態
     const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
     const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
@@ -653,6 +656,15 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
             <div className="flex sm:hidden items-center gap-2">
               <button
                 type="button"
+                onClick={() => setSpSettingsOpen(true)}
+                className="h-9 w-9 rounded-lg border border-gray-200 bg-white flex items-center justify-center"
+                aria-label="記事設定"
+              >
+                <Settings className="w-4 h-4 text-gray-600" />
+              </button>
+
+              <button
+                type="button"
                 onClick={saveDraft}
                 disabled={isSaveDisabled}
                 className="h-9 px-3 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-900 disabled:opacity-60"
@@ -684,6 +696,17 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
 
                 {spMenuOpen && (
                   <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[140px] z-50">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSpMenuOpen(false);
+                        setSpSettingsOpen(true);
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Settings className="w-4 h-4" />
+                      記事設定
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -844,6 +867,58 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
             </div>
           </div>
         </div>
+
+        {/* SP用設定ドロワー */}
+        {spSettingsOpen && (
+          <>
+            {/* オーバーレイ */}
+            <div
+              className="lg:hidden fixed inset-0 bg-black/50 z-50"
+              onClick={() => setSpSettingsOpen(false)}
+            />
+            {/* ドロワー本体 */}
+            <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl max-h-[85vh] overflow-hidden animate-slide-up">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-gray-900">記事設定</h2>
+                <button
+                  type="button"
+                  onClick={() => setSpSettingsOpen(false)}
+                  className="p-2 -mr-2 text-gray-500 hover:text-gray-700"
+                  aria-label="閉じる"
+                >
+                  <ChevronLeft className="w-5 h-5 rotate-[-90deg]" />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(85vh - 56px)' }}>
+                <ArticleSettingsPanel
+                  thumbnailUrl={coverImageUrl || null}
+                  onChangeThumbnail={setCoverImageUrl}
+                  isPaid={isPaid}
+                  onChangeIsPaid={handleChangeIsPaid}
+                  price={price}
+                  onChangePrice={setPrice}
+                  tags={tags}
+                  onChangeTags={setTags}
+                  status={status}
+                  onChangeStatus={setStatus}
+                  stats={stats}
+                  onUploadThumbnail={uploadThumbnail}
+                  affiliateEnabled={affiliateEnabled}
+                  onChangeAffiliateEnabled={setAffiliateEnabled}
+                  affiliateTarget={affiliateTarget}
+                  onChangeAffiliateTarget={setAffiliateTarget}
+                  affiliateRate={affiliateRate}
+                  onChangeAffiliateRate={handleAffiliateRateChange}
+                  affiliateRateError={affiliateRateError}
+                  affiliateRateNextChangeAt={affiliateRateNextChangeAt}
+                  showPaidBoundary={showPaidBoundary}
+                  thankYouMessage={thankYouMessage}
+                  onChangeThankYouMessage={setThankYouMessage}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
