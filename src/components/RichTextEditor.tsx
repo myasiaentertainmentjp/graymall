@@ -238,8 +238,9 @@ export default function RichTextEditor({
   }, [counts]);
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className="flex flex-wrap items-center gap-2 border border-gray-200 rounded-md p-2 bg-white">
+    <div className={`w-full flex flex-col ${className}`}>
+      {/* ツールバー - sticky（ヘッダー+セクションタイトルの下） */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 p-2 bg-white sticky top-[110px] z-10 rounded-t-lg">
         <button
           type="button"
           className="px-2 py-1 rounded hover:bg-gray-100 text-sm"

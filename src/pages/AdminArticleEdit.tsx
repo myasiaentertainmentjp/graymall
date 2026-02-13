@@ -507,21 +507,25 @@ export default function AdminArticleEdit() {
             </section>
 
             {/* 本文 */}
-            <section className="bg-white rounded-xl border p-6">
-              <h2 className="text-lg font-bold mb-4">本文</h2>
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <RichTextEditor
-                  key={article?.id}
-                  value={content}
-                  onChange={setContent}
-                  placeholder="本文を入力..."
-                  className="min-h-[400px]"
-                  onUploadImage={handleUploadImage}
-                />
+            <section className="bg-white rounded-xl border overflow-visible">
+              <div className="sticky top-[60px] z-20 bg-white px-6 pt-6 pb-2 border-b rounded-t-xl">
+                <h2 className="text-lg font-bold">本文</h2>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                ※ 有料部分は本文中の &lt;!-- paid --&gt; 以降になります。
-              </p>
+              <div className="px-6 pb-6">
+                <div className="border border-gray-300 rounded-lg">
+                  <RichTextEditor
+                    key={article?.id}
+                    value={content}
+                    onChange={setContent}
+                    placeholder="本文を入力..."
+                    className="min-h-[400px]"
+                    onUploadImage={handleUploadImage}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  ※ 有料部分は本文中の &lt;!-- paid --&gt; 以降になります。
+                </p>
+              </div>
             </section>
 
             {/* 価格設定 */}
