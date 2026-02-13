@@ -1,8 +1,8 @@
 // src/pages/AdminArticleEdit.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Save, Loader2, Eye, Edit3 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Eye, Edit3, Upload, Image, X } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
 import type { Database } from '../lib/database.types';
 
@@ -81,6 +81,10 @@ export default function AdminArticleEdit() {
   const [affiliateTarget, setAffiliateTarget] = useState<'all' | 'buyers' | null>(null);
   const [affiliateRate, setAffiliateRate] = useState<number | null>(null);
   const [authorProfileId, setAuthorProfileId] = useState<string | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>('draft');
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -115,6 +119,8 @@ export default function AdminArticleEdit() {
       setAffiliateTarget(data.affiliate_target);
       setAffiliateRate(data.affiliate_rate);
       setAuthorProfileId((data as any).author_profile_id || null);
+      setCoverImageUrl(data.cover_image_url || null);
+      setStatus(data.status || 'draft');
     } catch (err) {
       console.error('Error loading article:', err);
       setError('記事の読み込みに失敗しました');
@@ -170,6 +176,33 @@ export default function AdminArticleEdit() {
     return data.publicUrl;
   };
 
+  // カバー画像アップロード
+  const handleCoverUpload = async (file: File) => {
+    if (!id || !file) return;
+    setUploadingCover(true);
+    try {
+      const webpBlob = await convertImageToWebp(file);
+      const uploadFile = new File([webpBlob], `cover-${Date.now()}.webp`, { type: 'image/webp' });
+      const path = `articles/${id}/cover-${Date.now()}.webp`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(path, uploadFile, { upsert: true, contentType: 'image/webp' });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('article-images').getPublicUrl(path);
+      if (data?.publicUrl) {
+        setCoverImageUrl(data.publicUrl);
+      }
+    } catch (err) {
+      console.error('Cover upload error:', err);
+      alert('カバー画像のアップロードに失敗しました');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!id) return;
 
@@ -178,9 +211,7 @@ export default function AdminArticleEdit() {
     setSuccessMessage(null);
 
     try {
-      const { error } = await supabase
-        .from('articles')
-        .update({
+      const updateData: any = {
           title,
           excerpt,
           content,
@@ -191,9 +222,20 @@ export default function AdminArticleEdit() {
           affiliate_target: affiliateEnabled ? affiliateTarget : null,
           affiliate_rate: affiliateEnabled ? affiliateRate : null,
           author_profile_id: authorProfileId,
+          cover_image_url: coverImageUrl,
+          status,
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
+        };
+
+        // 公開に変更した場合、published_atを設定
+        if (status === 'published' && article?.status !== 'published') {
+          updateData.published_at = new Date().toISOString();
+        }
+
+        const { error } = await supabase
+          .from('articles')
+          .update(updateData)
+          .eq('id', id);
 
       if (error) throw error;
 
@@ -304,6 +346,92 @@ export default function AdminArticleEdit() {
       <div className="max-w-5xl mx-auto px-4 py-6">
         {activeTab === 'edit' ? (
           <div className="grid gap-6">
+            {/* ステータス・カバー画像 */}
+            <section className="bg-white rounded-xl border p-6">
+              <h2 className="text-lg font-bold mb-4">公開設定</h2>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* ステータス */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ステータス
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="draft">下書き</option>
+                    <option value="pending_review">審査待ち</option>
+                    <option value="published">公開</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {status === 'published' && '公開中 - サイトに表示されます'}
+                    {status === 'pending_review' && '審査待ち - 承認後に公開されます'}
+                    {status === 'draft' && '下書き - まだ公開されません'}
+                  </p>
+                </div>
+
+                {/* カバー画像 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    カバー画像（サムネイル）
+                  </label>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleCoverUpload(e.target.files[0])}
+                  />
+                  {coverImageUrl ? (
+                    <div className="relative">
+                      <img
+                        src={coverImageUrl}
+                        alt="カバー画像"
+                        className="w-full h-40 object-cover rounded-lg border"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => coverInputRef.current?.click()}
+                          disabled={uploadingCover}
+                          className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                          title="変更"
+                        >
+                          <Upload className="w-4 h-4 text-gray-600" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCoverImageUrl(null)}
+                          className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                          title="削除"
+                        >
+                          <X className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => coverInputRef.current?.click()}
+                      disabled={uploadingCover}
+                      className="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-blue-400 hover:bg-blue-50 transition"
+                    >
+                      {uploadingCover ? (
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                      ) : (
+                        <>
+                          <Image className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-500">クリックして画像を選択</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </section>
+
             {/* 基本情報 */}
             <section className="bg-white rounded-xl border p-6">
               <h2 className="text-lg font-bold mb-4">基本情報</h2>
