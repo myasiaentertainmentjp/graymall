@@ -68,7 +68,7 @@ export function getNotificationMessage(type: string, data?: any): { title: strin
     case 'new_comment':
       return {
         title: '新しいコメント',
-        body: `「${data?.articleTitle || '記事'}」にコメントがつきました`,
+        body: `【${data?.authorName || ''}】「${data?.articleTitle || '記事'}」にコメントがつきました`,
       };
     default:
       return {
