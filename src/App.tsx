@@ -54,6 +54,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminReviewArticle = lazy(() => import('./pages/AdminReviewArticle'));
 const AdminHomepageManager = lazy(() => import('./pages/AdminHomepageManager'));
 const AdminArticleEdit = lazy(() => import('./pages/AdminArticleEdit'));
+const AdminAuthorProfiles = lazy(() => import('./pages/AdminAuthorProfiles'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const PreviewArticle = lazy(() => import('./pages/PreviewArticle'));
@@ -242,6 +243,15 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminArticleEdit />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/authors"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAuthorProfiles />
                 </ProtectedRoute>
               }
             />

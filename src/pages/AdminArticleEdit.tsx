@@ -8,8 +8,54 @@ import type { Database } from '../lib/database.types';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];
+type AuthorProfile = { id: string; display_name: string; avatar_url: string | null };
 
 type TabType = 'edit' | 'preview';
+
+// 画像をWebPに変換
+async function convertImageToWebp(file: File): Promise<Blob> {
+  const MAX_WIDTH = 1200;
+  const WEBP_QUALITY = 0.85;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      let width = img.width;
+      let height = img.height;
+      if (width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas context取得に失敗'));
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('WebP変換に失敗'))),
+        'image/webp',
+        WEBP_QUALITY
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('画像の読み込みに失敗'));
+    };
+
+    img.src = objectUrl;
+  });
+}
 
 export default function AdminArticleEdit() {
   const { id } = useParams();
@@ -17,6 +63,7 @@ export default function AdminArticleEdit() {
 
   const [article, setArticle] = useState<Article | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [authorProfiles, setAuthorProfiles] = useState<AuthorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +80,13 @@ export default function AdminArticleEdit() {
   const [affiliateEnabled, setAffiliateEnabled] = useState(false);
   const [affiliateTarget, setAffiliateTarget] = useState<'all' | 'buyers' | null>(null);
   const [affiliateRate, setAffiliateRate] = useState<number | null>(null);
+  const [authorProfileId, setAuthorProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
       loadArticle();
       loadCategories();
+      loadAuthorProfiles();
     }
   }, [id]);
 
@@ -65,6 +114,7 @@ export default function AdminArticleEdit() {
       setAffiliateEnabled(data.affiliate_enabled);
       setAffiliateTarget(data.affiliate_target);
       setAffiliateRate(data.affiliate_rate);
+      setAuthorProfileId((data as any).author_profile_id || null);
     } catch (err) {
       console.error('Error loading article:', err);
       setError('記事の読み込みに失敗しました');
@@ -80,6 +130,44 @@ export default function AdminArticleEdit() {
       .is('parent_id', null)
       .order('sort_order');
     if (data) setCategories(data);
+  };
+
+  const loadAuthorProfiles = async () => {
+    const { data } = await supabase
+      .from('author_profiles')
+      .select('id, display_name, avatar_url')
+      .order('display_name');
+    if (data) setAuthorProfiles(data);
+  };
+
+  // 画像アップロード関数
+  const handleUploadImage = async (file: File): Promise<string> => {
+    if (!id) throw new Error('記事IDがありません');
+
+    let uploadFile: File = file;
+    let contentType = file.type || 'image/*';
+
+    try {
+      // WebPに変換
+      const webpBlob = await convertImageToWebp(file);
+      uploadFile = new File([webpBlob], `${Date.now()}.webp`, { type: 'image/webp' });
+      contentType = 'image/webp';
+    } catch (err) {
+      console.warn('WebP変換失敗、元ファイルを使用:', err);
+    }
+
+    const path = `articles/${id}/${Date.now()}-${Math.random().toString(16).slice(2)}.webp`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('article-images')
+      .upload(path, uploadFile, { upsert: true, contentType });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('article-images').getPublicUrl(path);
+    if (!data?.publicUrl) throw new Error('画像URLの取得に失敗しました');
+
+    return data.publicUrl;
   };
 
   const handleSave = async () => {
@@ -102,6 +190,7 @@ export default function AdminArticleEdit() {
           affiliate_enabled: affiliateEnabled,
           affiliate_target: affiliateEnabled ? affiliateTarget : null,
           affiliate_rate: affiliateEnabled ? affiliateRate : null,
+          author_profile_id: authorProfileId,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -261,6 +350,27 @@ export default function AdminArticleEdit() {
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    著者プロフィール
+                  </label>
+                  <select
+                    value={authorProfileId || ''}
+                    onChange={(e) => setAuthorProfileId(e.target.value || null)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">デフォルト（投稿者）</option>
+                    {authorProfiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.display_name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    記事に表示される著者を選択できます
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -274,10 +384,11 @@ export default function AdminArticleEdit() {
                   onChange={setContent}
                   placeholder="本文を入力..."
                   className="min-h-[400px]"
+                  onUploadImage={handleUploadImage}
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                ※ 有料部分は本文中に「--- 有料 ---」などの区切りを入れてください。
+                ※ 有料部分は本文中の &lt;!-- paid --&gt; 以降になります。
               </p>
             </section>
 
@@ -314,7 +425,7 @@ export default function AdminArticleEdit() {
                 </div>
                 {hasPartialPaywall && (
                   <p className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                    本文中の &lt;!-- paywall --&gt; コメント以降が有料部分になります。
+                    本文中の &lt;!-- paid --&gt; コメント以降が有料部分になります。
                     このコメントがない場合は全体が有料になります。
                   </p>
                 )}

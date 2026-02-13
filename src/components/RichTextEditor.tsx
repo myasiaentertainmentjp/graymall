@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link as LinkIcon, Image as ImageIcon, X } from 'lucide-react';
 
 type RichTextEditorProps = {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
 function countFromHtml(html: string): { chars: number; images: number } {
@@ -23,10 +25,21 @@ export default function RichTextEditor({
   onChange,
   placeholder = '本文を入力…',
   className = '',
+  onUploadImage,
 }: RichTextEditorProps) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const imgInputRef = useRef<HTMLInputElement | null>(null);
   const isInternalChange = useRef(false);
   const [counts, setCounts] = useState<{ chars: number; images: number }>(() => countFromHtml(value));
+
+  // リンクモーダル
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
+  const savedSelectionRef = useRef<Range | null>(null);
+
+  // 画像アップロード中
+  const [uploading, setUploading] = useState(false);
 
   const emitChange = useCallback(() => {
     const el = ref.current;
@@ -102,6 +115,102 @@ export default function RichTextEditor({
     emitChange();
   };
 
+  // 選択範囲を保存
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      savedSelectionRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  };
+
+  // 選択範囲を復元
+  const restoreSelection = () => {
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedSelectionRef.current);
+      }
+    }
+  };
+
+  // リンク挿入モーダルを開く
+  const openLinkModal = () => {
+    saveSelection();
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      setLinkText(selection.toString());
+    } else {
+      setLinkText('');
+    }
+    setLinkUrl('');
+    setLinkModalOpen(true);
+  };
+
+  // リンクを挿入
+  const insertLink = () => {
+    if (!linkUrl.trim()) {
+      setLinkModalOpen(false);
+      return;
+    }
+
+    ensureFocus();
+    restoreSelection();
+
+    const url = linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`;
+
+    if (linkText.trim()) {
+      // テキストがある場合はHTMLを挿入
+      const linkHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+      document.execCommand('insertHTML', false, linkHtml);
+    } else {
+      // 選択範囲にリンクを適用
+      document.execCommand('createLink', false, url);
+      // target="_blank"を設定
+      const selection = window.getSelection();
+      if (selection && selection.anchorNode) {
+        const parentEl = selection.anchorNode.parentElement;
+        if (parentEl && parentEl.tagName === 'A') {
+          parentEl.setAttribute('target', '_blank');
+          parentEl.setAttribute('rel', 'noopener noreferrer');
+        }
+      }
+    }
+
+    emitChange();
+    setLinkModalOpen(false);
+    setLinkUrl('');
+    setLinkText('');
+  };
+
+  // 画像選択
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadImage) return;
+
+    // GIFはサポート対象外
+    if (file.type === 'image/gif') {
+      alert('GIF画像はサポートされていません。JPG、PNG、WebPをお使いください。');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await onUploadImage(file);
+      ensureFocus();
+      document.execCommand('insertImage', false, url);
+      emitChange();
+    } catch (err) {
+      console.error('画像アップロードエラー:', err);
+      alert('画像のアップロードに失敗しました');
+    } finally {
+      setUploading(false);
+      if (imgInputRef.current) {
+        imgInputRef.current.value = '';
+      }
+    }
+  };
+
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
@@ -116,6 +225,11 @@ export default function RichTextEditor({
       ensureFocus();
       document.execCommand('insertText', false, '  ');
       emitChange();
+    }
+    // Ctrl/Cmd + K でリンク挿入
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openLinkModal();
     }
   };
 
@@ -207,6 +321,39 @@ export default function RichTextEditor({
 
         <div className="w-px bg-gray-200 mx-1 h-6" />
 
+        {/* リンク挿入ボタン */}
+        <button
+          type="button"
+          className="px-2 py-1 rounded hover:bg-gray-100 text-sm flex items-center gap-1"
+          onClick={openLinkModal}
+          title="リンク (Ctrl+K)"
+        >
+          <LinkIcon className="w-4 h-4" />
+          リンク
+        </button>
+
+        {/* 画像挿入ボタン */}
+        {onUploadImage && (
+          <button
+            type="button"
+            className="px-2 py-1 rounded hover:bg-gray-100 text-sm flex items-center gap-1 disabled:opacity-50"
+            onClick={() => imgInputRef.current?.click()}
+            disabled={uploading}
+            title="画像を挿入"
+          >
+            <ImageIcon className="w-4 h-4" />
+            {uploading ? '...' : '画像'}
+          </button>
+        )}
+
+        <input
+          ref={imgInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleImageSelect}
+        />
+
         <button
           type="button"
           className="px-2 py-1 rounded hover:bg-gray-100 text-sm"
@@ -230,7 +377,7 @@ export default function RichTextEditor({
 
       <div
         ref={ref}
-        className="mt-2 min-h-[280px] w-full rounded-md border border-gray-200 bg-white p-4 focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="mt-2 min-h-[280px] w-full rounded-md border border-gray-200 bg-white p-4 focus:outline-none focus:ring-2 focus:ring-gray-300 prose prose-sm max-w-none"
         contentEditable
         suppressContentEditableWarning
         onInput={emitChange}
@@ -239,11 +386,98 @@ export default function RichTextEditor({
         data-placeholder={placeholder}
         style={{ position: 'relative' }}
       />
+
+      {/* リンク挿入モーダル */}
+      {linkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">リンクを挿入</h3>
+              <button
+                type="button"
+                onClick={() => setLinkModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  URL
+                </label>
+                <input
+                  type="text"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      insertLink();
+                    }
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  表示テキスト（空欄の場合は選択中のテキストを使用）
+                </label>
+                <input
+                  type="text"
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  placeholder="リンクテキスト"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      insertLink();
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLinkModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  onClick={insertLink}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                  挿入
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         [contenteditable][data-placeholder]:empty:before {
           content: attr(data-placeholder);
           color: #9CA3AF;
           pointer-events: none;
+        }
+        [contenteditable] img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.5rem;
+          margin: 1rem 0;
+        }
+        [contenteditable] a {
+          color: #2563EB;
+          text-decoration: underline;
         }
       `}</style>
     </div>

@@ -393,6 +393,13 @@ import { supabase } from '../lib/supabase';
               <Home className="w-5 h-5" />
               トップページ管理
             </Link>
+            <Link
+              to="/admin/authors"
+              className="bg-gray-100 rounded-lg border border-transparent p-4 flex items-center gap-3 text-gray-600 hover:text-gray-900 transition"
+            >
+              <Users className="w-5 h-5" />
+              著者プロフィール管理
+            </Link>
           </div>
 
           {activeTab === 'pending' && (

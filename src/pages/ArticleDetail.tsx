@@ -15,13 +15,31 @@ import { useSEO } from '../hooks/useSEO';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null };
+  author_profiles?: { display_name: string; avatar_url?: string | null; bio?: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
 
 type RelatedArticle = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null };
+  author_profiles?: { display_name: string; avatar_url?: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
+
+// 著者情報を取得するヘルパー（author_profilesがあればそちらを優先）
+function getAuthorInfo(article: Article | RelatedArticle) {
+  if (article.author_profiles) {
+    return {
+      display_name: article.author_profiles.display_name,
+      avatar_url: article.author_profiles.avatar_url || null,
+      bio: 'bio' in article.author_profiles ? article.author_profiles.bio : null,
+    };
+  }
+  return {
+    display_name: article.users?.display_name || article.users?.email?.split('@')[0] || '匿名',
+    avatar_url: article.users?.avatar_url || null,
+    bio: article.users && 'bio' in article.users ? article.users.bio : null,
+  };
+}
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -400,6 +418,7 @@ export default function ArticleDetail() {
         .select(`
           *,
           users:author_id (display_name, email, avatar_url, bio),
+          author_profiles:author_profile_id (display_name, avatar_url, bio),
           primary_category:primary_category_id (id, name, slug)
         `)
         .eq('slug', slug)
@@ -435,6 +454,7 @@ export default function ArticleDetail() {
         .select(`
           *,
           users:author_id (display_name, email, avatar_url),
+          author_profiles:author_profile_id (display_name, avatar_url),
           primary_category:primary_category_id (id, name, slug)
         `)
         .eq('author_id', data.author_id)
@@ -690,23 +710,28 @@ export default function ArticleDetail() {
 
           <div className="mb-6 pb-6 border-b border-gray-200">
             {/* 著者情報 */}
-            <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
-              <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-lg font-medium overflow-hidden">
-                {article.users?.avatar_url ? (
-                  <img src={article.users.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  (article.users?.display_name || article.users?.email || 'U')[0].toUpperCase()
-                )}
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">
-                  {article.users?.display_name || article.users?.email?.split('@')[0]}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {new Date(article.created_at).toLocaleDateString('ja-JP')}
-                </div>
-              </div>
-            </Link>
+            {(() => {
+              const authorInfo = getAuthorInfo(article);
+              return (
+                <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-lg font-medium overflow-hidden">
+                    {authorInfo.avatar_url ? (
+                      <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      (authorInfo.display_name || 'U')[0].toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {authorInfo.display_name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {new Date(article.created_at).toLocaleDateString('ja-JP')}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })()}
 
             {/* アフィリエイト共有ボタン（アフィリエイト有効の場合） */}
             {canAffiliate && (article.affiliate_target === 'all' || hasAccess) && (
@@ -918,37 +943,42 @@ export default function ArticleDetail() {
         <div className="mt-12 space-y-12">
           {/* 著者プロフィール */}
           <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
-                  {article.users?.avatar_url ? (
-                    <img src={article.users.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
-                      {(article.users?.display_name?.[0] || 'U').toUpperCase()}
+            {(() => {
+              const authorInfo = getAuthorInfo(article);
+              return (
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
+                      {authorInfo.avatar_url ? (
+                        <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
+                          {(authorInfo.display_name?.[0] || 'U').toUpperCase()}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      to={`/users/${article.author_id}`}
+                      className="font-bold text-base sm:text-lg text-gray-900 hover:text-gray-700 line-clamp-1 block"
+                    >
+                      {authorInfo.display_name}
+                    </Link>
+                    <Link
+                      to={`/users/${article.author_id}`}
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      プロフィールを見る
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <FollowButton targetUserId={article.author_id} />
+                  </div>
                 </div>
-              </Link>
-              <div className="flex-1 min-w-0">
-                <Link
-                  to={`/users/${article.author_id}`}
-                  className="font-bold text-base sm:text-lg text-gray-900 hover:text-gray-700 line-clamp-1 block"
-                >
-                  {article.users?.display_name || article.users?.email?.split('@')[0]}
-                </Link>
-                <Link
-                  to={`/users/${article.author_id}`}
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
-                >
-                  プロフィールを見る
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="flex-shrink-0">
-                <FollowButton targetUserId={article.author_id} />
-              </div>
-            </div>
+              );
+            })()}
           </div>
 
           {/* アフィリエイト紹介セクション */}
@@ -1006,7 +1036,7 @@ export default function ArticleDetail() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900">
-                  {article.users?.display_name || '著者'}の他の記事
+                  {getAuthorInfo(article).display_name}の他の記事
                 </h3>
                 <Link
                   to={`/users/${article.author_id}`}
