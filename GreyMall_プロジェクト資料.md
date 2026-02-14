@@ -54,9 +54,36 @@
 ---
 
 ## デプロイ方法
-1. Claude Codeでコード修正
-2. `dist`フォルダをzip圧縮
-3. シンレンタルサーバーのファイルマネージャーでアップロード・置き換え
+
+### ビルド
+```bash
+npm run build
+```
+→ `dist` フォルダに出力される
+
+### アップロード
+1. `/Users/koji/graymall-work/dist` フォルダの中身を全て
+2. シンレンタルサーバーのファイルマネージャーでアップロード・置き換え
+
+### Git管理
+```bash
+git add -A
+git commit -m "変更内容"
+git push origin main
+```
+※ Boltが自動デプロイする場合もあるが、レンタルサーバーへは手動アップロード必要
+
+---
+
+## Supabase Storage
+
+| バケット名 | 用途 |
+|-----------|------|
+| article-images | 記事画像・著者アバター |
+
+### アップロードパス例
+- 記事画像: `articles/{article_id}/{timestamp}-{random}.{ext}`
+- 著者アバター: `author-avatars/{timestamp}-{random}.{ext}`
 
 ---
 
@@ -103,6 +130,7 @@
 | article_likes | 記事いいね |
 | article_views | 記事閲覧数 |
 | articles | 記事コンテンツ |
+| **author_profiles** | **著者プロフィール（表示用）** |
 | author_dashboard | 著者ダッシュボード（View） |
 | auto_likes_processed | 自動いいね処理【UNRESTRICTED】 |
 | categories | カテゴリ |
@@ -114,7 +142,7 @@
 | notifications | 通知 |
 | orders | 注文 |
 | payouts | 支払い |
-| profiles | プロフィール |
+| profiles | プロフィール（ユーザーアカウント） |
 | stripe_webhook_events | Stripe Webhookイベント |
 | subscriptions | サブスクリプション |
 | transfers | 振込 |
@@ -126,10 +154,161 @@
 
 ---
 
+## 著者システム（重要）
+
+Grey Mallでは**2つの著者システム**が存在する。
+
+### 1. profiles（実ユーザー）
+- `author_id` カラムで紐付け
+- 実際にログインして記事を作成したユーザー
+- 管理者が一括で記事を作成した場合、全記事の `author_id` は管理者になる
+
+### 2. author_profiles（表示用プロフィール）
+- `author_profile_id` カラムで紐付け
+- フロントエンドで表示する著者情報
+- 管理画面（`/admin/authors`）から管理可能
+- **実際の投稿者とは別の著者として表示できる**
+
+### フロントエンドでの使い分け
+```typescript
+// クエリ例
+.select(`
+  *,
+  users:author_id (display_name, email, avatar_url),
+  author_profile:author_profile_id (id, display_name, avatar_url),
+  primary_category:primary_category_id (id, name, slug)
+`)
+
+// 表示優先度: author_profile > users
+const authorName = article.author_profile?.display_name || article.users?.display_name;
+```
+
+### リンク先
+- `author_profile_id` がある場合: `/authors/{author_profile_id}`
+- ない場合: `/users/{author_id}`
+
+### author_profilesテーブル構造
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | uuid | 主キー |
+| display_name | text | 表示名 |
+| avatar_url | text | アバター画像URL |
+| bio | text | 自己紹介文 |
+| created_at | timestamp | 作成日時 |
+
+### 登録済み著者プロフィール（10名）
+| 表示名 | 自己紹介 |
+|--------|----------|
+| りょう🔥古着と銭 | 古着転売→実店舗出して爆死→今は出張買取で復活。川口在住。フランチャイズだけは絶対やめとけ。 |
+| なつみ｜副業OL | 横浜の事務職OL。中国輸入×メルカリで副業してます。最初に仕入れたスマホケース300個がまだ家にあります。 |
+| はるか📎元・税務署の人 | 国税専門官を5年やって辞めました。今はフリーランスの経理代行をしています。副業の確定申告と税務調査の話が専門です。「20万以下は申告不要」は半分ウソです。 |
+| しんじ | （プロフィールなし） |
+| だいき🍛キッチンカーの人 | カレーのキッチンカーやってます。八王子あたりで見かけたら買ってください。 |
+| ゆか🫧元エステ店長 | 自宅サロン3ヶ月で潰しました。大手エステの店長時代に見た高額商材の押し売りが忘れられません。今は業務委託で3店舗掛け持ち中。 |
+| こうた｜FC被害者の会 | 買取フランチャイズに200万払って1年で辞めた。 |
+| まさと💀500万溶かした人 | 仮想通貨に貯金全部突っ込んで全部溶かしました。あの時の自分をぶん殴りたい。福岡でWeb制作しながら借金返済中。 |
+| けんた🎸→🤖 | バンド6年やって月収8万だった。今はAI作曲。 |
+| さや🖌️ | 手描きイラストレーターです。AIを使い始めたらTwitterで炎上してフォロワー半分になりました。でも後悔はしてないです。 |
+
+### よく使うSQL
+
+```sql
+-- 著者プロフィール一覧取得
+SELECT id, display_name, bio FROM author_profiles;
+
+-- 記事に著者プロフィールを紐付け
+UPDATE articles
+SET author_profile_id = '{author_profile_id}'
+WHERE id = '{article_id}';
+
+-- 著者プロフィールのbio更新
+UPDATE author_profiles
+SET bio = '自己紹介文'
+WHERE id = '{id}';
+
+-- 特定著者の記事数確認
+SELECT ap.display_name, COUNT(a.id) as article_count
+FROM author_profiles ap
+LEFT JOIN articles a ON a.author_profile_id = ap.id
+GROUP BY ap.id, ap.display_name;
+```
+
+---
+
+## ルーティング構成
+
+### 公開ページ
+| パス | コンポーネント | 説明 |
+|------|---------------|------|
+| `/` | Home | トップページ |
+| `/articles` | ArticleList | 記事一覧 |
+| `/articles/:slug` | ArticleDetail | 記事詳細 |
+| `/users/:id` | UserProfile | ユーザープロフィール（実ユーザー） |
+| `/authors/:id` | AuthorProfile | 著者プロフィール（表示用） |
+| `/signin` | SignIn | ログイン |
+| `/signup` | SignUp | 新規登録 |
+
+### 認証必須ページ
+| パス | コンポーネント | 説明 |
+|------|---------------|------|
+| `/me/articles` | MyArticles | 自分の記事一覧 |
+| `/me/liked` | LikedArticles | いいねした記事 |
+| `/me/purchased` | PurchasedArticles | 購入した記事 |
+| `/me/favorites` | FavoriteArticles | お気に入り記事 |
+| `/me/recent` | RecentArticles | 最近見た記事 |
+| `/me/following` | FollowingUsers | フォロー中のユーザー |
+| `/editor/new` | Editor | 新規記事作成 |
+| `/editor/:id` | Editor | 記事編集 |
+| `/preview/:id` | PreviewArticle | 記事プレビュー |
+| `/publish/:id` | PublishConfirm | 公開確認 |
+| `/dashboard` | SalesManagement | 売上管理 |
+| `/settings` | Settings | 設定 |
+| `/profile` | Profile | プロフィール編集 |
+
+### 管理者専用ページ
+| パス | コンポーネント | 説明 |
+|------|---------------|------|
+| `/admin` | AdminDashboard | 管理ダッシュボード |
+| `/admin/review/:id` | AdminReviewArticle | 記事審査 |
+| `/admin/homepage` | AdminHomepageManager | トップページ管理 |
+| `/admin/article/:id` | AdminArticleEdit | 記事編集（管理者） |
+| `/admin/authors` | AdminAuthorProfiles | 著者プロフィール管理 |
+
+---
+
+## 主要コンポーネント
+
+### ArticleCard.tsx
+記事カード表示。著者情報は `author_profile` を優先表示。
+
+```typescript
+// 著者名の取得優先度
+1. article.author_profile?.display_name
+2. article.users?.display_name
+3. article.users?.email.split('@')[0]
+4. '著者不明'
+
+// リンク先
+article.author_profile?.id
+  ? `/authors/${article.author_profile.id}`
+  : `/users/${article.author_id}`
+```
+
+### ArticleDetail.tsx
+記事詳細ページ。有料部分は `<!-- paid -->` デリミタで区切る。
+
+### Editor.tsx
+TipTapベースのリッチテキストエディタ。
+- 有料エリア設定と販売設定は連動
+- `showPaidBoundary` と `isPaid` は同期する
+
+---
+
 ## 注意事項
 - サービスロールキー・Webhook署名シークレットは機密情報です
 - Stripe連携があるため、決済関連の変更は慎重に
 - デプロイ前に必ずローカルで動作確認すること
+- **author_profile_id と author_id を混同しないこと**
 
 ---
 
@@ -210,6 +389,43 @@
 - `sw.js`（Service Worker）を追加（静的アセットのキャッシュ）
 - `index.php` にPWA関連のmetaタグを追加
 
+### 2026年2月14日
+**著者プロフィールシステム実装・バグ修正**
+
+#### 著者プロフィール機能
+- `AuthorProfile.tsx` 新規作成（`/authors/:id` ルート）
+- `author_profiles` テーブルを使った表示用著者システム
+- ArticleCard、ArticleDetailの著者リンクを `author_profile_id` 対応
+  - `author_profile_id` がある場合 → `/authors/{id}`
+  - ない場合 → `/users/{author_id}`（従来通り）
+- 管理画面から著者プロフィール管理可能（`/admin/authors`）
+
+#### クエリ修正
+以下のファイルで `author_profile:author_profile_id` を追加：
+- Home.tsx
+- ArticleCard.tsx
+- ArticleList.tsx
+- ArticleDetail.tsx
+- RecentArticles.tsx
+- PurchasedArticles.tsx
+- LikedArticles.tsx
+- FavoriteArticles.tsx
+- UserProfile.tsx
+
+#### バグ修正
+- 管理画面の著者アバターアップロードエラー修正
+  - 原因: テンプレートリテラルのエスケープ（`\${}`）
+  - 修正: `AdminAuthorProfiles.tsx` line 88
+
+#### エディタ改善
+- 有料エリア設定（左の＋ボタン）と販売設定（右サイドバー）を連動
+  - 有料エリア表示 → 自動で「有料」に設定
+  - 無料に変更 → 有料エリア非表示
+
+#### 公開確認画面
+- タグ表示を追加
+- アフィリエイト設定の表示を追加
+
 ---
 
-最終更新: 2026年2月3日
+最終更新: 2026年2月14日
