@@ -34,7 +34,7 @@ import { useEffect, useState } from 'react';
           const articleIds = [...new Set(orders.map(o => o.article_id))];
           const { data: articlesData } = await supabase
             .from('articles')
-            .select(`*, users:author_id (display_name, email, avatar_url), primary_category:primary_category_id (id, name, slug)`)
+            .select(`*, users:author_id (display_name, email, avatar_url), author_profile:author_profile_id (id, display_name, avatar_url), primary_category:primary_category_id (id, name, slug)`)
             .in('id', articleIds);
           const sortedArticles = articleIds.map(id => articlesData?.find(a => a.id === id)).filter(Boolean) as Article[];
           setArticles(sortedArticles);

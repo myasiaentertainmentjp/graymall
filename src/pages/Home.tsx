@@ -14,6 +14,7 @@ type Category = Database['public']['Tables']['categories']['Row'];
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null };
+  author_profile?: { id: string; display_name: string; avatar_url: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
 
@@ -33,6 +34,7 @@ async function fetchArticles() {
     .select(`
       *,
       users:author_id (display_name, email, avatar_url),
+      author_profile:author_profile_id (id, display_name, avatar_url),
       primary_category:primary_category_id (id, name, slug)
     `)
     .eq('status', 'published')
@@ -90,6 +92,7 @@ async function fetchFollowingArticles(userId: string) {
     .select(`
       *,
       users:author_id (display_name, email, avatar_url),
+      author_profile:author_profile_id (id, display_name, avatar_url),
       primary_category:primary_category_id (id, name, slug)
     `)
     .in('author_id', followingIds)
@@ -152,6 +155,7 @@ async function fetchRecommendedArticles(userId: string) {
     .select(`
       *,
       users:author_id (display_name, email, avatar_url),
+      author_profile:author_profile_id (id, display_name, avatar_url),
       primary_category:primary_category_id (id, name, slug)
     `)
     .in('primary_category_id', topCategories)

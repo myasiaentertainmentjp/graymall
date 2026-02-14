@@ -201,6 +201,24 @@
             </div>
 
             <div>
+              <div className="text-sm font-semibold text-gray-700 mb-2">タグ</div>
+              {article?.tags && article.tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="inline-flex px-3 py-1 rounded-full bg-gray-100 text-sm text-gray-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">未設定</div>
+              )}
+            </div>
+
+            <div>
               <div className="text-sm font-semibold text-gray-700 mb-2">本文（冒頭200文字）</div>
               <div className="text-sm text-gray-600 bg-gray-50 rounded-xl p-4">
                 {article?.excerpt || '（本文なし）'}

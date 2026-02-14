@@ -476,6 +476,7 @@ export default function ArticleDetail() {
           .select(`
             *,
             users:author_id (display_name, email, avatar_url),
+            author_profile:author_profile_id (id, display_name, avatar_url),
             primary_category:primary_category_id (id, name, slug)
           `)
           .eq('status', 'published')
@@ -497,6 +498,7 @@ export default function ArticleDetail() {
           .select(`
             *,
             users:author_id (display_name, email, avatar_url),
+            author_profile:author_profile_id (id, display_name, avatar_url),
             primary_category:primary_category_id (id, name, slug)
           `)
           .eq('primary_category_id', data.primary_category_id)

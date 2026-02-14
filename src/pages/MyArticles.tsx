@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import Layout from '../components/Layout';
 import type { Database } from '../lib/database.types';
-import { FileText, Plus } from 'lucide-react';
+import { FileText, Plus, Trash2 } from 'lucide-react';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 type StatusFilter = 'all' | 'draft' | 'published' | 'pending_review' | 'rejected';
@@ -16,6 +16,8 @@ export default function MyArticles() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     useEffect(() => {
       if (user) {
@@ -47,6 +49,30 @@ export default function MyArticles() {
         console.error('Exception loading my articles:', err);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const handleDelete = async (articleId: string) => {
+      setDeletingId(articleId);
+      try {
+        const { error: deleteError } = await supabase
+          .from('articles')
+          .delete()
+          .eq('id', articleId)
+          .eq('author_id', user?.id);
+
+        if (deleteError) {
+          setError('記事の削除に失敗しました');
+          console.error('Error deleting article:', deleteError);
+        } else {
+          setArticles(articles.filter(a => a.id !== articleId));
+        }
+      } catch (err) {
+        setError('記事の削除に失敗しました');
+        console.error('Exception deleting article:', err);
+      } finally {
+        setDeletingId(null);
+        setDeleteConfirm(null);
       }
     };
 
@@ -211,6 +237,32 @@ export default function MyArticles() {
                       >
                         表示
                       </Link>
+                    )}
+                    {deleteConfirm === article.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">削除しますか？</span>
+                        <button
+                          onClick={() => handleDelete(article.id)}
+                          disabled={deletingId === article.id}
+                          className="text-red-600 hover:text-red-800 font-medium text-sm disabled:opacity-50"
+                        >
+                          {deletingId === article.id ? '削除中...' : 'はい'}
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="text-gray-600 hover:text-gray-800 font-medium text-sm"
+                        >
+                          いいえ
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeleteConfirm(article.id)}
+                        className="text-red-600 hover:text-red-800 font-medium text-sm flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        削除
+                      </button>
                     )}
                   </div>
                 </div>

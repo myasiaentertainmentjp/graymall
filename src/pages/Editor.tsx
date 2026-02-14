@@ -540,17 +540,32 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
       editorRef.current?.scrollToHeadingIndex(index);
     }
 
+    // 右サイドバーの販売設定トグルと有料エリア表示を連携
     function handleChangeIsPaid(newIsPaid: boolean) {
       setIsPaid(newIsPaid);
+      if (newIsPaid) {
+        // 有料に切り替え → 有料エリアも表示
+        if (!showPaidBoundary) {
+          setShowPaidBoundary(true);
+          if (isPaidContentEmpty(paidContent)) {
+            setPaidContent('<p></p>');
+          }
+        }
+      } else {
+        // 無料に切り替え → 有料エリアも非表示（コンテンツは保持）
+        setShowPaidBoundary(false);
+      }
     }
 
     // 要件1修正: 有料エリア削除時にpaidContentを保持
     // 要件2修正: カーソル位置以降を有料エリアに移動
+    // 要件3修正: 有料エリア挿入時は右側のisPaidも連携
     function handleTogglePaidBoundary(cursorContentAfter?: string) {
       setShowPaidBoundary((prev) => {
         const next = !prev;
         if (next) {
-          // 有料エリアを表示する場合
+          // 有料エリアを表示する場合 → 販売設定も有料に
+          setIsPaid(true);
           if (cursorContentAfter && cursorContentAfter.trim()) {
             // カーソル位置以降のコンテンツがある場合、それを有料エリアに移動
             setPaidContent(cursorContentAfter);
@@ -559,8 +574,10 @@ type AffiliateRate = 0 | 10 | 20 | 30 | 40 | 50;
             setPaidContent('<p></p>');
           }
           // 既存の paidContent がある場合はそのまま保持
+        } else {
+          // 非表示にする場合 → 販売設定も無料に（paidContentは保持）
+          setIsPaid(false);
         }
-        // 非表示にする場合、paidContentは絶対に消さない（保持）
         return next;
       });
     }

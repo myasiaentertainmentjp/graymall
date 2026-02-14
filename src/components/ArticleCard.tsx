@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null };
+  author_profile?: { id: string; display_name: string; avatar_url: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
 
@@ -29,6 +30,10 @@ function formatTimeAgo(dateString: string | null): string {
 }
 
 function authorLabel(article: Article) {
+  // author_profileがあればそちらを優先
+  const profileName = article.author_profile?.display_name?.trim();
+  if (profileName) return profileName;
+
   const name = article.users?.display_name?.trim();
   if (name) return name;
 
@@ -89,7 +94,8 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
   const [hasAnonLiked, setHasAnonLiked] = useState(false);
 
   const label = authorLabel(article);
-  const avatarUrl = article.users?.avatar_url;
+  // author_profileのアバターを優先
+  const avatarUrl = article.author_profile?.avatar_url || article.users?.avatar_url;
   const affiliateLabel = getAffiliateLabel(article);
   const timeAgo = formatTimeAgo(article.published_at || article.created_at);
 
