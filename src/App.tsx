@@ -57,6 +57,7 @@ const AdminArticleEdit = lazy(() => import('./pages/AdminArticleEdit'));
 const AdminAuthorProfiles = lazy(() => import('./pages/AdminAuthorProfiles'));
 const Profile = lazy(() => import('./pages/Profile'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
+const AuthorProfile = lazy(() => import('./pages/AuthorProfile'));
 const PreviewArticle = lazy(() => import('./pages/PreviewArticle'));
 const PublishConfirm = lazy(() => import('./pages/PublishConfirm'));
 const PaymentSettingsPage = lazy(() => import('./pages/PaymentSettingsPage'));
@@ -257,6 +258,7 @@ function App() {
             />
 
             <Route path="/users/:id" element={<UserProfile />} />
+            <Route path="/authors/:id" element={<AuthorProfile />} />
 
             <Route
               path="/profile"

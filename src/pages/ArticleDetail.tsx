@@ -715,7 +715,7 @@ export default function ArticleDetail() {
             {(() => {
               const authorInfo = getAuthorInfo(article);
               return (
-                <Link to={`/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
+                <Link to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
                   <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-lg font-medium overflow-hidden">
                     {authorInfo.avatar_url ? (
                       <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -949,7 +949,7 @@ export default function ArticleDetail() {
               const authorInfo = getAuthorInfo(article);
               return (
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Link to={`/users/${article.author_id}`} className="flex-shrink-0">
+                  <Link to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`} className="flex-shrink-0">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
                       {authorInfo.avatar_url ? (
                         <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -962,13 +962,13 @@ export default function ArticleDetail() {
                   </Link>
                   <div className="flex-1 min-w-0">
                     <Link
-                      to={`/users/${article.author_id}`}
+                      to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`}
                       className="font-bold text-base sm:text-lg text-gray-900 hover:text-gray-700 line-clamp-1 block"
                     >
                       {authorInfo.display_name}
                     </Link>
                     <Link
-                      to={`/users/${article.author_id}`}
+                      to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`}
                       className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
                     >
                       プロフィールを見る
@@ -1041,7 +1041,7 @@ export default function ArticleDetail() {
                   {getAuthorInfo(article).display_name}の他の記事
                 </h3>
                 <Link
-                  to={`/users/${article.author_id}`}
+                  to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`}
                   className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
                 >
                   すべて見る

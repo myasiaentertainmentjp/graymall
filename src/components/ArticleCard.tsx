@@ -259,7 +259,7 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
           {/* Author & time */}
           <div className="flex items-center justify-between text-xs text-gray-500 mb-3 mt-auto">
             <Link
-              to={`/users/${article.author_id}`}
+              to={article.author_profile?.id ? `/authors/${article.author_profile.id}` : `/users/${article.author_id}`}
               onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1.5 min-w-0 hover:text-gray-900 transition"
             >
