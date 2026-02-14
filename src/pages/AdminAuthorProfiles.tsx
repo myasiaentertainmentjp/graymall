@@ -85,7 +85,7 @@ export default function AdminAuthorProfiles() {
     setUploading(true);
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `author-avatars/\${Date.now()}-\${Math.random().toString(16).slice(2)}.\${ext}`;
+      const path = `author-avatars/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('article-images')
         .upload(path, file, { upsert: true, contentType: file.type });
