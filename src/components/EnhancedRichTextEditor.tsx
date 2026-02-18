@@ -46,6 +46,7 @@
 
   import BlockquoteWithSource from './editor/extensions/BlockquoteWithSource';
   import ImageWithCaption from './editor/extensions/ImageWithCaption';
+  import YouTubeEmbed, { extractYouTubeId, isYouTubeUrl } from './editor/extensions/YouTubeEmbed';
 
   export type HeadingItem = { level: 2 | 3; text: string };
 
@@ -463,6 +464,7 @@
       TableCell,
       BlockquoteWithSource,
       ImageWithCaption,
+      YouTubeEmbed,
     ];
   }
 
@@ -734,6 +736,24 @@
           const text = clipboardData.getData('text/plain');
           if (!text) return false;
 
+          // YouTube URL detection
+          if (isYouTubeUrl(text.trim())) {
+            const videoId = extractYouTubeId(text.trim());
+            if (videoId) {
+              event.preventDefault();
+              setTimeout(() => {
+                const editorInstance = (view as any).editor;
+                if (editorInstance) {
+                  editorInstance.chain().focus().insertContent({
+                    type: 'youtubeEmbed',
+                    attrs: { videoId },
+                  }).run();
+                }
+              }, 0);
+              return true;
+            }
+          }
+
           if (looksLikeMarkdown(text)) {
             event.preventDefault();
             const convertedHtml = simpleMarkdownToHtml(text);
@@ -795,6 +815,24 @@
 
           const text = clipboardData.getData('text/plain');
           if (!text) return false;
+
+          // YouTube URL detection
+          if (isYouTubeUrl(text.trim())) {
+            const videoId = extractYouTubeId(text.trim());
+            if (videoId) {
+              event.preventDefault();
+              setTimeout(() => {
+                const editorInstance = (view as any).editor;
+                if (editorInstance) {
+                  editorInstance.chain().focus().insertContent({
+                    type: 'youtubeEmbed',
+                    attrs: { videoId },
+                  }).run();
+                }
+              }, 0);
+              return true;
+            }
+          }
 
           if (looksLikeMarkdown(text)) {
             event.preventDefault();
