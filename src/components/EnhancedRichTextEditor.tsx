@@ -756,35 +756,10 @@
             }
           }
 
-          // URL Link Preview detection
+          // URL Link Preview detection - 通常のペーストを許可（リンクプレビューは手動で）
+          // URLの場合もデフォルトのペースト処理に任せる
           if (isPreviewableUrl(text.trim())) {
-            event.preventDefault();
-            const url = text.trim();
-            setTimeout(async () => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                // まずプレースホルダーとして挿入
-                editorInstance.chain().focus().insertContent({
-                  type: 'linkPreview',
-                  attrs: { url },
-                }).run();
-                // OGPデータを取得して更新
-                const ogpData = await fetchOgpData(url);
-                if (ogpData) {
-                  // OGPデータが取得できたら、コンテンツ内のリンクプレビューを更新
-                  const currentHtml = editorInstance.getHTML();
-                  // data-url属性でマッチして更新
-                  const updatedHtml = currentHtml.replace(
-                    new RegExp(`data-url="${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*data-title=""`, 'g'),
-                    `data-url="${url}" data-title="${(ogpData.title || '').replace(/"/g, '&quot;')}" data-description="${(ogpData.description || '').replace(/"/g, '&quot;')}" data-image="${ogpData.image || ''}" data-site-name="${(ogpData.siteName || '').replace(/"/g, '&quot;')}" data-favicon="${ogpData.favicon || ''}"`
-                  );
-                  if (updatedHtml !== currentHtml) {
-                    editorInstance.commands.setContent(updatedHtml, false);
-                  }
-                }
-              }
-            }, 0);
-            return true;
+            return false; // デフォルト処理に任せる
           }
 
           if (looksLikeMarkdown(text)) {
@@ -867,31 +842,9 @@
             }
           }
 
-          // URL Link Preview detection (paid editor)
+          // URL Link Preview detection (paid editor) - 通常のペーストを許可
           if (isPreviewableUrl(text.trim())) {
-            event.preventDefault();
-            const url = text.trim();
-            setTimeout(async () => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                editorInstance.chain().focus().insertContent({
-                  type: 'linkPreview',
-                  attrs: { url },
-                }).run();
-                const ogpData = await fetchOgpData(url);
-                if (ogpData) {
-                  const currentHtml = editorInstance.getHTML();
-                  const updatedHtml = currentHtml.replace(
-                    new RegExp(`data-url="${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*data-title=""`, 'g'),
-                    `data-url="${url}" data-title="${(ogpData.title || '').replace(/"/g, '&quot;')}" data-description="${(ogpData.description || '').replace(/"/g, '&quot;')}" data-image="${ogpData.image || ''}" data-site-name="${(ogpData.siteName || '').replace(/"/g, '&quot;')}" data-favicon="${ogpData.favicon || ''}"`
-                  );
-                  if (updatedHtml !== currentHtml) {
-                    editorInstance.commands.setContent(updatedHtml, false);
-                  }
-                }
-              }
-            }, 0);
-            return true;
+            return false; // デフォルト処理に任せる
           }
 
           if (looksLikeMarkdown(text)) {
