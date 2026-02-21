@@ -446,7 +446,7 @@
       Link.configure({
         openOnClick: false,
         autolink: true,
-        linkOnPaste: true,
+        linkOnPaste: false, // handlePasteでLinkPreviewを挿入するため無効化
         HTMLAttributes: {
           rel: 'noopener noreferrer',
           target: '_blank',
