@@ -55,6 +55,11 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/affiliate-guide" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    アフィリエイトガイド
+                  </Link>
+                </li>
+                <li>
                   <Link to="/payments" className="text-sm text-gray-400 hover:text-white transition-colors">
                     取引・支払いについて
                   </Link>

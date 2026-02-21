@@ -439,7 +439,7 @@
 
   function buildExtensions(placeholder: string) {
     return [
-      StarterKit.configure({ blockquote: false }),
+      StarterKit.configure({ blockquote: false, link: false }),
       Placeholder.configure({ placeholder }),
       TextStyle,
       Color,

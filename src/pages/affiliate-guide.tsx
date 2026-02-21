@@ -163,7 +163,7 @@ export default function AffiliateGuidePage() {
         </section>
 
         {/* 広告表記について（重要） */}
-        <section className="mb-12">
+        <section id="pr-disclosure" className="mb-12 scroll-mt-20">
           <h2 className="text-xl font-bold text-white mb-6">広告表記について（重要）</h2>
           <div className="bg-amber-900/30 border border-amber-700 rounded-xl p-6">
             <div className="flex items-start gap-3 mb-4">

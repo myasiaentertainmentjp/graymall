@@ -9,7 +9,7 @@ import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
 import { SkeletonArticleDetail } from '../components/SkeletonCard';
 import type { Database } from '../lib/database.types';
-import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Facebook, Link2 } from 'lucide-react';
+import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, List, Facebook, Link2 } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
 import LinkCardRenderer from '../components/LinkCardRenderer';
@@ -79,17 +79,6 @@ function cleanArticleHtml(html: string): string {
   });
 
   return result;
-}
-
-/**
- * 読了時間を計算（日本語: 約800文字/分 - 一般的な速読ペース）
- */
-function calculateReadingTime(html: string): number {
-  const doc = new DOMParser().parseFromString(html || '', 'text/html');
-  const text = doc.body.textContent || '';
-  const charCount = text.replace(/\s+/g, '').length;
-  const minutes = Math.ceil(charCount / 800);
-  return Math.max(1, minutes);
 }
 
 /**
@@ -681,10 +670,6 @@ export default function ArticleDetail() {
                 {article.primary_category.name}
               </span>
             )}
-            <span className="flex items-center gap-1 text-sm text-gray-500">
-              <Clock className="w-4 h-4" />
-              {calculateReadingTime(article.content)}分で読める
-            </span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>

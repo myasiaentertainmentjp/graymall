@@ -208,7 +208,7 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
     <div className="bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-800 transition group">
       <Link to={`/articles/${article.slug}`} className="block">
         {/* Thumbnail */}
-        <div className="relative aspect-[16/9] bg-gray-800 overflow-hidden">
+        <div className="relative aspect-[1280/670] bg-gray-800 overflow-hidden">
           {article.cover_image_url ? (
             <img
               src={article.cover_image_url}

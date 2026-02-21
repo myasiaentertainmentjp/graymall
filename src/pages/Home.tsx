@@ -9,7 +9,7 @@ import { ChevronRight } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import { SkeletonRow } from '../components/SkeletonCard';
 import { Link, useSearchParams } from 'react-router-dom';
-import BannerCarousel from '../components/BannerCarousel';
+// import BannerCarousel from '../components/BannerCarousel'; // 本番反映時にコメント解除
 
 type Category = Database['public']['Tables']['categories']['Row'];
 

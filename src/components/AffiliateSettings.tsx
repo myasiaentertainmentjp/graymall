@@ -330,6 +330,9 @@ export default function AffiliateSettings({ article, onUpdate }: Props) {
             <p className="text-xs text-blue-600 mt-2">
               このリンクを経由して購入されると、あなたにも報酬が入ります
             </p>
+            <p className="text-xs text-gray-500 mt-1">
+              <a href="/affiliate-guide#pr-disclosure" className="underline hover:text-gray-700">PR表記について</a>
+            </p>
           </div>
         </>
       )}

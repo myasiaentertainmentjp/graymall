@@ -57,7 +57,7 @@ export default function CategorySidebar({ className = '' }: Props) {
       <div className="sticky top-20">
         <nav>
           {parentCategories.map(parent => (
-            <div key={parent.id} className="border-b border-gray-100 last:border-b-0">
+            <div key={parent.id}>
               <Link
                 to={`/articles?category=${parent.slug}`}
                 className={`block py-3 text-lg font-medium transition ${

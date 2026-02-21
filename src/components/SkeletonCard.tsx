@@ -3,7 +3,7 @@ export default function SkeletonCard() {
   return (
     <div className="animate-pulse">
       {/* サムネイル */}
-      <div className="aspect-[4/3] bg-gray-200 rounded-lg mb-3" />
+      <div className="aspect-[1280/670] bg-gray-200 rounded-lg mb-3" />
       {/* タイトル */}
       <div className="h-4 bg-gray-200 rounded mb-2" />
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
@@ -49,7 +49,7 @@ export function SkeletonArticleDetail() {
       </div>
 
       {/* アイキャッチ画像 */}
-      <div className="aspect-[16/9] bg-gray-200 rounded-2xl mb-8" />
+      <div className="aspect-[1280/670] bg-gray-200 rounded-2xl mb-8" />
 
       {/* 本文 */}
       <div className="space-y-4">
