@@ -48,15 +48,29 @@ function supabaseQuery($table, $params = []) {
 }
 
 /**
- * 記事データを取得
+ * 記事データを取得（slugまたはUUIDで検索）
  */
-function getArticleBySlug($slug) {
+function getArticleBySlugOrId($slugOrId) {
+    // まずslugで検索
     $result = supabaseQuery('articles', [
-        'slug' => 'eq.' . $slug,
+        'slug' => 'eq.' . $slugOrId,
         'status' => 'eq.published',
         'select' => 'id,title,excerpt,cover_image_url,slug,author_id,published_at,primary_category_id',
         'limit' => 1,
     ]);
+
+    // slugで見つからない場合、UUIDとして検索
+    if (empty($result) || !isset($result[0])) {
+        // UUID形式かチェック（簡易）
+        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $slugOrId)) {
+            $result = supabaseQuery('articles', [
+                'id' => 'eq.' . $slugOrId,
+                'status' => 'eq.published',
+                'select' => 'id,title,excerpt,cover_image_url,slug,author_id,published_at,primary_category_id',
+                'limit' => 1,
+            ]);
+        }
+    }
 
     if (!empty($result) && isset($result[0])) {
         $article = $result[0];
@@ -127,7 +141,7 @@ function getMetaTags($uri) {
     // 記事ページ: /articles/{slug}
     if (preg_match('#^/articles/([^/]+)$#', $uri, $matches)) {
         $slug = $matches[1];
-        $article = getArticleBySlug($slug);
+        $article = getArticleBySlugOrId($slug);
 
         if ($article) {
             $authorName = $article['author']['display_name'] ?? $article['author']['email'] ?? '不明';

@@ -306,8 +306,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* バナーカルーセル（横幅いっぱい、サイドバーの上） */}
-        {!selectedCategory && <BannerCarousel />}
+        {/* バナーカルーセル（横幅いっぱい、サイドバーの上）- 本番反映時にコメント解除 */}
+        {/* {!selectedCategory && <BannerCarousel />} */}
 
         {/* PC: 2カラムレイアウト（左サイドバー + メインコンテンツ） */}
         <div className="lg:flex lg:gap-8">
