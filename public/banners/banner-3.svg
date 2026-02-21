@@ -1,0 +1,25 @@
+<svg width="1200" height="628" viewBox="0 0 1200 628" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="628" fill="url(#grad3)"/>
+  <!-- Badge -->
+  <rect x="480" y="120" width="240" height="44" rx="22" fill="rgba(255,255,255,0.25)"/>
+  <text x="600" y="150" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="white">記事を紹介して報酬GET</text>
+  <text x="600" y="260" text-anchor="middle" font-family="sans-serif" font-size="64" font-weight="bold" fill="white">アフィリエイト機能</text>
+  <text x="600" y="340" text-anchor="middle" font-family="sans-serif" font-size="28" fill="rgba(255,255,255,0.9)">報酬率 0% 〜 50% を出品者が設定</text>
+  <!-- Coins icon area -->
+  <g transform="translate(520, 380)">
+    <circle cx="40" cy="40" r="35" fill="#fbbf24"/>
+    <text x="40" y="50" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#92400e">¥</text>
+    <circle cx="100" cy="50" r="35" fill="#fbbf24"/>
+    <text x="100" y="60" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#92400e">¥</text>
+    <circle cx="160" cy="40" r="35" fill="#fbbf24"/>
+    <text x="160" y="50" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#92400e">¥</text>
+  </g>
+  <rect x="450" y="500" width="300" height="56" rx="28" fill="white"/>
+  <text x="600" y="538" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#ea580c">アフィリエイトについて詳しく</text>
+</svg>

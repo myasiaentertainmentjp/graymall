@@ -1,0 +1,54 @@
+<svg width="1200" height="628" viewBox="0 0 1200 628" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#be185d;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fcd34d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="628" fill="url(#grad4)"/>
+  <!-- Decorative rays -->
+  <g opacity="0.1">
+    <polygon points="600,314 0,0 200,0" fill="white"/>
+    <polygon points="600,314 400,0 600,0" fill="white"/>
+    <polygon points="600,314 800,0 1000,0" fill="white"/>
+    <polygon points="600,314 1200,0 1200,200" fill="white"/>
+    <polygon points="600,314 1200,400 1200,628" fill="white"/>
+    <polygon points="600,314 800,628 600,628" fill="white"/>
+    <polygon points="600,314 200,628 0,628" fill="white"/>
+    <polygon points="600,314 0,400 0,200" fill="white"/>
+  </g>
+  <!-- Crown -->
+  <g transform="translate(540, 80)">
+    <polygon points="60,80 0,80 15,30 35,50 60,0 85,50 105,30 120,80" fill="url(#gold)"/>
+    <circle cx="15" cy="30" r="8" fill="url(#gold)"/>
+    <circle cx="60" cy="0" r="10" fill="url(#gold)"/>
+    <circle cx="105" cy="30" r="8" fill="url(#gold)"/>
+  </g>
+  <!-- Badge -->
+  <rect x="420" y="180" width="360" height="44" rx="22" fill="rgba(255,255,255,0.25)"/>
+  <text x="600" y="210" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="white">いま売れている記事は？</text>
+  <text x="600" y="320" text-anchor="middle" font-family="sans-serif" font-size="72" font-weight="bold" fill="white">人気記事</text>
+  <text x="600" y="400" text-anchor="middle" font-family="sans-serif" font-size="72" font-weight="bold" fill="white">ランキング</text>
+  <!-- Laurel wreath left -->
+  <g transform="translate(150, 200)" fill="url(#gold)">
+    <ellipse cx="30" cy="100" rx="8" ry="25" transform="rotate(-30, 30, 100)"/>
+    <ellipse cx="45" cy="150" rx="8" ry="25" transform="rotate(-15, 45, 150)"/>
+    <ellipse cx="50" cy="200" rx="8" ry="25" transform="rotate(0, 50, 200)"/>
+    <ellipse cx="45" cy="250" rx="8" ry="25" transform="rotate(15, 45, 250)"/>
+    <ellipse cx="30" cy="300" rx="8" ry="25" transform="rotate(30, 30, 300)"/>
+  </g>
+  <!-- Laurel wreath right -->
+  <g transform="translate(1050, 200)" fill="url(#gold)">
+    <ellipse cx="30" cy="100" rx="8" ry="25" transform="rotate(30, 30, 100)"/>
+    <ellipse cx="15" cy="150" rx="8" ry="25" transform="rotate(15, 15, 150)"/>
+    <ellipse cx="10" cy="200" rx="8" ry="25" transform="rotate(0, 10, 200)"/>
+    <ellipse cx="15" cy="250" rx="8" ry="25" transform="rotate(-15, 15, 250)"/>
+    <ellipse cx="30" cy="300" rx="8" ry="25" transform="rotate(-30, 30, 300)"/>
+  </g>
+  <rect x="450" y="480" width="300" height="56" rx="28" fill="white"/>
+  <text x="600" y="518" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#dc2626">今すぐチェック！ ▶</text>
+</svg>

@@ -90,7 +90,7 @@ export default function AuthorProfile() {
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-gray-300 text-sm mb-4 whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-200 text-sm mb-4 whitespace-pre-wrap leading-relaxed">
                   {profile.bio}
                 </p>
               )}
