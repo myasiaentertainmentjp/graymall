@@ -724,7 +724,47 @@
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
 
+          const text = clipboardData.getData('text/plain');
           const html = clipboardData.getData('text/html');
+
+          // URLの場合は先にチェック（HTMLがあっても優先）
+          if (text) {
+            // YouTube URL detection
+            if (isYouTubeUrl(text.trim())) {
+              const videoId = extractYouTubeId(text.trim());
+              if (videoId) {
+                event.preventDefault();
+                setTimeout(() => {
+                  const editorInstance = (view as any).editor;
+                  if (editorInstance) {
+                    editorInstance.chain().focus().insertContent({
+                      type: 'youtubeEmbed',
+                      attrs: { videoId },
+                    }).run();
+                  }
+                }, 0);
+                return true;
+              }
+            }
+
+            // URL Link Preview detection - OGP画像付きカードを自動挿入
+            if (isPreviewableUrl(text.trim())) {
+              event.preventDefault();
+              const url = text.trim();
+              setTimeout(() => {
+                const editorInstance = (view as any).editor;
+                if (editorInstance) {
+                  editorInstance.chain().focus().insertContent({
+                    type: 'linkPreview',
+                    attrs: { url },
+                  }).run();
+                }
+              }, 0);
+              return true;
+            }
+          }
+
+          // HTMLがある場合はデフォルト処理
           if (html && html.trim()) {
             setTimeout(() => {
               const currentHtml = view.state.doc.textContent ? (view as any).editor?.getHTML() : '';
@@ -735,42 +775,7 @@
             return false;
           }
 
-          const text = clipboardData.getData('text/plain');
           if (!text) return false;
-
-          // YouTube URL detection
-          if (isYouTubeUrl(text.trim())) {
-            const videoId = extractYouTubeId(text.trim());
-            if (videoId) {
-              event.preventDefault();
-              setTimeout(() => {
-                const editorInstance = (view as any).editor;
-                if (editorInstance) {
-                  editorInstance.chain().focus().insertContent({
-                    type: 'youtubeEmbed',
-                    attrs: { videoId },
-                  }).run();
-                }
-              }, 0);
-              return true;
-            }
-          }
-
-          // URL Link Preview detection - OGP画像付きカードを自動挿入
-          if (isPreviewableUrl(text.trim())) {
-            event.preventDefault();
-            const url = text.trim();
-            setTimeout(() => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                editorInstance.chain().focus().insertContent({
-                  type: 'linkPreview',
-                  attrs: { url },
-                }).run();
-              }
-            }, 0);
-            return true;
-          }
 
           if (looksLikeMarkdown(text)) {
             event.preventDefault();
@@ -828,23 +833,39 @@
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
 
-          const html = clipboardData.getData('text/html');
-          if (html && html.trim()) return false;
-
           const text = clipboardData.getData('text/plain');
-          if (!text) return false;
+          const html = clipboardData.getData('text/html');
 
-          // YouTube URL detection
-          if (isYouTubeUrl(text.trim())) {
-            const videoId = extractYouTubeId(text.trim());
-            if (videoId) {
+          // URLの場合は先にチェック（HTMLがあっても優先）
+          if (text) {
+            // YouTube URL detection
+            if (isYouTubeUrl(text.trim())) {
+              const videoId = extractYouTubeId(text.trim());
+              if (videoId) {
+                event.preventDefault();
+                setTimeout(() => {
+                  const editorInstance = (view as any).editor;
+                  if (editorInstance) {
+                    editorInstance.chain().focus().insertContent({
+                      type: 'youtubeEmbed',
+                      attrs: { videoId },
+                    }).run();
+                  }
+                }, 0);
+                return true;
+              }
+            }
+
+            // URL Link Preview detection (paid editor) - OGP画像付きカードを自動挿入
+            if (isPreviewableUrl(text.trim())) {
               event.preventDefault();
+              const url = text.trim();
               setTimeout(() => {
                 const editorInstance = (view as any).editor;
                 if (editorInstance) {
                   editorInstance.chain().focus().insertContent({
-                    type: 'youtubeEmbed',
-                    attrs: { videoId },
+                    type: 'linkPreview',
+                    attrs: { url },
                   }).run();
                 }
               }, 0);
@@ -852,21 +873,10 @@
             }
           }
 
-          // URL Link Preview detection (paid editor) - OGP画像付きカードを自動挿入
-          if (isPreviewableUrl(text.trim())) {
-            event.preventDefault();
-            const url = text.trim();
-            setTimeout(() => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                editorInstance.chain().focus().insertContent({
-                  type: 'linkPreview',
-                  attrs: { url },
-                }).run();
-              }
-            }, 0);
-            return true;
-          }
+          // HTMLがある場合はデフォルト処理
+          if (html && html.trim()) return false;
+
+          if (!text) return false;
 
           if (looksLikeMarkdown(text)) {
             event.preventDefault();
