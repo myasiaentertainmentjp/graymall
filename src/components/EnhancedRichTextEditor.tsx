@@ -724,74 +724,34 @@
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
 
-          const text = clipboardData.getData('text/plain');
-          const html = clipboardData.getData('text/html');
+          const text = clipboardData.getData('text/plain') || '';
+          const trimmedText = text.trim();
+          const editor = (view as any).editor;
 
-          // URLの場合は先にチェック（HTMLがあっても優先）
-          if (text) {
-            // YouTube URL detection
-            if (isYouTubeUrl(text.trim())) {
-              const videoId = extractYouTubeId(text.trim());
-              if (videoId) {
-                event.preventDefault();
-                setTimeout(() => {
-                  const editorInstance = (view as any).editor;
-                  if (editorInstance) {
-                    editorInstance.chain().focus().insertContent({
-                      type: 'youtubeEmbed',
-                      attrs: { videoId },
-                    }).run();
-                  }
-                }, 0);
-                return true;
-              }
-            }
-
-            // URL Link Preview detection - OGP画像付きカードを自動挿入
-            if (isPreviewableUrl(text.trim())) {
+          // YouTube URL - 専用埋め込み
+          if (trimmedText && isYouTubeUrl(trimmedText)) {
+            const videoId = extractYouTubeId(trimmedText);
+            if (videoId && editor) {
               event.preventDefault();
-              const url = text.trim();
-              setTimeout(() => {
-                const editorInstance = (view as any).editor;
-                if (editorInstance) {
-                  editorInstance.chain().focus().insertContent({
-                    type: 'linkPreview',
-                    attrs: { url },
-                  }).run();
-                }
-              }, 0);
+              editor.chain().focus().insertContent({
+                type: 'youtubeEmbed',
+                attrs: { videoId },
+              }).run();
               return true;
             }
           }
 
-          // HTMLがある場合はデフォルト処理
-          if (html && html.trim()) {
-            setTimeout(() => {
-              const currentHtml = view.state.doc.textContent ? (view as any).editor?.getHTML() : '';
-              if (currentHtml) {
-                scheduleHeadingExtraction(currentHtml);
-              }
-            }, 100);
-            return false;
-          }
-
-          if (!text) return false;
-
-          if (looksLikeMarkdown(text)) {
+          // 一般URL - OGPカード
+          if (trimmedText && isPreviewableUrl(trimmedText) && editor) {
             event.preventDefault();
-            const convertedHtml = simpleMarkdownToHtml(text);
-            setTimeout(() => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                editorInstance.chain().focus().insertContent(convertedHtml).run();
-                setTimeout(() => {
-                  scheduleHeadingExtraction(editorInstance.getHTML());
-                }, 50);
-              }
-            }, 0);
+            editor.chain().focus().insertContent({
+              type: 'linkPreview',
+              attrs: { url: trimmedText },
+            }).run();
             return true;
           }
 
+          // それ以外はデフォルト処理
           return false;
         },
       },
@@ -833,63 +793,34 @@
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
 
-          const text = clipboardData.getData('text/plain');
-          const html = clipboardData.getData('text/html');
+          const text = clipboardData.getData('text/plain') || '';
+          const trimmedText = text.trim();
+          const editor = (view as any).editor;
 
-          // URLの場合は先にチェック（HTMLがあっても優先）
-          if (text) {
-            // YouTube URL detection
-            if (isYouTubeUrl(text.trim())) {
-              const videoId = extractYouTubeId(text.trim());
-              if (videoId) {
-                event.preventDefault();
-                setTimeout(() => {
-                  const editorInstance = (view as any).editor;
-                  if (editorInstance) {
-                    editorInstance.chain().focus().insertContent({
-                      type: 'youtubeEmbed',
-                      attrs: { videoId },
-                    }).run();
-                  }
-                }, 0);
-                return true;
-              }
-            }
-
-            // URL Link Preview detection (paid editor) - OGP画像付きカードを自動挿入
-            if (isPreviewableUrl(text.trim())) {
+          // YouTube URL - 専用埋め込み
+          if (trimmedText && isYouTubeUrl(trimmedText)) {
+            const videoId = extractYouTubeId(trimmedText);
+            if (videoId && editor) {
               event.preventDefault();
-              const url = text.trim();
-              setTimeout(() => {
-                const editorInstance = (view as any).editor;
-                if (editorInstance) {
-                  editorInstance.chain().focus().insertContent({
-                    type: 'linkPreview',
-                    attrs: { url },
-                  }).run();
-                }
-              }, 0);
+              editor.chain().focus().insertContent({
+                type: 'youtubeEmbed',
+                attrs: { videoId },
+              }).run();
               return true;
             }
           }
 
-          // HTMLがある場合はデフォルト処理
-          if (html && html.trim()) return false;
-
-          if (!text) return false;
-
-          if (looksLikeMarkdown(text)) {
+          // 一般URL - OGPカード
+          if (trimmedText && isPreviewableUrl(trimmedText) && editor) {
             event.preventDefault();
-            const convertedHtml = simpleMarkdownToHtml(text);
-            setTimeout(() => {
-              const editorInstance = (view as any).editor;
-              if (editorInstance) {
-                editorInstance.chain().focus().insertContent(convertedHtml).run();
-              }
-            }, 0);
+            editor.chain().focus().insertContent({
+              type: 'linkPreview',
+              attrs: { url: trimmedText },
+            }).run();
             return true;
           }
 
+          // それ以外はデフォルト処理
           return false;
         },
       },
