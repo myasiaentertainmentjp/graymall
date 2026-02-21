@@ -439,7 +439,13 @@
 
   function buildExtensions(placeholder: string) {
     return [
-      StarterKit.configure({ blockquote: false, link: false }),
+      StarterKit.configure({
+        blockquote: false,
+        link: false,
+        heading: {
+          levels: [2, 3], // h1は使用しない
+        },
+      }),
       Placeholder.configure({ placeholder }),
       TextStyle,
       Color,
