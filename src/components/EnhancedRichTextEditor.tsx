@@ -726,28 +726,27 @@
 
           const text = clipboardData.getData('text/plain') || '';
           const trimmedText = text.trim();
-          const editor = (view as any).editor;
 
           // YouTube URL - 専用埋め込み
           if (trimmedText && isYouTubeUrl(trimmedText)) {
             const videoId = extractYouTubeId(trimmedText);
-            if (videoId && editor) {
+            if (videoId) {
               event.preventDefault();
-              editor.chain().focus().insertContent({
-                type: 'youtubeEmbed',
-                attrs: { videoId },
-              }).run();
+              const { state, dispatch } = view;
+              const node = state.schema.nodes.youtubeEmbed.create({ videoId });
+              const tr = state.tr.replaceSelectionWith(node);
+              dispatch(tr);
               return true;
             }
           }
 
           // 一般URL - OGPカード
-          if (trimmedText && isPreviewableUrl(trimmedText) && editor) {
+          if (trimmedText && isPreviewableUrl(trimmedText)) {
             event.preventDefault();
-            editor.chain().focus().insertContent({
-              type: 'linkPreview',
-              attrs: { url: trimmedText },
-            }).run();
+            const { state, dispatch } = view;
+            const node = state.schema.nodes.linkPreview.create({ url: trimmedText });
+            const tr = state.tr.replaceSelectionWith(node);
+            dispatch(tr);
             return true;
           }
 
@@ -795,28 +794,27 @@
 
           const text = clipboardData.getData('text/plain') || '';
           const trimmedText = text.trim();
-          const editor = (view as any).editor;
 
           // YouTube URL - 専用埋め込み
           if (trimmedText && isYouTubeUrl(trimmedText)) {
             const videoId = extractYouTubeId(trimmedText);
-            if (videoId && editor) {
+            if (videoId) {
               event.preventDefault();
-              editor.chain().focus().insertContent({
-                type: 'youtubeEmbed',
-                attrs: { videoId },
-              }).run();
+              const { state, dispatch } = view;
+              const node = state.schema.nodes.youtubeEmbed.create({ videoId });
+              const tr = state.tr.replaceSelectionWith(node);
+              dispatch(tr);
               return true;
             }
           }
 
           // 一般URL - OGPカード
-          if (trimmedText && isPreviewableUrl(trimmedText) && editor) {
+          if (trimmedText && isPreviewableUrl(trimmedText)) {
             event.preventDefault();
-            editor.chain().focus().insertContent({
-              type: 'linkPreview',
-              attrs: { url: trimmedText },
-            }).run();
+            const { state, dispatch } = view;
+            const node = state.schema.nodes.linkPreview.create({ url: trimmedText });
+            const tr = state.tr.replaceSelectionWith(node);
+            dispatch(tr);
             return true;
           }
 
