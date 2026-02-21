@@ -205,10 +205,10 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
   };
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden hover:shadow-md transition group">
+    <div className="bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-800 transition group">
       <Link to={`/articles/${article.slug}`} className="block">
         {/* Thumbnail */}
-        <div className="relative aspect-[16/9] bg-gray-100 overflow-hidden">
+        <div className="relative aspect-[16/9] bg-gray-800 overflow-hidden">
           {article.cover_image_url ? (
             <img
               src={article.cover_image_url}
@@ -218,56 +218,58 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300">
+            <div className="w-full h-full flex items-center justify-center text-gray-600">
               <ImageIcon className="w-8 h-8" />
             </div>
           )}
 
           {/* Rank badge */}
           {rank && (
-            <div className="absolute top-2 left-2 w-6 h-6 bg-gray-900 text-white text-xs font-bold rounded flex items-center justify-center">
+            <div className="absolute top-2 left-2 w-6 h-6 bg-emerald-500 text-white text-xs font-bold rounded flex items-center justify-center">
               {rank}
             </div>
           )}
+
+          {/* Price badge on thumbnail */}
+          <div className="absolute bottom-2 right-2">
+            {article.price > 0 ? (
+              <span className="px-3 py-1 bg-emerald-500 text-white text-sm font-bold rounded-full">
+                ¥{article.price.toLocaleString()}
+              </span>
+            ) : (
+              <span className="px-3 py-1 bg-gray-800/90 text-white text-sm font-medium rounded-full">
+                無料
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Content */}
         <div className="p-3 flex flex-col">
           {/* Title */}
-          <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
+          <h3 className="font-bold text-sm text-white line-clamp-2 mb-2 min-h-[2.5rem]">
             {article.title}
           </h3>
 
-          {/* Price & Affiliate - fixed height area */}
-          <div className="h-6 mb-2">
-            {article.price > 0 ? (
-              <div className="text-sm font-semibold text-emerald-600">
-                ¥{article.price.toLocaleString()}
-              </div>
-            ) : (
-              <div className="text-sm text-gray-400">無料</div>
-            )}
-          </div>
-
           {/* Affiliate info - only show when affiliate is enabled */}
           {affiliateLabel && (
-            <div className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded inline-block">
+            <div className="text-xs text-emerald-400 mb-2 px-2 py-1 bg-emerald-500/10 rounded inline-block">
               {affiliateLabel}
             </div>
           )}
 
           {/* Author & time */}
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-3 mt-auto">
+          <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
             <Link
               to={article.author_profile?.id ? `/authors/${article.author_profile.id}` : `/users/${article.author_id}`}
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 min-w-0 hover:text-gray-900 transition"
+              className="flex items-center gap-1.5 min-w-0 hover:text-white transition"
             >
-              <div className="w-5 h-5 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+              <div className="w-5 h-5 rounded-full bg-emerald-500 overflow-hidden flex-shrink-0">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={`${label}のアイコン`} loading="lazy" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-medium text-gray-500">
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-medium text-white">
                     {authorInitial(label)}
                   </div>
                 )}
@@ -277,8 +279,8 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
             {!hideTime && <span className="flex-shrink-0">{timeAgo}</span>}
           </div>
 
-          {/* Like button - note style */}
-          <div className="flex items-center">
+          {/* Like button */}
+          <div className="flex items-center mt-2">
             <button
               onClick={toggleFavorite}
               disabled={favoriteLoading}
@@ -290,7 +292,7 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
                 className={`w-4 h-4 transition ${
                   isLiked
                     ? 'text-red-500 fill-red-500'
-                    : 'text-gray-400 group-hover/like:text-red-400'
+                    : 'text-gray-500 group-hover/like:text-red-400'
                 }`}
               />
               {totalFavoriteCount > 0 && (

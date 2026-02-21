@@ -12,6 +12,7 @@ import type { Database } from '../lib/database.types';
 import { Lock, ShoppingCart, CheckCircle, Loader2, Share2, Copy, ChevronRight, ChevronDown, User, Heart, Home, Clock, List, Facebook, Link2 } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
 import { useSEO } from '../hooks/useSEO';
+import LinkCardRenderer from '../components/LinkCardRenderer';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null };
@@ -173,12 +174,12 @@ function TableOfContents({ content }: { content: string }) {
 
 /**
  * 記事コンテンツ表示コンポーネント
- * CSSで余白を制御するのでシンプルに
+ * CSSで余白を制御、URLはリンクカードに変換
  */
 function ArticleContent({ html }: { html: string }) {
   return (
     <div className="prose md:prose-lg max-w-none article-content">
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <LinkCardRenderer html={html} />
     </div>
   );
 }

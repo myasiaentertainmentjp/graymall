@@ -19,11 +19,20 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
 };
 
 // データ取得関数
-async function fetchCategories() {
+async function fetchParentCategories() {
   const { data } = await supabase
     .from('categories')
     .select('*')
     .is('parent_id', null)
+    .order('sort_order');
+  return data || [];
+}
+
+// 全カテゴリを取得（子カテゴリ含む）
+async function fetchAllCategories() {
+  const { data } = await supabase
+    .from('categories')
+    .select('*')
     .order('sort_order');
   return data || [];
 }
@@ -40,7 +49,7 @@ async function fetchArticles() {
     .eq('status', 'published')
     .eq('is_archived', false)
     .order('published_at', { ascending: false })
-    .limit(100);
+    .limit(500);
   return (data || []) as Article[];
 }
 
@@ -178,8 +187,13 @@ export default function Home() {
 
   // React Query でデータ取得（キャッシュ付き）
   const { data: parentCategories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
+    queryKey: ['parentCategories'],
+    queryFn: fetchParentCategories,
+  });
+
+  const { data: allCategories = [] } = useQuery({
+    queryKey: ['allCategories'],
+    queryFn: fetchAllCategories,
   });
 
   const { data: allArticles = [], isLoading } = useQuery({
@@ -204,6 +218,19 @@ export default function Home() {
     enabled: !!user,
   });
 
+  // 親カテゴリごとの子カテゴリIDマップ
+  const categoryIdMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    parentCategories.forEach(parent => {
+      // 親カテゴリ自身と、その子カテゴリのIDを収集
+      const childIds = allCategories
+        .filter(c => c.parent_id === parent.id)
+        .map(c => c.id);
+      map[parent.id] = [parent.id, ...childIds];
+    });
+    return map;
+  }, [parentCategories, allCategories]);
+
   // メモ化された記事リスト
   const popularArticles = useMemo(() => {
     if (sectionMap['popular']?.length) {
@@ -225,23 +252,26 @@ export default function Home() {
     return allArticles.slice(0, 8);
   }, [allArticles, sectionMap]);
 
+  // カテゴリ別記事（子カテゴリも含む）
   const categoryArticles = useMemo(() => {
     const catArts: Record<string, Article[]> = {};
-    parentCategories.filter(c => !c.parent_id).forEach(cat => {
+    parentCategories.forEach(cat => {
+      const categoryIds = categoryIdMap[cat.id] || [cat.id];
       catArts[cat.id] = allArticles
-        .filter(a => a.primary_category_id === cat.id)
+        .filter(a => a.primary_category_id && categoryIds.includes(a.primary_category_id))
         .slice(0, 8);
     });
     return catArts;
-  }, [allArticles, parentCategories]);
+  }, [allArticles, parentCategories, categoryIdMap]);
 
-  // カテゴリ選択された場合の記事フィルタ
+  // カテゴリ選択された場合の記事フィルタ（子カテゴリも含む）
   const filteredArticles = useMemo(() => {
     if (!selectedCategory) return null;
     const category = parentCategories.find(c => c.slug === selectedCategory);
     if (!category) return null;
-    return allArticles.filter(a => a.primary_category_id === category.id);
-  }, [selectedCategory, parentCategories, allArticles]);
+    const categoryIds = categoryIdMap[category.id] || [category.id];
+    return allArticles.filter(a => a.primary_category_id && categoryIds.includes(a.primary_category_id));
+  }, [selectedCategory, parentCategories, allArticles, categoryIdMap]);
 
   return (
     <Layout>
@@ -253,8 +283,8 @@ export default function Home() {
               to="/"
               className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition whitespace-nowrap ${
                 !selectedCategory
-                  ? 'bg-gray-900 text-white font-medium'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-emerald-500 text-white font-medium'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
               すべて
@@ -265,8 +295,8 @@ export default function Home() {
                 to={`/?category=${cat.slug}`}
                 className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition whitespace-nowrap ${
                   selectedCategory === cat.slug
-                    ? 'bg-gray-900 text-white font-medium'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-emerald-500 text-white font-medium'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
                 {cat.name}
@@ -285,8 +315,8 @@ export default function Home() {
                   to="/"
                   className={`block px-2 py-3 text-lg transition ${
                     !selectedCategory
-                      ? 'text-gray-900 font-medium'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'text-emerald-400 font-medium'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   すべて
@@ -297,8 +327,8 @@ export default function Home() {
                     to={`/?category=${cat.slug}`}
                     className={`block px-2 py-3 text-lg transition ${
                       selectedCategory === cat.slug
-                        ? 'text-gray-900 font-medium'
-                        : 'text-gray-500 hover:text-gray-900'
+                        ? 'text-emerald-400 font-medium'
+                        : 'text-gray-400 hover:text-white'
                     }`}
                   >
                     {cat.name}
@@ -313,22 +343,22 @@ export default function Home() {
         {isLoading ? (
           <div className="space-y-6 sm:space-y-10">
             <section>
-              <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse" />
+              <div className="h-6 bg-gray-700 rounded w-32 mb-4 animate-pulse" />
               <SkeletonRow count={6} />
             </section>
             <section>
-              <div className="h-6 bg-gray-200 rounded w-28 mb-4 animate-pulse" />
+              <div className="h-6 bg-gray-700 rounded w-28 mb-4 animate-pulse" />
               <SkeletonRow count={6} />
             </section>
           </div>
         ) : selectedCategory && filteredArticles ? (
           /* カテゴリ選択時 */
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-white mb-4">
               {parentCategories.find(c => c.slug === selectedCategory)?.name}
             </h2>
             {filteredArticles.length === 0 ? (
-              <p className="text-gray-500">まだ記事がありません</p>
+              <p className="text-gray-400">まだ記事がありません</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredArticles.map((article) => (
@@ -344,8 +374,8 @@ export default function Home() {
             {popularArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">人気の記事</h2>
-                  <Link to="/articles?sort=popular" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                  <h2 className="text-lg font-bold text-white">人気の記事</h2>
+                  <Link to="/articles?sort=popular" className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -363,8 +393,8 @@ export default function Home() {
             {newArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">新着記事</h2>
-                  <Link to="/articles" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                  <h2 className="text-lg font-bold text-white">新着記事</h2>
+                  <Link to="/articles" className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -382,7 +412,7 @@ export default function Home() {
             {editorPickArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">編集部おすすめ</h2>
+                  <h2 className="text-lg font-bold text-white">編集部おすすめ</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {editorPickArticles.map((article) => (
@@ -398,7 +428,7 @@ export default function Home() {
             {user && recommendedArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">あなたへのおすすめ</h2>
+                  <h2 className="text-lg font-bold text-white">あなたへのおすすめ</h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8">
                   {recommendedArticles.map((article) => (
@@ -414,8 +444,8 @@ export default function Home() {
             {user && followingArticles.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">フォロー中</h2>
-                  <Link to="/me/following" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                  <h2 className="text-lg font-bold text-white">フォロー中</h2>
+                  <Link to="/me/following" className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
                     もっと見る <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -436,8 +466,8 @@ export default function Home() {
               return (
                 <section key={cat.id}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-gray-900">{cat.name}</h2>
-                    <Link to={`/articles?category=${cat.slug}`} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                    <h2 className="text-lg font-bold text-white">{cat.name}</h2>
+                    <Link to={`/articles?category=${cat.slug}`} className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
                       もっと見る <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
