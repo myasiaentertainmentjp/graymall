@@ -756,10 +756,20 @@
             }
           }
 
-          // URL Link Preview detection - 通常のペーストを許可（リンクプレビューは手動で）
-          // URLの場合もデフォルトのペースト処理に任せる
+          // URL Link Preview detection - OGP画像付きカードを自動挿入
           if (isPreviewableUrl(text.trim())) {
-            return false; // デフォルト処理に任せる
+            event.preventDefault();
+            const url = text.trim();
+            setTimeout(() => {
+              const editorInstance = (view as any).editor;
+              if (editorInstance) {
+                editorInstance.chain().focus().insertContent({
+                  type: 'linkPreview',
+                  attrs: { url },
+                }).run();
+              }
+            }, 0);
+            return true;
           }
 
           if (looksLikeMarkdown(text)) {
@@ -842,9 +852,20 @@
             }
           }
 
-          // URL Link Preview detection (paid editor) - 通常のペーストを許可
+          // URL Link Preview detection (paid editor) - OGP画像付きカードを自動挿入
           if (isPreviewableUrl(text.trim())) {
-            return false; // デフォルト処理に任せる
+            event.preventDefault();
+            const url = text.trim();
+            setTimeout(() => {
+              const editorInstance = (view as any).editor;
+              if (editorInstance) {
+                editorInstance.chain().focus().insertContent({
+                  type: 'linkPreview',
+                  attrs: { url },
+                }).run();
+              }
+            }, 0);
+            return true;
           }
 
           if (looksLikeMarkdown(text)) {
