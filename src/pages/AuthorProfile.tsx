@@ -61,9 +61,9 @@ export default function AuthorProfile() {
     <Layout>
       <div className="max-w-5xl mx-auto px-4 py-8">
         {loading ? (
-          <div className="text-gray-600">読み込み中...</div>
+          <div className="text-gray-400">読み込み中...</div>
         ) : !profile ? (
-          <div className="text-gray-600">著者が見つかりませんでした</div>
+          <div className="text-gray-400">著者が見つかりませんでした</div>
         ) : (
           <>
             {/* Profile Header */}
@@ -71,7 +71,7 @@ export default function AuthorProfile() {
               {/* Avatar + Name row */}
               <div className="flex items-start gap-4 mb-4">
                 {/* Avatar */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-700 overflow-hidden flex-shrink-0">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -82,7 +82,7 @@ export default function AuthorProfile() {
                 </div>
                 {/* Name */}
                 <div className="flex-1 min-w-0 pt-1">
-                  <h1 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+                  <h1 className="text-base sm:text-xl md:text-2xl font-bold text-white leading-tight">
                     {profile.display_name || '著者'}
                   </h1>
                 </div>
@@ -90,25 +90,25 @@ export default function AuthorProfile() {
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-gray-700 text-sm mb-4 whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-300 text-sm mb-4 whitespace-pre-wrap leading-relaxed">
                   {profile.bio}
                 </p>
               )}
             </div>
 
             {/* Articles Section */}
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-gray-700 pt-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900">
+                <h2 className="text-lg font-bold text-white">
                   投稿した記事
-                  <span className="ml-2 text-sm font-normal text-gray-500">
+                  <span className="ml-2 text-sm font-normal text-gray-400">
                     {articles.length}件
                   </span>
                 </h2>
               </div>
 
               {articles.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-gray-400">
                   公開記事がありません
                 </div>
               ) : (

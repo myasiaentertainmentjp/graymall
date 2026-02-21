@@ -164,20 +164,20 @@ function FAQAccordion({ item }: { item: FAQItem }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-700 rounded-lg overflow-hidden">
       <button
-        className={`w-full flex items-center gap-3 px-4 py-4 text-left transition-colors ${isOpen ? 'bg-gray-100' : 'bg-white hover:bg-gray-50'}`}
+        className={`w-full flex items-center gap-3 px-4 py-4 text-left transition-colors ${isOpen ? 'bg-gray-800' : 'bg-gray-900 hover:bg-gray-800'}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span className="flex items-center justify-center w-7 h-7 bg-blue-600 text-white font-bold text-sm rounded-full flex-shrink-0">Q</span>
-        <span className="flex-1 text-gray-800 font-medium">{item.question}</span>
+        <span className="flex-1 text-gray-100 font-medium">{item.question}</span>
         <span className="text-gray-400 text-xl font-light">{isOpen ? '−' : '+'}</span>
       </button>
       {isOpen && (
-        <div className="flex gap-3 px-4 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex gap-3 px-4 py-4 bg-gray-900 border-t border-gray-700">
           <span className="flex items-center justify-center w-7 h-7 bg-red-600 text-white font-bold text-sm rounded-full flex-shrink-0">A</span>
-          <p className="flex-1 text-gray-600 leading-relaxed whitespace-pre-wrap">
+          <p className="flex-1 text-gray-300 leading-relaxed whitespace-pre-wrap">
             {Array.isArray(item.answer) ? item.answer.join('\n') : item.answer}
           </p>
         </div>
@@ -190,13 +190,13 @@ export default function FAQPage() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">よくある質問（FAQ）</h1>
+        <h1 className="text-2xl font-bold text-white mb-6 pb-4 border-b-2 border-gray-700">よくある質問（FAQ）</h1>
 
-        <p className="text-gray-600 leading-relaxed mb-8">グレーモールの登録・購入・出品・売上・アフィリエイトに関して、よくある質問をまとめました。</p>
+        <p className="text-gray-300 leading-relaxed mb-8">グレーモールの登録・購入・出品・売上・アフィリエイトに関して、よくある質問をまとめました。</p>
 
         {faqData.map((section, index) => (
           <section key={index} className="mb-10">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">{section.title}</h2>
+            <h2 className="text-lg font-semibold text-gray-100 mb-4 pb-2 border-b border-gray-700">{section.title}</h2>
             <div className="space-y-3">
               {section.items.map((item, itemIndex) => (
                 <FAQAccordion key={itemIndex} item={item} />

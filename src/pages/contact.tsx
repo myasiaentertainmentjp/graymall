@@ -53,7 +53,7 @@ export default function ContactPage() {
     return (
       <Layout>
         <div className="max-w-3xl mx-auto px-4 py-12">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">お問い合わせ</h1>
+          <h1 className="text-2xl font-bold text-white mb-6 pb-4 border-b-2 border-gray-700">お問い合わせ</h1>
           <div className="text-center py-12 bg-green-50 rounded-lg border border-green-200">
             <p className="text-green-800 mb-2">お問い合わせを受け付けました。</p>
             <p className="text-green-800 mb-2">内容を確認の上、必要に応じてご連絡いたします。</p>
@@ -67,13 +67,13 @@ export default function ContactPage() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">お問い合わせ</h1>
+        <h1 className="text-2xl font-bold text-white mb-6 pb-4 border-b-2 border-gray-700">お問い合わせ</h1>
 
         <section className="mb-12">
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col gap-2">
-              <label htmlFor="name" className="font-medium text-gray-700">
+              <label htmlFor="name" className="font-medium text-gray-200">
                 お名前 <span className="text-red-600 text-xs">必須</span>
               </label>
               <input
@@ -84,12 +84,12 @@ export default function ContactPage() {
                 onChange={handleChange}
                 required
                 placeholder="山田 太郎"
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white"
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="font-medium text-gray-700">
+              <label htmlFor="email" className="font-medium text-gray-200">
                 メールアドレス <span className="text-red-600 text-xs">必須</span>
               </label>
               <input
@@ -100,13 +100,13 @@ export default function ContactPage() {
                 onChange={handleChange}
                 required
                 placeholder="example@email.com"
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white"
               />
-              <p className="text-sm text-gray-500">登録済みの方は、登録メールアドレスをご入力ください</p>
+              <p className="text-sm text-gray-400">登録済みの方は、登録メールアドレスをご入力ください</p>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="category" className="font-medium text-gray-700">
+              <label htmlFor="category" className="font-medium text-gray-200">
                 お問い合わせ種別 <span className="text-red-600 text-xs">必須</span>
               </label>
               <select
@@ -115,7 +115,7 @@ export default function ContactPage() {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white"
               >
                 <option value="">選択してください</option>
                 <option value="account">アカウント・ログインについて</option>
@@ -128,7 +128,7 @@ export default function ContactPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="message" className="font-medium text-gray-700">
+              <label htmlFor="message" className="font-medium text-gray-200">
                 お問い合わせ内容 <span className="text-red-600 text-xs">必須</span>
               </label>
               <textarea
@@ -141,7 +141,7 @@ export default function ContactPage() {
                 placeholder="お問い合わせ内容をご記入ください"
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
               />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 ※トラブル報告の場合は、該当のコンテンツURL・取引ID・発生日時などをご記載いただくとスムーズです。
               </p>
             </div>
@@ -165,24 +165,24 @@ export default function ContactPage() {
         </section>
 
         {/* 運営者連絡先ブロック */}
-        <div className="bg-gray-50 p-5 rounded-lg">
-          <h2 className="font-semibold text-gray-800 mb-3">運営者連絡先</h2>
+        <div className="bg-gray-900 p-5 rounded-lg">
+          <h2 className="font-semibold text-gray-100 mb-3">運営者連絡先</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">運営者</dt>
-              <dd className="text-gray-800">合同会社マイアジアエンターテインメント</dd>
+              <dt className="text-gray-300 w-24 flex-shrink-0">運営者</dt>
+              <dd className="text-gray-100">合同会社マイアジアエンターテインメント</dd>
             </div>
             <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">メール</dt>
+              <dt className="text-gray-300 w-24 flex-shrink-0">メール</dt>
               <dd><a href="mailto:info@graymall.jp" className="text-blue-600 hover:underline">info@graymall.jp</a></dd>
             </div>
             <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">電話</dt>
-              <dd className="text-gray-800">090-5835-6898</dd>
+              <dt className="text-gray-300 w-24 flex-shrink-0">電話</dt>
+              <dd className="text-gray-100">090-5835-6898</dd>
             </div>
             <div className="flex">
-              <dt className="text-gray-600 w-24 flex-shrink-0">受付時間</dt>
-              <dd className="text-gray-800">平日10:00〜18:00（年末年始を除く）</dd>
+              <dt className="text-gray-300 w-24 flex-shrink-0">受付時間</dt>
+              <dd className="text-gray-100">平日10:00〜18:00（年末年始を除く）</dd>
             </div>
           </dl>
         </div>
