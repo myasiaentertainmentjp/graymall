@@ -22,16 +22,34 @@ interface ItemListItem {
   description?: string;
 }
 
+interface PersonData {
+  name: string;
+  url: string;
+  image?: string;
+  description?: string;
+  jobTitle?: string;
+}
+
+interface OrganizationData {
+  name: string;
+  url: string;
+  logo: string;
+  description?: string;
+}
+
 interface SEOProps {
   title?: string;
   description?: string;
   ogImage?: string;
-  ogType?: 'website' | 'article';
+  ogType?: 'website' | 'article' | 'profile';
   canonicalUrl?: string;
   noIndex?: boolean;
   articleData?: ArticleStructuredData;
   breadcrumbs?: BreadcrumbItem[];
   itemList?: ItemListItem[];
+  personData?: PersonData;
+  organizationData?: OrganizationData;
+  pagination?: { currentPage: number; totalPages: number; baseUrl: string };
 }
 
 const DEFAULT_TITLE = 'グレーモール - デジタルコンテンツマーケットプレイス';
@@ -179,6 +197,56 @@ function createItemListSchema(items: ItemListItem[]): object {
   };
 }
 
+function createPersonSchema(data: PersonData): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: data.name,
+    url: data.url.startsWith('http') ? data.url : `${SITE_URL}${data.url}`,
+    ...(data.image && { image: data.image }),
+    ...(data.description && { description: data.description }),
+    ...(data.jobTitle && { jobTitle: data.jobTitle }),
+  };
+}
+
+function createOrganizationSchema(data: OrganizationData): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: data.name,
+    url: data.url,
+    logo: data.logo,
+    ...(data.description && { description: data.description }),
+  };
+}
+
+function updatePaginationLinks(pagination: { currentPage: number; totalPages: number; baseUrl: string } | undefined) {
+  // Remove existing pagination links
+  document.querySelectorAll('link[rel="prev"], link[rel="next"]').forEach(el => el.remove());
+
+  if (!pagination || pagination.totalPages <= 1) return;
+
+  const { currentPage, totalPages, baseUrl } = pagination;
+  const getPageUrl = (page: number) => {
+    const url = page === 1 ? baseUrl : `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}page=${page}`;
+    return url.startsWith('http') ? url : `${SITE_URL}${url}`;
+  };
+
+  if (currentPage > 1) {
+    const prevLink = document.createElement('link');
+    prevLink.rel = 'prev';
+    prevLink.href = getPageUrl(currentPage - 1);
+    document.head.appendChild(prevLink);
+  }
+
+  if (currentPage < totalPages) {
+    const nextLink = document.createElement('link');
+    nextLink.rel = 'next';
+    nextLink.href = getPageUrl(currentPage + 1);
+    document.head.appendChild(nextLink);
+  }
+}
+
 export function useSEO({
   title,
   description,
@@ -189,6 +257,9 @@ export function useSEO({
   articleData,
   breadcrumbs,
   itemList,
+  personData,
+  organizationData,
+  pagination,
 }: SEOProps = {}) {
   useEffect(() => {
     const fullTitle = title ? `${title} | グレーモール` : DEFAULT_TITLE;
@@ -210,6 +281,17 @@ export function useSEO({
     updateMetaTag('og:image', fullOgImage, true);
     updateMetaTag('og:type', ogType, true);
     updateMetaTag('og:url', fullCanonicalUrl, true);
+    updateMetaTag('og:site_name', 'グレーモール', true);
+    updateMetaTag('og:locale', 'ja_JP', true);
+
+    // Article-specific OGP tags
+    if (articleData) {
+      updateMetaTag('article:published_time', articleData.publishedAt, true);
+      if (articleData.modifiedAt) {
+        updateMetaTag('article:modified_time', articleData.modifiedAt, true);
+      }
+      updateMetaTag('article:author', articleData.authorName, true);
+    }
 
     // Update Twitter tags
     updateMetaTag('twitter:card', 'summary_large_image');
@@ -252,6 +334,23 @@ export function useSEO({
       updateStructuredData('itemlist', null);
     }
 
+    // Add Person schema if personData is provided (for author pages)
+    if (personData) {
+      updateStructuredData('person', createPersonSchema(personData));
+    } else {
+      updateStructuredData('person', null);
+    }
+
+    // Add Organization schema if organizationData is provided
+    if (organizationData) {
+      updateStructuredData('organization', createOrganizationSchema(organizationData));
+    } else {
+      updateStructuredData('organization', null);
+    }
+
+    // Update pagination links (rel=prev/next)
+    updatePaginationLinks(pagination);
+
     // Cleanup on unmount - restore defaults
     return () => {
       document.title = DEFAULT_TITLE;
@@ -272,6 +371,10 @@ export function useSEO({
       updateStructuredData('article', null);
       updateStructuredData('breadcrumb', null);
       updateStructuredData('itemlist', null);
+      updateStructuredData('person', null);
+      updateStructuredData('organization', null);
+      // Remove pagination links
+      document.querySelectorAll('link[rel="prev"], link[rel="next"]').forEach(el => el.remove());
     };
-  }, [title, description, ogImage, ogType, canonicalUrl, noIndex, articleData, breadcrumbs, itemList]);
+  }, [title, description, ogImage, ogType, canonicalUrl, noIndex, articleData, breadcrumbs, itemList, personData, organizationData, pagination]);
 }

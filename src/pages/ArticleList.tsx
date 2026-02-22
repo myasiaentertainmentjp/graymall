@@ -92,6 +92,12 @@ export default function ArticleList() {
       image: article.cover_image_url || undefined,
       description: article.excerpt || undefined,
     })),
+    // ページネーションSEO (rel=prev/next)
+    pagination: totalPages > 1 ? {
+      currentPage,
+      totalPages,
+      baseUrl: categorySlug ? `/articles?category=${categorySlug}` : '/articles',
+    } : undefined,
   });
 
   useEffect(() => {

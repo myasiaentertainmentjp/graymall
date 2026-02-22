@@ -9,6 +9,7 @@ import { ChevronRight } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import { SkeletonRow } from '../components/SkeletonCard';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 // import BannerCarousel from '../components/BannerCarousel'; // 本番反映時にコメント解除
 
 type Category = Database['public']['Tables']['categories']['Row'];
@@ -185,6 +186,16 @@ export default function Home() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get('category');
+
+  // SEO設定（トップページ用 + Organization構造化データ）
+  useSEO({
+    organizationData: {
+      name: 'グレーモール',
+      url: 'https://graymall.jp',
+      logo: 'https://graymall.jp/logo.png',
+      description: 'グレーモールは、個人の体験談やノウハウを販売・購入できるデジタルコンテンツマーケットプレイスです。',
+    },
+  });
 
   // React Query でデータ取得（キャッシュ付き）
   const { data: parentCategories = [] } = useQuery({

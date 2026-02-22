@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
+import { useSEO } from '../hooks/useSEO';
 
 type AuthorProfileRow = Database['public']['Tables']['author_profiles']['Row'];
 type Article = Database['public']['Tables']['articles']['Row'] & {
@@ -20,6 +21,32 @@ export default function AuthorProfile() {
   const [profile, setProfile] = useState<AuthorProfileRow | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // SEO設定（著者ページ用構造化データ）
+  useSEO({
+    title: profile?.display_name ? `${profile.display_name}の記事一覧` : undefined,
+    description: profile?.bio || (profile?.display_name ? `${profile.display_name}さんの体験談・ノウハウ記事一覧` : undefined),
+    ogImage: profile?.avatar_url || undefined,
+    ogType: 'profile',
+    canonicalUrl: profile ? `/authors/${profile.id}` : undefined,
+    personData: profile ? {
+      name: profile.display_name,
+      url: `/authors/${profile.id}`,
+      image: profile.avatar_url || undefined,
+      description: profile.bio || undefined,
+    } : undefined,
+    breadcrumbs: profile ? [
+      { name: 'ホーム', url: '/' },
+      { name: '著者', url: '/authors' },
+      { name: profile.display_name, url: `/authors/${profile.id}` },
+    ] : undefined,
+    itemList: articles.map(article => ({
+      name: article.title,
+      url: `/articles/${article.slug}`,
+      image: article.cover_image_url || undefined,
+      description: article.excerpt || undefined,
+    })),
+  });
 
   useEffect(() => {
     (async () => {
