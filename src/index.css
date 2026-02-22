@@ -75,7 +75,12 @@ button {
   }
 
   .ProseMirror li {
-    margin: 0.25rem 0;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .ProseMirror ul, .ProseMirror ol {
+    margin: 0.5rem 0;
   }
 
   /* H2/H3 styling */
