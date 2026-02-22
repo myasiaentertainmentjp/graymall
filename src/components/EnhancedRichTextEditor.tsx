@@ -723,7 +723,7 @@
         }, 200);
       },
       editorProps: {
-        attributes: { class: 'prose prose-slate max-w-none focus:outline-none min-h-[420px] pl-12 pr-4 py-4' },
+        attributes: { class: 'prose prose-slate max-w-none focus:outline-none min-h-[420px] pl-4 sm:pl-12 pr-4 py-4' },
         handlePaste: (view, event) => {
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
@@ -791,7 +791,7 @@
         }, 200);
       },
       editorProps: {
-        attributes: { class: 'prose prose-slate max-w-none focus:outline-none min-h-[260px] pl-12 pr-4 py-4' },
+        attributes: { class: 'prose prose-slate max-w-none focus:outline-none min-h-[260px] pl-4 sm:pl-12 pr-4 py-4' },
         handlePaste: (view, event) => {
           const clipboardData = event.clipboardData;
           if (!clipboardData) return false;
@@ -1594,8 +1594,8 @@
       }
 
       return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb" style={{ overflow: 'visible' }}>
-          <div className="flex items-center px-2 py-2 gap-1" style={{ overflowX: 'auto', overflowY: 'visible' }}>
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
+          <div className="flex items-center px-2 py-2 gap-1 overflow-x-auto scrollbar-hide">
             <button
               type="button"
               {...handleMobileAction(() => {
