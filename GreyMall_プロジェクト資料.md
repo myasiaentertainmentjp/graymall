@@ -448,7 +448,109 @@ TipTapベースのリッチテキストエディタ。
 #### フッター修正
 - カタカナ「グレーモール」をロゴ画像（`/logo.png`）に置き換え
 
-### 2026年2月22日
+### 2026年2月22日（2）
+**SEO/LLMO大規模最適化・構造化データ・GA4イベント・静的ページSEO**
+
+#### SEO構造化データ（JSON-LD）
+`src/hooks/useSEO.ts` に以下の構造化データを実装:
+- **Article**: 記事詳細ページ
+- **Product**: 有料記事（ECサイトとして認識）
+- **Breadcrumb**: 全ページのパンくずリスト
+- **Person**: 著者プロフィールページ
+- **Organization**: ホームページ
+- **WebSite**: ホームページ（検索アクション対応）
+- **ItemList**: 記事一覧、著者の記事一覧
+- **FAQPage**: FAQページ
+
+#### LLMO（LLM最適化）対策
+- `keywords` metaタグ（記事タグから自動生成）
+- `article:tag` OGPタグ（最大5個）
+- `author` metaタグ（記事著者）
+- AI向けメタデータ（`index.html`）:
+  - `robots`: max-snippet, max-image-preview
+  - `category`, `application-name`, `generator`
+  - `theme-color`, `mobile-web-app-capable`
+
+#### 静的ページSEO追加
+以下の全ページに `useSEO` を追加:
+- `/faq` - FAQPage構造化データ付き
+- `/terms` - 利用規約
+- `/privacy` - プライバシーポリシー
+- `/law` - 特定商取引法
+- `/contact` - お問い合わせ
+- `/guidelines` - 使い方ガイド
+- `/company` - 会社概要
+
+#### ページネーションSEO
+- `rel="prev"` / `rel="next"` リンクを自動生成
+- 記事一覧ページで対応
+
+#### GA4イベントトラッキング
+`src/lib/analytics.ts` を新規作成:
+- `trackArticleView`: 記事閲覧（view_item）
+- `trackAddToFavorite`: お気に入り追加（add_to_wishlist）
+- `trackShare`: シェア（share）
+- `trackSearch`: 検索
+- `trackCategoryView`: カテゴリ閲覧（view_item_list）
+- `trackFollow`: フォロー
+- `trackPublishArticle`: 記事公開
+
+#### パフォーマンス最適化
+- **DNS Prefetch/Preconnect** (`index.html`):
+  - Supabase, Stripe, Google Fonts, GTM
+- **Preload**: Google Fonts CSS
+- **画像alt自動補完**: `enhanceImageAlts()` 関数
+
+#### セキュリティヘッダー強化（.htaccess）
+- `Referrer-Policy`: strict-origin-when-cross-origin
+- `Permissions-Policy`: geolocation, microphone, camera無効化
+- `Strict-Transport-Security`: HSTS有効化
+- `ETag無効化`: キャッシュ最適化
+
+#### RSS Feed
+- `public/rss.php` を新規作成
+- `.htaccess` で `/rss`, `/rss.xml`, `/feed` をルーティング
+- Supabase REST APIから最新20件の記事を取得
+
+#### データベース最適化（sql_to_run.sql）
+以下のインデックスを追加:
+- `idx_articles_status_published_at`: 公開記事検索
+- `idx_articles_category_status`: カテゴリ別検索
+- `idx_articles_author_status`: 著者別検索
+- `idx_articles_slug`: スラッグ検索
+- `idx_articles_fake_favorite_count`: いいね数ソート
+- その他、お気に入り、フォロー、通知、コメント、購入履歴用
+
+#### pg_cron設定
+- 予約投稿の自動公開: 1分ごとに `publish_scheduled_articles()` を実行
+- 自動いいね機能: `add_auto_likes_to_new_articles()` 関数を更新
+
+#### Service Worker強化（sw.js v2）
+- **スマートキャッシュ戦略**:
+  - 静的アセット: キャッシュファースト
+  - 画像: キャッシュファースト + バックグラウンド更新
+  - HTML: ネットワークファースト + オフラインフォールバック
+  - API: キャッシュなし（常にネットワーク）
+- **キャッシュサイズ制限**: 動的50件、画像100件
+- **オフライン対応**: ネットワーク切断時はキャッシュから表示
+- **プッシュ通知対応準備**: 将来の通知機能用
+
+#### Core Web Vitals計測
+`src/lib/analytics.ts` にWeb Vitals計測機能を追加:
+- **LCP** (Largest Contentful Paint): 最大コンテンツの描画時間
+- **FID** (First Input Delay): 初回入力遅延
+- **CLS** (Cumulative Layout Shift): レイアウトシフト累積
+- **FCP** (First Contentful Paint): 最初のコンテンツ描画
+- **TTFB** (Time to First Byte): 最初のバイト到達時間
+- GA4に `web_vitals` イベントとして送信
+
+#### WebP自動変換（既存実装の確認）
+- エディタで画像ペースト/アップロード時に自動WebP変換
+- 品質: 85%、最大幅: 1200px
+- GIF非対応（アラート表示）
+- カバー画像も同様に変換
+
+### 2026年2月22日（1）
 **OGPカードコンパクト化・エディタモバイル改善・リスト間隔調整**
 
 #### OGPリンクプレビューカードのコンパクト化
@@ -486,4 +588,4 @@ TipTapベースのリッチテキストエディタ。
 
 ---
 
-最終更新: 2026年2月22日
+最終更新: 2026年2月22日（SEO/LLMO大規模最適化）

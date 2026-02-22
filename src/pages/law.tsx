@@ -1,7 +1,18 @@
 // src/pages/law.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function LawPage() {
+  useSEO({
+    title: '特定商取引法に基づく表記',
+    description: 'グレーモールの特定商取引法に基づく表記です。事業者情報、返品・返金ポリシーなどを記載しています。',
+    canonicalUrl: '/law',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: '特定商取引法に基づく表記', url: '/law' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">

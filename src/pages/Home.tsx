@@ -10,7 +10,7 @@ import ArticleCard from '../components/ArticleCard';
 import { SkeletonRow } from '../components/SkeletonCard';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
-// import BannerCarousel from '../components/BannerCarousel'; // 本番反映時にコメント解除
+import BannerCarousel from '../components/BannerCarousel';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 
@@ -317,8 +317,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* バナーカルーセル（横幅いっぱい、サイドバーの上）- 本番反映時にコメント解除 */}
-        {/* {!selectedCategory && <BannerCarousel />} */}
+        {/* バナーカルーセル（横幅いっぱい、サイドバーの上） */}
+        {!selectedCategory && <BannerCarousel />}
 
         {/* PC: 2カラムレイアウト（左サイドバー + メインコンテンツ） */}
         <div className="lg:flex lg:gap-8">

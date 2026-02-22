@@ -1,7 +1,18 @@
 // src/pages/terms.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function TermsPage() {
+  useSEO({
+    title: '利用規約',
+    description: 'グレーモールの利用規約です。本サービスをご利用いただく前に必ずお読みください。',
+    canonicalUrl: '/terms',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: '利用規約', url: '/terms' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">

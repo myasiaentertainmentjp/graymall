@@ -132,3 +132,73 @@ INSERT INTO article_like_config (article_id, article_type, max_likes) VALUES
   ('0cea3e84-4674-44bc-9d28-832ca3a11088', 'C', 15),
   ('214ee53d-b66c-498f-81da-7903e23361ea', 'C', 15)
 ON CONFLICT (article_id) DO UPDATE SET article_type = 'C', max_likes = 15;
+
+-- ============================================
+-- 4. 予約投稿の自動公開（pg_cron）
+-- ============================================
+-- pg_cron拡張を有効化（Supabaseダッシュボード > Database > Extensions で有効化必要）
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- 1分ごとに予約投稿をチェックして公開
+-- SELECT cron.schedule(
+--   'publish-scheduled-articles',
+--   '* * * * *',
+--   'SELECT publish_scheduled_articles()'
+-- );
+
+-- 既存のジョブを確認
+-- SELECT * FROM cron.job;
+
+-- ジョブを削除する場合
+-- SELECT cron.unschedule('publish-scheduled-articles');
+
+-- ============================================
+-- 5. データベースインデックス最適化
+-- ============================================
+-- よく使われるクエリを高速化するインデックス
+
+-- 記事の検索用複合インデックス
+CREATE INDEX IF NOT EXISTS idx_articles_status_published_at
+ON articles(status, published_at DESC)
+WHERE status = 'published' AND is_archived = false;
+
+-- カテゴリ別記事検索用
+CREATE INDEX IF NOT EXISTS idx_articles_category_status
+ON articles(primary_category_id, status, published_at DESC);
+
+-- 著者別記事検索用
+CREATE INDEX IF NOT EXISTS idx_articles_author_status
+ON articles(author_id, status, published_at DESC);
+
+-- 著者プロフィール別記事検索用
+CREATE INDEX IF NOT EXISTS idx_articles_author_profile_status
+ON articles(author_profile_id, status, published_at DESC);
+
+-- スラッグ検索用（記事詳細ページ）
+CREATE INDEX IF NOT EXISTS idx_articles_slug
+ON articles(slug) WHERE status = 'published';
+
+-- いいね数でのソート用
+CREATE INDEX IF NOT EXISTS idx_articles_fake_favorite_count
+ON articles(fake_favorite_count DESC)
+WHERE status = 'published';
+
+-- お気に入り検索用
+CREATE INDEX IF NOT EXISTS idx_article_favorites_user_article
+ON article_favorites(user_id, article_id);
+
+-- フォロー検索用
+CREATE INDEX IF NOT EXISTS idx_follows_follower_following
+ON follows(follower_id, following_id);
+
+-- 通知検索用
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+ON notifications(user_id, created_at DESC);
+
+-- コメント検索用
+CREATE INDEX IF NOT EXISTS idx_article_comments_article_created
+ON article_comments(article_id, created_at DESC);
+
+-- 購入履歴検索用
+CREATE INDEX IF NOT EXISTS idx_purchases_user_article
+ON purchases(user_id, article_id);

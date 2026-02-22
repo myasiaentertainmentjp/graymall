@@ -1,7 +1,18 @@
 // src/pages/company.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function CompanyPage() {
+  useSEO({
+    title: '会社概要',
+    description: 'グレーモールを運営する合同会社マイアジアエンターテインメントの会社概要です。',
+    canonicalUrl: '/company',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: '会社概要', url: '/company' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">

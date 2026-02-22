@@ -3,8 +3,18 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { supabase } from '../lib/supabase';
+import { useSEO } from '../hooks/useSEO';
 
 export default function ContactPage() {
+  useSEO({
+    title: 'お問い合わせ',
+    description: 'グレーモールへのお問い合わせはこちらから。ご質問、ご意見、ご要望などお気軽にお問い合わせください。',
+    canonicalUrl: '/contact',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: 'お問い合わせ', url: '/contact' },
+    ],
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',

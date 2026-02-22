@@ -8,6 +8,7 @@ interface ArticleStructuredData {
   publishedAt: string;
   modifiedAt?: string;
   slug: string;
+  price?: number | null;
 }
 
 interface BreadcrumbItem {
@@ -37,6 +38,15 @@ interface OrganizationData {
   description?: string;
 }
 
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface FAQData {
+  items: FAQItem[];
+}
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -50,6 +60,8 @@ interface SEOProps {
   personData?: PersonData;
   organizationData?: OrganizationData;
   pagination?: { currentPage: number; totalPages: number; baseUrl: string };
+  keywords?: string[];
+  faqData?: FAQData;
 }
 
 const DEFAULT_TITLE = 'グレーモール - デジタルコンテンツマーケットプレイス';
@@ -220,6 +232,49 @@ function createOrganizationSchema(data: OrganizationData): object {
   };
 }
 
+function createFAQSchema(data: FAQData): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.items.map(item => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+function createProductSchema(data: ArticleStructuredData): object | null {
+  // 有料記事の場合のみProduct構造化データを生成
+  if (!data.price || data.price <= 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: data.title,
+    description: data.description,
+    image: data.image || DEFAULT_OG_IMAGE,
+    brand: {
+      '@type': 'Brand',
+      name: 'グレーモール',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}/articles/${data.slug}`,
+      priceCurrency: 'JPY',
+      price: data.price,
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Person',
+        name: data.authorName,
+      },
+    },
+  };
+}
+
 function updatePaginationLinks(pagination: { currentPage: number; totalPages: number; baseUrl: string } | undefined) {
   // Remove existing pagination links
   document.querySelectorAll('link[rel="prev"], link[rel="next"]').forEach(el => el.remove());
@@ -260,6 +315,8 @@ export function useSEO({
   personData,
   organizationData,
   pagination,
+  keywords,
+  faqData,
 }: SEOProps = {}) {
   useEffect(() => {
     const fullTitle = title ? `${title} | グレーモール` : DEFAULT_TITLE;
@@ -274,6 +331,11 @@ export function useSEO({
 
     // Update description
     updateMetaTag('description', fullDescription);
+
+    // Update keywords (for LLMO/AI optimization)
+    if (keywords && keywords.length > 0) {
+      updateMetaTag('keywords', keywords.join(','));
+    }
 
     // Update OGP tags
     updateMetaTag('og:title', fullTitle, true);
@@ -291,6 +353,21 @@ export function useSEO({
         updateMetaTag('article:modified_time', articleData.modifiedAt, true);
       }
       updateMetaTag('article:author', articleData.authorName, true);
+      // Author meta tag (LLMO optimization)
+      updateMetaTag('author', articleData.authorName);
+    }
+
+    // Article tags (LLMO optimization)
+    if (keywords && keywords.length > 0) {
+      // Remove existing article:tag meta tags
+      document.querySelectorAll('meta[property="article:tag"]').forEach(el => el.remove());
+      // Add new article:tag meta tags (max 5)
+      keywords.slice(0, 5).forEach(tag => {
+        const meta = document.createElement('meta');
+        meta.setAttribute('property', 'article:tag');
+        meta.setAttribute('content', tag);
+        document.head.appendChild(meta);
+      });
     }
 
     // Update Twitter tags
@@ -316,8 +393,12 @@ export function useSEO({
     // Add Article schema if article data is provided
     if (articleData) {
       updateStructuredData('article', createArticleSchema(articleData));
+      // Add Product schema for paid articles (EC/marketplace optimization)
+      const productSchema = createProductSchema(articleData);
+      updateStructuredData('product', productSchema);
     } else {
       updateStructuredData('article', null);
+      updateStructuredData('product', null);
     }
 
     // Add Breadcrumb schema if breadcrumbs are provided
@@ -348,6 +429,13 @@ export function useSEO({
       updateStructuredData('organization', null);
     }
 
+    // Add FAQPage schema if faqData is provided
+    if (faqData && faqData.items.length > 0) {
+      updateStructuredData('faq', createFAQSchema(faqData));
+    } else {
+      updateStructuredData('faq', null);
+    }
+
     // Update pagination links (rel=prev/next)
     updatePaginationLinks(pagination);
 
@@ -369,12 +457,16 @@ export function useSEO({
       // Remove structured data
       updateStructuredData('website', null);
       updateStructuredData('article', null);
+      updateStructuredData('product', null);
       updateStructuredData('breadcrumb', null);
       updateStructuredData('itemlist', null);
       updateStructuredData('person', null);
       updateStructuredData('organization', null);
+      updateStructuredData('faq', null);
       // Remove pagination links
       document.querySelectorAll('link[rel="prev"], link[rel="next"]').forEach(el => el.remove());
+      // Remove article:tag meta tags
+      document.querySelectorAll('meta[property="article:tag"]').forEach(el => el.remove());
     };
-  }, [title, description, ogImage, ogType, canonicalUrl, noIndex, articleData, breadcrumbs, itemList, personData, organizationData, pagination]);
+  }, [title, description, ogImage, ogType, canonicalUrl, noIndex, articleData, breadcrumbs, itemList, personData, organizationData, pagination, keywords, faqData]);
 }

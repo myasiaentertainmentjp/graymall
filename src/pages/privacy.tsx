@@ -1,7 +1,18 @@
 // src/pages/privacy.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function PrivacyPage() {
+  useSEO({
+    title: 'プライバシーポリシー',
+    description: 'グレーモールのプライバシーポリシーです。個人情報の取り扱いについて説明しています。',
+    canonicalUrl: '/privacy',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: 'プライバシーポリシー', url: '/privacy' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">

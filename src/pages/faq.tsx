@@ -1,6 +1,7 @@
 // src/pages/faq.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 type FAQItem = {
   question: string;
@@ -12,7 +13,7 @@ type FAQSection = {
   items: FAQItem[];
 };
 
-const faqData: FAQSection[] = [
+const faqDataSections: FAQSection[] = [
   {
     title: 'アカウント・ログイン',
     items: [
@@ -187,6 +188,27 @@ function FAQAccordion({ item }: { item: FAQItem }) {
 }
 
 export default function FAQPage() {
+  // FAQ構造化データ用にフラット化
+  const faqItems = useMemo(() =>
+    faqDataSections.flatMap(section =>
+      section.items.map(item => ({
+        question: item.question,
+        answer: Array.isArray(item.answer) ? item.answer.join(' ') : item.answer,
+      }))
+    ),
+  []);
+
+  useSEO({
+    title: 'よくある質問（FAQ）',
+    description: 'グレーモールの登録・購入・出品・売上・アフィリエイトに関するよくある質問と回答をまとめています。',
+    canonicalUrl: '/faq',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: 'よくある質問', url: '/faq' },
+    ],
+    faqData: { items: faqItems },
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">
@@ -194,7 +216,7 @@ export default function FAQPage() {
 
         <p className="text-gray-300 leading-relaxed mb-8">グレーモールの登録・購入・出品・売上・アフィリエイトに関して、よくある質問をまとめました。</p>
 
-        {faqData.map((section, index) => (
+        {faqDataSections.map((section, index) => (
           <section key={index} className="mb-10">
             <h2 className="text-lg font-semibold text-gray-100 mb-4 pb-2 border-b border-gray-700">{section.title}</h2>
             <div className="space-y-3">

@@ -4,6 +4,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { checkArticleAccess } from '../lib/articleAccess';
+import { trackArticleView, trackAddToFavorite, trackShare } from '../lib/analytics';
 import Layout from '../components/Layout';
 import ArticleCard from '../components/ArticleCard';
 import ArticleComments from '../components/ArticleComments';
@@ -43,6 +44,41 @@ function getAuthorInfo(article: Article | RelatedArticle) {
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+/**
+ * 画像のalt属性を自動補完（SEO対策）
+ * - figcaptionがあればそれを使用
+ * - なければファイル名から生成
+ * - それでもなければデフォルトテキスト
+ */
+function enhanceImageAlts(html: string, articleTitle: string): string {
+  // img タグを処理
+  return html.replace(/<img([^>]*)>/gi, (match, attrs) => {
+    // 既にaltがあり、空でない場合はスキップ
+    const altMatch = attrs.match(/alt=["']([^"']+)["']/i);
+    if (altMatch && altMatch[1].trim()) {
+      return match;
+    }
+
+    // srcからファイル名を取得
+    const srcMatch = attrs.match(/src=["']([^"']+)["']/i);
+    let altText = `${articleTitle}の画像`;
+
+    if (srcMatch) {
+      const src = srcMatch[1];
+      // ファイル名を取得（拡張子除く）
+      const filename = src.split('/').pop()?.split('?')[0]?.replace(/\.[^.]+$/, '') || '';
+      // UUIDやハッシュっぽくない場合はファイル名を使用
+      if (filename && !/^[a-f0-9-]{20,}$/i.test(filename)) {
+        altText = decodeURIComponent(filename).replace(/[-_]/g, ' ');
+      }
+    }
+
+    // 既存のalt属性を削除して新しいものを追加
+    const cleanedAttrs = attrs.replace(/alt=["'][^"']*["']/gi, '').trim();
+    return `<img ${cleanedAttrs} alt="${altText}">`;
+  });
+}
 
 /**
  * 記事HTMLから画像後の空行を除去
@@ -215,6 +251,7 @@ export default function ArticleDetail() {
       publishedAt: article.published_at || article.created_at,
       modifiedAt: article.updated_at || undefined,
       slug: article.slug,
+      price: article.price,
     } : undefined,
     breadcrumbs: article ? [
       { name: 'ホーム', url: '/' },
@@ -223,6 +260,8 @@ export default function ArticleDetail() {
         : [{ name: '記事一覧', url: '/articles' }]),
       { name: article.title, url: `/articles/${article.slug}` },
     ] : undefined,
+    // LLMO: 記事のタグをキーワードとして設定
+    keywords: article?.tags?.length ? article.tags : undefined,
   });
 
   // 決済成功で戻ってきた場合
@@ -362,6 +401,8 @@ export default function ArticleDetail() {
           .insert({ user_id: user.id, article_id: article.id });
         setIsFavorite(true);
         setRealFavoriteCount(prev => prev + 1);
+        // GA4: お気に入り追加イベント
+        trackAddToFavorite({ id: article.id, title: article.title, price: article.price });
       }
 
       setFavoriteLoading(false);
@@ -446,6 +487,17 @@ export default function ArticleDetail() {
       }
 
       setArticle(data as Article);
+
+      // GA4: 記事閲覧イベント
+      const authorInfo = getAuthorInfo(data as Article);
+      trackArticleView({
+        id: data.id,
+        title: data.title,
+        slug: data.slug,
+        price: data.price,
+        categoryName: (data as any).primary_category?.name,
+        authorName: authorInfo.display_name,
+      });
 
       // 購入済み判定（認証済みの場合のみ）
       if (user) {
@@ -802,25 +854,25 @@ export default function ArticleDetail() {
           <TableOfContents content={article.content} />
 
           {isFree || hasAccess ? (
-            <ArticleContent html={addHeadingIds(cleanArticleHtml(
+            <ArticleContent html={addHeadingIds(enhanceImageAlts(cleanArticleHtml(
               article.content
                 .replace(/<!-- paid -->/g, '')
                 .replace(/<!-- PAYWALL_BOUNDARY -->/g, '')
-            ))} />
+            ), article.title))} />
           ) : (
             <>
               <div className="prose md:prose-lg max-w-none mb-8">
-                <div dangerouslySetInnerHTML={{ __html: cleanArticleHtml(article.excerpt) }} />
+                <div dangerouslySetInnerHTML={{ __html: enhanceImageAlts(cleanArticleHtml(article.excerpt), article.title) }} />
               </div>
 
               {(article.content.includes('<!-- paid -->') || article.content.includes('<!-- PAYWALL_BOUNDARY -->')) && (
                 <div className="prose md:prose-lg max-w-none mb-8">
                   <div dangerouslySetInnerHTML={{
-                    __html: cleanArticleHtml(
+                    __html: enhanceImageAlts(cleanArticleHtml(
                       article.content
                         .split('<!-- paid -->')[0]
                         .split('<!-- PAYWALL_BOUNDARY -->')[0]
-                    )
+                    ), article.title)
                   }} />
                 </div>
               )}
@@ -934,6 +986,7 @@ export default function ArticleDetail() {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
+                trackShare('copy', { id: article.id, title: article.title });
                 alert('URLをコピーしました');
               }}
               className="flex items-center justify-center w-9 h-9 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"

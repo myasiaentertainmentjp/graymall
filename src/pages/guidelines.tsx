@@ -1,7 +1,18 @@
 // src/pages/guidelines.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function GuidelinesPage() {
+  useSEO({
+    title: '使い方ガイド',
+    description: 'グレーモールの使い方ガイドです。掲載可能なコンテンツの範囲と禁止事項について説明しています。',
+    canonicalUrl: '/guidelines',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: '使い方ガイド', url: '/guidelines' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">
