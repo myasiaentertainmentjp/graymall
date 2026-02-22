@@ -162,19 +162,19 @@ export default function BannerCarousel({ slides = defaultSlides, autoPlayInterva
         </div>
       </div>
 
-      {/* PC: 中央1枚 + 左右にチラ見せ */}
+      {/* PC: 中央1枚 + 左右にチラ見せ（ZOZO/tips風） */}
       <div className="hidden lg:block relative overflow-hidden">
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-4">
           {/* 左のスライド（チラ見せ） */}
           <div
-            className="w-[12%] flex-shrink-0 cursor-pointer"
+            className="w-[18%] flex-shrink-0 cursor-pointer"
             onClick={goToPrev}
           >
             {renderSlide(slides[getSlideIndex(-1)], false)}
           </div>
 
           {/* 中央のスライド */}
-          <div className="w-[72%] flex-shrink-0 relative">
+          <div className="w-[60%] flex-shrink-0 relative">
             {renderSlide(slides[currentIndex], true)}
             {/* 矢印を中央スライドの端に配置 */}
             <button
@@ -195,7 +195,7 @@ export default function BannerCarousel({ slides = defaultSlides, autoPlayInterva
 
           {/* 右のスライド（チラ見せ） */}
           <div
-            className="w-[12%] flex-shrink-0 cursor-pointer"
+            className="w-[18%] flex-shrink-0 cursor-pointer"
             onClick={goToNext}
           >
             {renderSlide(slides[getSlideIndex(1)], false)}
