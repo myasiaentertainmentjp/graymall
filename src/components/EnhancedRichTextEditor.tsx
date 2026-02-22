@@ -1620,61 +1620,22 @@
 
             <div className="w-px h-6 bg-gray-200 mx-1" />
 
-            <div className="relative flex-shrink-0">
-              <button
-                type="button"
-                {...handleMobileAction(() => {
-                  setHeadingMenuOpen(!headingMenuOpen);
-                  setMobileMenuOpen(false);
-                  setListMenuOpen(false);
-                  setAlignMenuOpen(false);
-                })}
-                className={`h-10 px-3 rounded-lg flex items-center gap-1 text-sm ${
-                  currentEditor?.isActive('heading') ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 active:bg-gray-200 text-gray-700'
-                }`}
-              >
-                {currentEditor?.isActive('heading', { level: 2 }) ? '見出し大' :
-                 currentEditor?.isActive('heading', { level: 3 }) ? '見出し小' : '本文'}
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {headingMenuOpen && (
-                <div className="absolute bottom-12 left-0 bg-white rounded-xl shadow-lg border border-gray-200 p-1 min-w-[130px] z-50">
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => {
-                      currentEditor?.chain().focus().setParagraph().run();
-                      setHeadingMenuOpen(false);
-                    })}
-                    className={`w-full px-3 py-2.5 text-left text-sm rounded-lg flex items-center gap-2 ${
-                      !currentEditor?.isActive('heading') ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
-                    }`}
-                  >
-                    <Type className="w-4 h-4" />
-                    本文
-                  </button>
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('h2'))}
-                    className={`w-full px-3 py-2.5 text-left text-sm rounded-lg flex items-center gap-2 ${
-                      currentEditor?.isActive('heading', { level: 2 }) ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
-                    }`}
-                  >
-                    <Heading2 className="w-4 h-4" />
-                    見出し大
-                  </button>
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('h3'))}
-                    className={`w-full px-3 py-2.5 text-left text-sm rounded-lg flex items-center gap-2 ${
-                      currentEditor?.isActive('heading', { level: 3 }) ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
-                    }`}
-                  >
-                    <Heading3 className="w-4 h-4" />
-                    見出し小
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              {...handleMobileAction(() => {
+                setHeadingMenuOpen(!headingMenuOpen);
+                setMobileMenuOpen(false);
+                setListMenuOpen(false);
+                setAlignMenuOpen(false);
+              })}
+              className={`flex-shrink-0 h-10 px-3 rounded-lg flex items-center gap-1 text-sm ${
+                headingMenuOpen ? 'bg-blue-100 text-blue-700' : currentEditor?.isActive('heading') ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100 active:bg-gray-200 text-gray-700'
+              }`}
+            >
+              {currentEditor?.isActive('heading', { level: 2 }) ? '見出し大' :
+               currentEditor?.isActive('heading', { level: 3 }) ? '見出し小' : '本文'}
+              <ChevronDown className="w-4 h-4" />
+            </button>
 
             <button
               type="button"
@@ -1847,6 +1808,47 @@
                   className="p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
                 >
                   <AlignRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 見出しメニュー */}
+          {headingMenuOpen && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-50">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  {...handleMobileAction(() => {
+                    currentEditor?.chain().focus().setParagraph().run();
+                    setHeadingMenuOpen(false);
+                  })}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-lg ${
+                    !currentEditor?.isActive('heading') ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
+                  }`}
+                >
+                  <Type className="w-5 h-5" />
+                  <span className="text-xs">本文</span>
+                </button>
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('h2'))}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-lg ${
+                    currentEditor?.isActive('heading', { level: 2 }) ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
+                  }`}
+                >
+                  <Heading2 className="w-5 h-5" />
+                  <span className="text-xs">見出し大</span>
+                </button>
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('h3'))}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-lg ${
+                    currentEditor?.isActive('heading', { level: 3 }) ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 active:bg-gray-100'
+                  }`}
+                >
+                  <Heading3 className="w-5 h-5" />
+                  <span className="text-xs">見出し小</span>
                 </button>
               </div>
             </div>
