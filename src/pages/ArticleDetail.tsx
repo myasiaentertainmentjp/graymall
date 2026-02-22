@@ -199,13 +199,30 @@ export default function ArticleDetail() {
   // アフィリエイトリファラルID（URLの?ref=xxx）
   const affiliateUserId = searchParams.get('ref');
 
-  // SEO設定
+  // SEO設定（構造化データ含む）
+  const authorInfo = article ? getAuthorInfo(article) : null;
   useSEO({
     title: article?.title,
     description: article?.excerpt || undefined,
     ogImage: article?.cover_image_url || undefined,
     ogType: 'article',
     canonicalUrl: article ? `/articles/${article.slug}` : undefined,
+    articleData: article ? {
+      title: article.title,
+      description: article.excerpt || '',
+      image: article.cover_image_url || undefined,
+      authorName: authorInfo?.display_name || '匿名',
+      publishedAt: article.published_at || article.created_at,
+      modifiedAt: article.updated_at || undefined,
+      slug: article.slug,
+    } : undefined,
+    breadcrumbs: article ? [
+      { name: 'ホーム', url: '/' },
+      ...(article.primary_category
+        ? [{ name: article.primary_category.name, url: `/articles?category=${article.primary_category.slug}` }]
+        : [{ name: '記事一覧', url: '/articles' }]),
+      { name: article.title, url: `/articles/${article.slug}` },
+    ] : undefined,
   });
 
   // 決済成功で戻ってきた場合

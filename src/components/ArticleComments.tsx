@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { MessageCircle, Trash2, Edit2, X, Check, Loader2 } from 'lucide-react';
+import { MessageCircle, Trash2, Edit2, X, Check, Loader2, Reply } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface Comment {
@@ -12,11 +12,13 @@ interface Comment {
   content: string;
   created_at: string;
   updated_at: string;
+  parent_id: string | null;
   users?: {
     display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
+  replies?: Comment[];
 }
 
 interface ArticleCommentsProps {
@@ -42,6 +44,8 @@ export default function ArticleComments({
   const [editContent, setEditContent] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
 
   const INITIAL_DISPLAY = 5;
   const isFreeArticle = articlePrice === 0;
@@ -72,12 +76,30 @@ export default function ArticleComments({
         users:user_id (display_name, email, avatar_url)
       `)
       .eq('article_id', articleId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Error loading comments:', error);
     } else {
-      setComments(data || []);
+      // 親コメントと返信を整理
+      const commentMap = new Map<string, Comment>();
+      const rootComments: Comment[] = [];
+
+      (data || []).forEach(comment => {
+        comment.replies = [];
+        commentMap.set(comment.id, comment);
+      });
+
+      (data || []).forEach(comment => {
+        if (comment.parent_id && commentMap.has(comment.parent_id)) {
+          commentMap.get(comment.parent_id)!.replies!.push(comment);
+        } else if (!comment.parent_id) {
+          rootComments.push(comment);
+        }
+      });
+
+      // 新しい順に並べ替え
+      setComments(rootComments.reverse());
     }
 
     setLoading(false);
@@ -163,9 +185,60 @@ export default function ArticleComments({
       console.error('Error deleting comment:', error);
       alert('コメントの削除に失敗しました。');
     } else {
-      setComments(comments.filter(c => c.id !== commentId));
+      // 親コメントまたは返信を削除
+      setComments(comments.map(c => ({
+        ...c,
+        replies: c.replies?.filter(r => r.id !== commentId)
+      })).filter(c => c.id !== commentId));
       setTotalCount(prev => prev - 1);
     }
+  };
+
+  // 返信投稿
+  const handleReply = async (parentId: string) => {
+    if (!user || !replyContent.trim() || submitting) return;
+
+    if (!isFreeArticle && !hasPurchased) {
+      alert('この記事にコメントするには購入が必要です。');
+      return;
+    }
+
+    if (replyContent.length > 500) {
+      alert('返信は500文字以内で入力してください。');
+      return;
+    }
+
+    setSubmitting(true);
+
+    const { data, error } = await supabase
+      .from('article_comments')
+      .insert({
+        article_id: articleId,
+        user_id: user.id,
+        content: replyContent.trim(),
+        parent_id: parentId,
+      })
+      .select(`
+        *,
+        users:user_id (display_name, email, avatar_url)
+      `)
+      .single();
+
+    if (error) {
+      console.error('Error posting reply:', error);
+      alert('返信の投稿に失敗しました。');
+    } else if (data) {
+      setComments(comments.map(c =>
+        c.id === parentId
+          ? { ...c, replies: [...(c.replies || []), data] }
+          : c
+      ));
+      setTotalCount(prev => prev + 1);
+      setReplyContent('');
+      setReplyingTo(null);
+    }
+
+    setSubmitting(false);
   };
 
   const displayedComments = showAll ? comments : comments.slice(0, INITIAL_DISPLAY);
@@ -304,8 +377,17 @@ export default function ArticleComments({
                     )}
 
                     {/* アクション */}
-                    {canModify && editingId !== comment.id && (
-                      <div className="flex items-center gap-2 mt-2">
+                    {editingId !== comment.id && (
+                      <div className="flex items-center gap-3 mt-2">
+                        {canComment && (
+                          <button
+                            onClick={() => { setReplyingTo(comment.id); setReplyContent(''); }}
+                            className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+                          >
+                            <Reply className="w-3 h-3" />
+                            返信
+                          </button>
+                        )}
                         {isOwner && (
                           <button
                             onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}
@@ -315,13 +397,91 @@ export default function ArticleComments({
                             編集
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDelete(comment.id)}
-                          className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          削除
-                        </button>
+                        {canModify && (
+                          <button
+                            onClick={() => handleDelete(comment.id)}
+                            className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            削除
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 返信フォーム */}
+                    {replyingTo === comment.id && (
+                      <div className="mt-3 pl-4 border-l-2 border-gray-200">
+                        <textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="返信を入力..."
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none text-sm"
+                          rows={2}
+                          maxLength={500}
+                        />
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-gray-400">{replyContent.length}/500</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setReplyingTo(null)}
+                              className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded"
+                            >
+                              キャンセル
+                            </button>
+                            <button
+                              onClick={() => handleReply(comment.id)}
+                              disabled={!replyContent.trim() || submitting}
+                              className="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded hover:bg-gray-800 disabled:opacity-50"
+                            >
+                              {submitting ? <Loader2 className="w-3 h-3 animate-spin" /> : '返信'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 返信一覧 */}
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-100">
+                        {comment.replies.map((reply) => {
+                          const replyDisplayName = reply.users?.display_name || reply.users?.email?.split('@')[0] || '匿名';
+                          const isReplyOwner = user?.id === reply.user_id;
+                          const canModifyReply = isReplyOwner || user?.id === articleAuthorId;
+
+                          return (
+                            <div key={reply.id} className="flex items-start gap-2">
+                              <Link to={`/users/${reply.user_id}`} className="flex-shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden">
+                                  {reply.users?.avatar_url ? (
+                                    <img src={reply.users.avatar_url} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-medium text-gray-500">
+                                      {replyDisplayName[0].toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
+                              </Link>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <Link to={`/users/${reply.user_id}`} className="font-medium text-xs text-gray-900 hover:underline">
+                                    {replyDisplayName}
+                                  </Link>
+                                  <span className="text-[10px] text-gray-400">{formatDate(reply.created_at)}</span>
+                                </div>
+                                <p className="text-xs text-gray-700 whitespace-pre-wrap">{reply.content}</p>
+                                {canModifyReply && (
+                                  <button
+                                    onClick={() => handleDelete(reply.id)}
+                                    className="text-[10px] text-gray-400 hover:text-red-500 mt-1"
+                                  >
+                                    削除
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

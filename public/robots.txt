@@ -35,5 +35,8 @@ Disallow: /article/*/settings
 # Sitemap
 Sitemap: https://graymall.jp/sitemap.xml
 
+# RSS Feed
+# https://graymall.jp/rss
+
 # Crawl-delay (optional)
 Crawl-delay: 1

@@ -1,4 +1,70 @@
 -- ============================================
+-- 0. 自動いいね済み記事のfake_favorite_countを修正
+-- ============================================
+-- 既存の自動いいね済み記事の fake_favorite_count を更新
+UPDATE articles a
+SET fake_favorite_count = COALESCE(a.fake_favorite_count, 0) + alp.likes_count
+FROM auto_likes_processed alp
+WHERE a.id = alp.article_id
+  AND (a.fake_favorite_count IS NULL OR a.fake_favorite_count = 0);
+
+-- ============================================
+-- 0.5. 自動いいね関数を更新（fake_favorite_countも更新するように）
+-- ============================================
+CREATE OR REPLACE FUNCTION add_auto_likes_to_new_articles()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  target_article RECORD;
+  graymall_user RECORD;
+  likes_to_add INT;
+  added_count INT;
+BEGIN
+  FOR target_article IN
+    SELECT a.id, a.title
+    FROM articles a
+    WHERE a.status = 'published'
+      AND a.published_at IS NOT NULL
+      AND a.published_at > NOW() - INTERVAL '30 minutes'
+      AND a.published_at <= NOW() - INTERVAL '5 minutes'
+      AND NOT EXISTS (
+        SELECT 1 FROM auto_likes_processed alp WHERE alp.article_id = a.id
+      )
+  LOOP
+    likes_to_add := 3 + floor(random() * 5)::INT;
+    added_count := 0;
+
+    FOR graymall_user IN
+      SELECT u.id
+      FROM users u
+      WHERE u.email LIKE '%@graymall.jp'
+        AND NOT EXISTS (
+          SELECT 1 FROM article_favorites af
+          WHERE af.article_id = target_article.id AND af.user_id = u.id
+        )
+      ORDER BY random()
+      LIMIT likes_to_add
+    LOOP
+      INSERT INTO article_favorites (user_id, article_id)
+      VALUES (graymall_user.id, target_article.id)
+      ON CONFLICT DO NOTHING;
+      added_count := added_count + 1;
+    END LOOP;
+
+    -- ★ fake_favorite_count も更新（Home画面で表示されるように）
+    UPDATE articles
+    SET fake_favorite_count = COALESCE(fake_favorite_count, 0) + added_count
+    WHERE id = target_article.id;
+
+    INSERT INTO auto_likes_processed (article_id, likes_count)
+    VALUES (target_article.id, added_count);
+  END LOOP;
+END;
+$$;
+
+-- ============================================
 -- 1. fake_favorite_countカラムを追加（存在しない場合）
 -- ============================================
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS fake_favorite_count INTEGER DEFAULT 0;

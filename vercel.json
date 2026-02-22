@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://wjvccdnyhfdcmsrcjysc.supabase.co/functions/v1/sitemap" },
+    { "source": "/rss", "destination": "https://wjvccdnyhfdcmsrcjysc.supabase.co/functions/v1/rss" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

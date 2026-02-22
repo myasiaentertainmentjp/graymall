@@ -24,23 +24,23 @@ function extractOgpData(html: string, url: string) {
   };
 
   // og:title
-  const ogTitleMatch = html.match(/<meta\s+(?:property|name)=["']og:title["']\s+content=["']([^"']+)["']/i)
-    || html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:title["']/i);
+  const ogTitleMatch = html.match(/<meta\s+[^>]*(?:property|name)=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s+[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']og:title["']/i);
   if (ogTitleMatch) result.title = ogTitleMatch[1];
 
   // og:description
-  const ogDescMatch = html.match(/<meta\s+(?:property|name)=["']og:description["']\s+content=["']([^"']+)["']/i)
-    || html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:description["']/i);
+  const ogDescMatch = html.match(/<meta\s+[^>]*(?:property|name)=["']og:description["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s+[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']og:description["']/i);
   if (ogDescMatch) result.description = ogDescMatch[1];
 
   // og:image
-  const ogImageMatch = html.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i)
-    || html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:image["']/i);
+  const ogImageMatch = html.match(/<meta\s+[^>]*(?:property|name)=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s+[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']og:image["']/i);
   if (ogImageMatch) result.image = ogImageMatch[1];
 
   // og:site_name
-  const ogSiteNameMatch = html.match(/<meta\s+(?:property|name)=["']og:site_name["']\s+content=["']([^"']+)["']/i)
-    || html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:site_name["']/i);
+  const ogSiteNameMatch = html.match(/<meta\s+[^>]*(?:property|name)=["']og:site_name["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s+[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']og:site_name["']/i);
   if (ogSiteNameMatch) result.siteName = ogSiteNameMatch[1];
 
   // フォールバック: titleタグ

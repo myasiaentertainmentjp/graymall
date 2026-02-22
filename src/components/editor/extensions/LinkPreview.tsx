@@ -126,7 +126,7 @@ function LinkPreviewComponent({ node, deleteNode }: { node: any; deleteNode: () 
   }
 
   return (
-    <NodeViewWrapper className="link-preview my-4 relative group">
+    <NodeViewWrapper className="link-preview my-3 relative group">
       {/* 削除ボタン */}
       <button
         type="button"
@@ -145,12 +145,12 @@ function LinkPreviewComponent({ node, deleteNode }: { node: any; deleteNode: () 
         <div className="flex">
           {/* 画像 */}
           {ogpData.image && (
-            <div className="w-32 sm:w-40 flex-shrink-0 bg-gray-100">
+            <div className="w-24 sm:w-32 flex-shrink-0 bg-gray-100">
               <img
                 src={ogpData.image}
                 alt={ogpData.title || ''}
                 className="w-full h-full object-cover"
-                style={{ minHeight: '100px', maxHeight: '120px' }}
+                style={{ minHeight: '72px', maxHeight: '80px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -159,23 +159,23 @@ function LinkPreviewComponent({ node, deleteNode }: { node: any; deleteNode: () 
           )}
 
           {/* テキスト情報 */}
-          <div className="flex-1 p-3 min-w-0">
+          <div className="flex-1 px-3 py-2 min-w-0 flex flex-col justify-center">
             {ogpData.title && (
-              <h3 className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+              <h3 className="text-xs font-medium text-gray-900 line-clamp-1 mb-0.5">
                 {ogpData.title}
               </h3>
             )}
             {ogpData.description && (
-              <p className="text-[11px] sm:text-xs text-gray-500 line-clamp-2 mb-2">
+              <p className="text-[10px] text-gray-500 line-clamp-1 mb-1">
                 {ogpData.description}
               </p>
             )}
-            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-400">
+            <div className="flex items-center gap-1 text-[10px] text-gray-400">
               {ogpData.favicon && (
                 <img
                   src={ogpData.favicon}
                   alt=""
-                  className="w-4 h-4"
+                  className="w-3 h-3"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}

@@ -1,7 +1,7 @@
  // src/pages/PublishConfirm.tsx
   import { useEffect, useState } from 'react';
   import { useNavigate, useParams } from 'react-router-dom';
-  import { ChevronLeft, Image, AlertCircle } from 'lucide-react';
+  import { ChevronLeft, Image, AlertCircle, Clock, Calendar } from 'lucide-react';
   import { supabase } from '../lib/supabase';
 
   export default function PublishConfirm() {
@@ -12,6 +12,9 @@
     const [submitting, setSubmitting] = useState(false);
     const [article, setArticle] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
+    const [publishMode, setPublishMode] = useState<'now' | 'scheduled'>('now');
+    const [scheduledDate, setScheduledDate] = useState('');
+    const [scheduledTime, setScheduledTime] = useState('09:00');
 
     useEffect(() => {
       if (!id) {
@@ -41,23 +44,44 @@
         }
 
         setArticle(data);
+        // デフォルトの予約日時を明日の9時に設定
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        setScheduledDate(tomorrow.toISOString().split('T')[0]);
         setLoading(false);
       })();
     }, [id]);
 
-    const canSubmit = article?.status === 'draft' || article?.status === 'rejected';
+    const canSubmit = article?.status === 'draft' || article?.status === 'rejected' || article?.status === 'scheduled';
 
     async function handleSubmit() {
       if (!id || !canSubmit) return;
 
       setSubmitting(true);
 
+      let updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (publishMode === 'scheduled') {
+        // 予約投稿
+        const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}:00`);
+        if (scheduledAt <= new Date()) {
+          alert('予約日時は現在より後の日時を指定してください。');
+          setSubmitting(false);
+          return;
+        }
+        updateData.status = 'scheduled';
+        updateData.scheduled_at = scheduledAt.toISOString();
+      } else {
+        // 即時公開申請
+        updateData.status = 'pending_review';
+        updateData.scheduled_at = null;
+      }
+
       const { error: updateError } = await supabase
         .from('articles')
-        .update({
-          status: 'pending_review',
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', id)
         .eq('author_id', (await supabase.auth.getUser()).data.user?.id);
 
@@ -69,7 +93,12 @@
         return;
       }
 
-      alert('公開申請を送信しました。管理者の確認をお待ちください。');
+      if (publishMode === 'scheduled') {
+        const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}:00`);
+        alert(`${scheduledAt.toLocaleString('ja-JP')} に公開予約しました。`);
+      } else {
+        alert('公開申請を送信しました。管理者の確認をお待ちください。');
+      }
       navigate('/me/articles');
     }
 
@@ -100,6 +129,7 @@
       pending_review: '審査待ち',
       published: '公開済み',
       rejected: '差戻し',
+      scheduled: '公開予約中',
     };
 
     // アフィリエイト対象のラベル
@@ -226,6 +256,76 @@
             </div>
           </div>
 
+          {/* 公開方法の選択 */}
+          {canSubmit && (
+            <div className="mt-8 bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="text-sm font-semibold text-gray-700 mb-4">公開方法</div>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition">
+                  <input
+                    type="radio"
+                    name="publishMode"
+                    value="now"
+                    checked={publishMode === 'now'}
+                    onChange={() => setPublishMode('now')}
+                    className="w-4 h-4 text-gray-900"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">今すぐ公開申請</div>
+                    <div className="text-xs text-gray-500">管理者の確認後に公開されます</div>
+                  </div>
+                </label>
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition">
+                  <input
+                    type="radio"
+                    name="publishMode"
+                    value="scheduled"
+                    checked={publishMode === 'scheduled'}
+                    onChange={() => setPublishMode('scheduled')}
+                    className="w-4 h-4 text-gray-900 mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      予約投稿
+                    </div>
+                    <div className="text-xs text-gray-500 mb-3">指定した日時に自動で公開されます</div>
+                    {publishMode === 'scheduled' && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        />
+                        <input
+                          type="time"
+                          value={scheduledTime}
+                          onChange={(e) => setScheduledTime(e.target.value)}
+                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* 予約中の記事の情報 */}
+          {article?.status === 'scheduled' && article?.scheduled_at && (
+            <div className="mt-6 p-4 rounded-xl bg-blue-50 border border-blue-200 flex items-start gap-3">
+              <Clock className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <div className="text-sm font-semibold text-blue-800">公開予約中</div>
+                <div className="text-sm text-blue-700 mt-1">
+                  {new Date(article.scheduled_at).toLocaleString('ja-JP')} に公開予定
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 flex items-center justify-end gap-4">
             <button
               type="button"
@@ -240,7 +340,7 @@
               disabled={submitting || !canSubmit}
               className="h-12 px-6 rounded-xl bg-slate-900 text-white text-sm font-semibold disabled:opacity-60"
             >
-              {submitting ? '送信中...' : '公開申請を送信'}
+              {submitting ? '送信中...' : publishMode === 'scheduled' ? '予約する' : '公開申請を送信'}
             </button>
           </div>
         </div>

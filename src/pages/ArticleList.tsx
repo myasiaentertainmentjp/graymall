@@ -7,6 +7,7 @@ import CategorySidebar from '../components/CategorySidebar';
 import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 const ITEMS_PER_PAGE = 60;
 
@@ -53,6 +54,45 @@ export default function ArticleList() {
     if (currentSort === 'popular') return '人気の記事';
     return '新着記事';
   };
+
+  // SEO用のタイトルと説明を生成
+  const getSeoTitle = () => {
+    if (searchQuery) return `「${searchQuery}」の検索結果`;
+    if (category) return `${category.name}の記事一覧 - ノウハウ・体験談`;
+    if (currentSort === 'popular') return '人気の記事一覧';
+    return '新着記事一覧';
+  };
+
+  const getSeoDescription = () => {
+    if (searchQuery) return `「${searchQuery}」に関する記事の検索結果。体験談やノウハウを探せます。`;
+    if (category) return `${category.name}に関する体験談・ノウハウ記事一覧。実践者の生の声や成功事例、収益化のコツを学べます。`;
+    if (currentSort === 'popular') return '人気の体験談・ノウハウ記事ランキング。多くの読者に支持されている記事をチェック。';
+    return '最新の体験談・ノウハウ記事一覧。新しく投稿された記事をチェックできます。';
+  };
+
+  // SEO設定（カテゴリページの構造化データ含む）
+  useSEO({
+    title: getSeoTitle(),
+    description: getSeoDescription(),
+    canonicalUrl: categorySlug ? `/articles?category=${categorySlug}` : '/articles',
+    breadcrumbs: category
+      ? [
+          { name: 'ホーム', url: '/' },
+          { name: '記事一覧', url: '/articles' },
+          { name: category.name, url: `/articles?category=${category.slug}` },
+        ]
+      : [
+          { name: 'ホーム', url: '/' },
+          { name: '記事一覧', url: '/articles' },
+        ],
+    // 記事一覧を構造化データとして出力（上位10件）
+    itemList: articles.map(article => ({
+      name: article.title,
+      url: `/articles/${article.slug}`,
+      image: article.cover_image_url || undefined,
+      description: article.excerpt || undefined,
+    })),
+  });
 
   useEffect(() => {
     loadCategories();
