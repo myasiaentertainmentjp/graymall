@@ -100,18 +100,15 @@
         let isMounted = true;
 
         const initializeAuth = async () => {
-          console.log('[AuthContext] Initializing auth...');
           try {
             const { data: { session: currentSession } } = await supabase.auth.getSession();
 
             if (!isMounted) return;
 
             if (currentSession?.user) {
-              console.log('[AuthContext] Session found:', currentSession.user.email);
               setUser(currentSession.user);
               setSession(currentSession);
             } else {
-              console.log('[AuthContext] No session found');
               setUser(null);
               setSession(null);
               setProfile(null);
@@ -120,7 +117,6 @@
             console.error('[AuthContext] Error initializing auth:', error);
           } finally {
             if (isMounted) {
-              console.log('[AuthContext] Setting loading to false (initial)');
               setLoading(false);
             }
           }
@@ -129,8 +125,6 @@
         initializeAuth();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-          console.log('[AuthContext] Auth state changed:', event);
-
           if (!isMounted) return;
 
           // 同期的に user/session を更新し、loading を false にする
@@ -143,7 +137,6 @@
             setProfile(null);
           }
 
-          console.log('[AuthContext] Setting loading to false (state change)');
           setLoading(false);
         });
 

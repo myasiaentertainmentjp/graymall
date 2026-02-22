@@ -592,10 +592,8 @@
         // before() で段落の前の位置を取得（その段落から後ろが有料になる）
         try {
           const beforePos = $from.before();
-          console.log('updatePlusButtonPosition: 保存する位置:', beforePos, 'カーソル位置:', $from.pos, 'ドキュメントサイズ:', editor.state.doc.content.size);
           savedParagraphPosRef.current = { before: beforePos };
-        } catch (e) {
-          console.warn('updatePlusButtonPosition: $from.before()でエラー:', e);
+        } catch {
           savedParagraphPosRef.current = null;
         }
 
@@ -1114,8 +1112,6 @@
       if (splitPos < 0) splitPos = 0;
       if (splitPos > docEnd) splitPos = docEnd;
 
-      console.log('有料エリア挿入: savedParagraphPosRef:', savedParagraphPosRef.current, '分割位置:', splitPos, 'ドキュメントサイズ:', docEnd, '現在の選択位置:', freeEditor.state.selection.from);
-
       let contentAfterCursor = '';
 
       // 分割位置より後にコンテンツがある場合
@@ -1133,16 +1129,14 @@
             tempDiv.appendChild(fragment);
             contentAfterCursor = tempDiv.innerHTML;
 
-            console.log('有料エリアに移動するコンテンツ:', contentAfterCursor.substring(0, 100) + '...');
-
             // 分割位置より後を削除
             if (contentAfterCursor && contentAfterCursor.trim()) {
               freeEditor.chain().focus().deleteRange({ from: splitPos, to: docEnd }).run();
               onChangeContent(freeEditor.getHTML());
             }
           }
-        } catch (e) {
-          console.warn('コンテンツ移動エラー:', e);
+        } catch {
+          // コンテンツ移動エラーは無視
         }
       }
 
