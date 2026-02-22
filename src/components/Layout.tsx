@@ -50,7 +50,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Left: Logo */}
             <div className="flex items-center gap-4">
               <Link to="/" className="flex items-center">
-                <img src="/logo-white.png" alt="GrayMall" className="h-6 sm:h-7" />
+                <img src="/logo-white.png" alt="グレーモール" className="h-6 sm:h-7" />
               </Link>
             </div>
 

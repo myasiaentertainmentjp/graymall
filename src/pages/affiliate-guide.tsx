@@ -7,7 +7,7 @@ import { useSEO } from '../hooks/useSEO';
 export default function AffiliateGuidePage() {
   useSEO({
     title: 'アフィリエイトの仕組み',
-    description: 'GrayMallのアフィリエイト（紹介）プログラムの仕組みと報酬について解説します。',
+    description: 'グレーモールのアフィリエイト（紹介）プログラムの仕組みと報酬について解説します。',
   });
 
   return (
@@ -117,7 +117,7 @@ export default function AffiliateGuidePage() {
               <li className="flex gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
                 <div>
-                  <h3 className="font-bold text-white mb-1">GrayMallに無料登録・ログイン</h3>
+                  <h3 className="font-bold text-white mb-1">グレーモールに無料登録・ログイン</h3>
                   <p className="text-sm text-gray-400">
                     アフィリエイトリンクの取得にはログインが必要です。まだアカウントをお持ちでない方は<Link to="/signup" className="text-emerald-400 hover:underline">こちら</Link>から無料登録できます。
                   </p>
@@ -196,7 +196,7 @@ export default function AffiliateGuidePage() {
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
               <h3 className="font-bold text-white mb-2">紹介に費用はかかりますか？</h3>
               <p className="text-sm text-gray-400">
-                いいえ、完全無料です。GrayMallへの無料登録だけで紹介リンクを取得できます。
+                いいえ、完全無料です。グレーモールへの無料登録だけで紹介リンクを取得できます。
               </p>
             </div>
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">

@@ -145,7 +145,7 @@ export default function SubscriptionPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full mb-4">
             <Crown className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">GrayMall プレミアム</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">グレーモール プレミアム</h1>
           <p className="text-gray-600">
             より柔軟な設定と特別な機能でコンテンツ販売を強化
           </p>
