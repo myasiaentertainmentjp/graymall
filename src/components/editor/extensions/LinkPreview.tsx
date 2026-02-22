@@ -161,16 +161,16 @@ function LinkPreviewComponent({ node, deleteNode }: { node: any; deleteNode: () 
           {/* テキスト情報 */}
           <div className="flex-1 p-3 min-w-0">
             {ogpData.title && (
-              <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-2 mb-1">
                 {ogpData.title}
               </h3>
             )}
             {ogpData.description && (
-              <p className="text-xs text-gray-500 line-clamp-2 mb-2">
+              <p className="text-[11px] sm:text-xs text-gray-500 line-clamp-2 mb-2">
                 {ogpData.description}
               </p>
             )}
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-400">
               {ogpData.favicon && (
                 <img
                   src={ogpData.favicon}
