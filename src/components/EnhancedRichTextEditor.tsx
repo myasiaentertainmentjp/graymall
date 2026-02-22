@@ -1700,80 +1700,33 @@
               <span className="w-5 h-5 flex items-center justify-center text-gray-700 font-bold text-sm" style={{ borderBottom: '2px solid #dc2626' }}>A</span>
             </button>
 
-            <div className="relative flex-shrink-0">
-              <button
-                type="button"
-                {...handleMobileAction(() => {
-                  setListMenuOpen(!listMenuOpen);
-                  setMobileMenuOpen(false);
-                  setHeadingMenuOpen(false);
-                  setAlignMenuOpen(false);
-                })}
-                className="h-10 px-2 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200"
-              >
-                <List className="w-5 h-5 text-gray-700" />
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-              {listMenuOpen && (
-                <div className="absolute bottom-12 left-0 bg-white rounded-xl shadow-lg border border-gray-200 p-1 min-w-[140px] z-50">
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('bullet'))}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 active:bg-gray-100 rounded-lg flex items-center gap-2"
-                  >
-                    <List className="w-4 h-4" /> 箇条書き
-                  </button>
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('ordered'))}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 active:bg-gray-100 rounded-lg flex items-center gap-2"
-                  >
-                    <ListOrdered className="w-4 h-4" /> 番号リスト
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              {...handleMobileAction(() => {
+                setListMenuOpen(!listMenuOpen);
+                setMobileMenuOpen(false);
+                setHeadingMenuOpen(false);
+                setAlignMenuOpen(false);
+              })}
+              className={`flex-shrink-0 h-10 px-2 rounded-lg flex items-center gap-1 ${listMenuOpen ? 'bg-blue-100' : 'hover:bg-gray-100 active:bg-gray-200'}`}
+            >
+              <List className="w-5 h-5 text-gray-700" />
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            </button>
 
-            <div className="relative flex-shrink-0">
-              <button
-                type="button"
-                {...handleMobileAction(() => {
-                  setAlignMenuOpen(!alignMenuOpen);
-                  setMobileMenuOpen(false);
-                  setHeadingMenuOpen(false);
-                  setListMenuOpen(false);
-                })}
-                className="h-10 px-2 rounded-lg flex items-center gap-1 hover:bg-gray-100 active:bg-gray-200"
-              >
-                <AlignLeft className="w-5 h-5 text-gray-700" />
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-              {alignMenuOpen && (
-                <div className="absolute bottom-12 left-0 bg-white rounded-xl shadow-lg border border-gray-200 p-1 z-50">
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('align-left'))}
-                    className="w-full px-3 py-2 hover:bg-gray-50 active:bg-gray-100 rounded-lg"
-                  >
-                    <AlignLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('align-center'))}
-                    className="w-full px-3 py-2 hover:bg-gray-50 active:bg-gray-100 rounded-lg"
-                  >
-                    <AlignCenter className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    {...handleMobileAction(() => insertBlock('align-right'))}
-                    className="w-full px-3 py-2 hover:bg-gray-50 active:bg-gray-100 rounded-lg"
-                  >
-                    <AlignRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              {...handleMobileAction(() => {
+                setAlignMenuOpen(!alignMenuOpen);
+                setMobileMenuOpen(false);
+                setHeadingMenuOpen(false);
+                setListMenuOpen(false);
+              })}
+              className={`flex-shrink-0 h-10 px-2 rounded-lg flex items-center gap-1 ${alignMenuOpen ? 'bg-blue-100' : 'hover:bg-gray-100 active:bg-gray-200'}`}
+            >
+              <AlignLeft className="w-5 h-5 text-gray-700" />
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            </button>
 
             <div className="w-px h-6 bg-gray-200 mx-1" />
 
@@ -1842,6 +1795,59 @@
                     <span className="text-xs text-gray-600">{item.label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* リストメニュー */}
+          {listMenuOpen && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-50">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('bullet'))}
+                  className="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <List className="w-5 h-5" />
+                  <span className="text-xs">箇条書き</span>
+                </button>
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('ordered'))}
+                  className="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <ListOrdered className="w-5 h-5" />
+                  <span className="text-xs">番号</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 配置メニュー */}
+          {alignMenuOpen && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-50">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('align-left'))}
+                  className="p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <AlignLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('align-center'))}
+                  className="p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <AlignCenter className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  {...handleMobileAction(() => insertBlock('align-right'))}
+                  className="p-3 rounded-lg hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <AlignRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           )}
