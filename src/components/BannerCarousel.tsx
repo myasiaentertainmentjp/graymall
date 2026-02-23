@@ -107,7 +107,7 @@ export default function BannerCarousel({ slides = defaultSlides, autoPlayInterva
 
   const renderSlide = (slide: BannerSlide, isCenter: boolean) => {
     const content = (
-      <div className={`relative w-full aspect-[2.5/1] lg:aspect-[3.5/1] overflow-hidden rounded-lg transition-all duration-300 ${isCenter ? 'opacity-100' : 'opacity-60'}`}>
+      <div className={`relative w-full aspect-[2.5/1] overflow-hidden rounded-lg transition-all duration-300 ${isCenter ? 'opacity-100' : 'opacity-60'}`}>
         <img
           src={slide.image}
           alt={slide.alt}
@@ -162,45 +162,46 @@ export default function BannerCarousel({ slides = defaultSlides, autoPlayInterva
         </div>
       </div>
 
-      {/* PC: 中央1枚 + 左右にチラ見せ（ZOZO/tips風） */}
+      {/* PC: 中央1枚 + 左右に半分見せ（tips風） */}
       <div className="hidden lg:block relative overflow-hidden">
-        <div className="flex items-center justify-center gap-4">
-          {/* 左のスライド（チラ見せ） */}
+        <div className="flex items-center justify-center">
+          {/* 左のスライド（左半分が画面外） */}
           <div
-            className="w-[18%] flex-shrink-0 cursor-pointer"
+            className="w-[28%] flex-shrink-0 cursor-pointer -ml-[14%]"
             onClick={goToPrev}
           >
             {renderSlide(slides[getSlideIndex(-1)], false)}
           </div>
 
           {/* 中央のスライド */}
-          <div className="w-[60%] flex-shrink-0 relative">
+          <div className="w-[52%] flex-shrink-0 relative mx-4">
             {renderSlide(slides[currentIndex], true)}
-            {/* 矢印を中央スライドの端に配置 */}
-            <button
-              onClick={goToPrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
-              aria-label="前のスライド"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              onClick={goToNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
-              aria-label="次のスライド"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
           </div>
 
-          {/* 右のスライド（チラ見せ） */}
+          {/* 右のスライド（右半分が画面外） */}
           <div
-            className="w-[18%] flex-shrink-0 cursor-pointer"
+            className="w-[28%] flex-shrink-0 cursor-pointer -mr-[14%]"
             onClick={goToNext}
           >
             {renderSlide(slides[getSlideIndex(1)], false)}
           </div>
         </div>
+
+        {/* 矢印ボタン */}
+        <button
+          onClick={goToPrev}
+          className="absolute left-[16%] top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
+          aria-label="前のスライド"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={goToNext}
+          className="absolute right-[16%] top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
+          aria-label="次のスライド"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
       </div>
 
       {/* Navigation Arrows (モバイルのみ) */}
