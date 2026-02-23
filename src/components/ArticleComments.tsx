@@ -320,13 +320,7 @@ export default function ArticleComments({
                   {/* アバター */}
                   <Link to={`/users/${comment.user_id}`} className="flex-shrink-0">
                     <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                      {comment.users?.avatar_url ? (
-                        <img src={comment.users.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-sm font-medium text-gray-500">
-                          {displayName[0].toUpperCase()}
-                        </div>
-                      )}
+                      <img src={comment.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
                     </div>
                   </Link>
 
@@ -453,13 +447,7 @@ export default function ArticleComments({
                             <div key={reply.id} className="flex items-start gap-2">
                               <Link to={`/users/${reply.user_id}`} className="flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden">
-                                  {reply.users?.avatar_url ? (
-                                    <img src={reply.users.avatar_url} alt="" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs font-medium text-gray-500">
-                                      {replyDisplayName[0].toUpperCase()}
-                                    </div>
-                                  )}
+                                  <img src={reply.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
                                 </div>
                               </Link>
                               <div className="flex-1 min-w-0">
