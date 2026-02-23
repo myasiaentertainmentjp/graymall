@@ -598,4 +598,48 @@ TipTapベースのリッチテキストエディタ。
 
 ---
 
-最終更新: 2026年2月22日（SEO/LLMO最適化・FVバナー復活）
+### 2026年2月23日
+**RLS修正・画像最適化・大理石デザイン**
+
+#### RLS（Row Level Security）修正
+- **問題**: `author_profiles` テーブルのRLSポリシーが `info@graymall.jp` のみ読み取り可能だったため、フロントエンドで著者プロフィール情報が取得できず、全記事が「管理者」表示になっていた
+- **原因**: `auth.email() = 'info@graymall.jp'` という制限的なポリシー設定
+- **修正**: パブリック読み取りポリシーを追加
+```sql
+CREATE POLICY "author_profiles_public_read"
+ON author_profiles
+FOR SELECT
+USING (true);
+```
+- **教訓**: Supabaseクライアントからのjoinは、参照先テーブルのRLSポリシーも適用される。認証不要で読み取りが必要なテーブルには `USING (true)` のポリシーが必要
+
+#### 画像遅延読み込み（loading="lazy"）追加
+以下のコンポーネントに `loading="lazy"` を追加:
+- `ArticleComments.tsx`: コメント・返信のアバター画像
+- `LinkCardRenderer.tsx`: OGPカードの画像・favicon
+
+※ファーストビューの画像（BannerCarousel、ArticleCardの最初の数枚）には追加しない
+
+#### ヘッダー・フッターの大理石デザイン
+- `index.css` に `.marble-dark` クラスを追加
+- 複数の `linear-gradient` を重ねて大理石風の模様を再現
+- 静的なデザイン（アニメーションなし）
+
+#### よくある問題と解決策
+| 問題 | 原因 | 解決策 |
+|------|------|--------|
+| 記事の著者が「管理者」表示 | RLSポリシーで参照テーブルの読み取りがブロック | `USING (true)` のSELECTポリシーを追加 |
+| Supabase joinが空を返す | RLSでネストされたテーブルがブロック | 参照先テーブルのRLSを確認 |
+
+#### RLSポリシー確認クエリ
+```sql
+-- 全テーブルのRLSポリシー確認
+SELECT tablename, policyname, cmd, qual
+FROM pg_policies
+WHERE schemaname = 'public'
+ORDER BY tablename, policyname;
+```
+
+---
+
+最終更新: 2026年2月23日（RLS修正・画像最適化）

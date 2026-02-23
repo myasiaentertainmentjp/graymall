@@ -137,6 +137,7 @@ function LinkCard({ url }: { url: string }) {
               alt={ogpData.title || ''}
               className="w-full h-full object-cover"
               style={{ minHeight: '100px', maxHeight: '120px' }}
+              loading="lazy"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
@@ -162,6 +163,7 @@ function LinkCard({ url }: { url: string }) {
                 src={ogpData.favicon}
                 alt=""
                 className="w-4 h-4"
+                loading="lazy"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}

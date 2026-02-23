@@ -320,7 +320,7 @@ export default function ArticleComments({
                   {/* アバター */}
                   <Link to={`/users/${comment.user_id}`} className="flex-shrink-0">
                     <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                      <img src={comment.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
+                      <img src={comment.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   </Link>
 
@@ -447,7 +447,7 @@ export default function ArticleComments({
                             <div key={reply.id} className="flex items-start gap-2">
                               <Link to={`/users/${reply.user_id}`} className="flex-shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden">
-                                  <img src={reply.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
+                                  <img src={reply.users?.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" loading="lazy" />
                                 </div>
                               </Link>
                               <div className="flex-1 min-w-0">

@@ -1,7 +1,18 @@
 // src/pages/payments.tsx
 import Layout from '../components/Layout';
+import { useSEO } from '../hooks/useSEO';
 
 export default function PaymentsPage() {
+  useSEO({
+    title: '取引・支払いについて',
+    description: 'グレーモールにおける取引と支払いの流れ、支払方法、出金方法についてご説明します。',
+    canonicalUrl: '/payments',
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: '取引・支払いについて', url: '/payments' },
+    ],
+  });
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-12">

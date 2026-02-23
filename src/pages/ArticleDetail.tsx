@@ -17,23 +17,23 @@ import LinkCardRenderer from '../components/LinkCardRenderer';
 
 type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null };
-  author_profiles?: { display_name: string; avatar_url?: string | null; bio?: string | null } | null;
+  author_profile?: { id?: string; display_name: string; avatar_url?: string | null; bio?: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
 
 type RelatedArticle = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null };
-  author_profiles?: { display_name: string; avatar_url?: string | null } | null;
+  author_profile?: { id?: string; display_name: string; avatar_url?: string | null; bio?: string | null } | null;
   primary_category?: { id: string; name: string; slug: string } | null;
 };
 
-// 著者情報を取得するヘルパー（author_profilesがあればそちらを優先）
+// 著者情報を取得するヘルパー（author_profileがあればそちらを優先）
 function getAuthorInfo(article: Article | RelatedArticle) {
-  if (article.author_profiles) {
+  if (article.author_profile) {
     return {
-      display_name: article.author_profiles.display_name,
-      avatar_url: article.author_profiles.avatar_url || null,
-      bio: 'bio' in article.author_profiles ? article.author_profiles.bio : null,
+      display_name: article.author_profile.display_name,
+      avatar_url: article.author_profile.avatar_url || null,
+      bio: article.author_profile.bio || null,
     };
   }
   return {
@@ -466,7 +466,7 @@ export default function ArticleDetail() {
         .select(`
           *,
           users:author_id (display_name, email, avatar_url, bio),
-          author_profiles:author_profile_id (display_name, avatar_url, bio),
+          author_profile:author_profile_id (id, display_name, avatar_url, bio),
           primary_category:primary_category_id (id, name, slug)
         `)
         .eq('slug', slug)
@@ -513,7 +513,7 @@ export default function ArticleDetail() {
         .select(`
           *,
           users:author_id (display_name, email, avatar_url),
-          author_profiles:author_profile_id (display_name, avatar_url),
+          author_profile:author_profile_id (id, display_name, avatar_url),
           primary_category:primary_category_id (id, name, slug)
         `)
         .eq('author_id', data.author_id)

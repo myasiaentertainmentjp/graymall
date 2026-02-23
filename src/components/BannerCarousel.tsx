@@ -107,7 +107,7 @@ export default function BannerCarousel({ slides = defaultSlides, autoPlayInterva
 
   const renderSlide = (slide: BannerSlide, isCenter: boolean) => {
     const content = (
-      <div className={`relative w-full aspect-[2.5/1] overflow-hidden rounded-lg transition-all duration-300 ${isCenter ? 'opacity-100' : 'opacity-60'}`}>
+      <div className={`relative w-full aspect-[2.5/1] lg:aspect-[3.5/1] overflow-hidden rounded-lg transition-all duration-300 ${isCenter ? 'opacity-100' : 'opacity-60'}`}>
         <img
           src={slide.image}
           alt={slide.alt}

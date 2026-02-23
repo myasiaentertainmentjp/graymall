@@ -2,8 +2,15 @@
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Home, Search, ArrowLeft } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 export default function NotFound() {
+  useSEO({
+    title: 'ページが見つかりません',
+    description: 'お探しのページは存在しないか、移動した可能性があります。',
+    noIndex: true,
+  });
+
   return (
     <Layout>
       <div className="min-h-[60vh] flex items-center justify-center px-4">

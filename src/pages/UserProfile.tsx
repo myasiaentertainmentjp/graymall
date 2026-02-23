@@ -8,6 +8,7 @@ import type { Database } from '../lib/database.types';
 import ArticleCard from '../components/ArticleCard';
 import { Settings, ExternalLink } from 'lucide-react';
 import { FollowButton } from '../features/social/FollowButton';
+import { useSEO } from '../hooks/useSEO';
 
 // SNS Icons
 function XIcon({ className }: { className?: string }) {
@@ -106,6 +107,26 @@ export default function UserProfile() {
     { url: profile.custom_link_1_url, label: profile.custom_link_1_label },
     { url: profile.custom_link_2_url, label: profile.custom_link_2_label },
   ].filter(link => link.url && link.label) : [];
+
+  // SEO設定
+  const displayName = profile?.display_name || 'ユーザー';
+  useSEO({
+    title: displayName,
+    description: profile?.bio || `${displayName}のプロフィールページです。`,
+    canonicalUrl: `/users/${userId}`,
+    ogType: 'profile',
+    ogImage: profile?.avatar_url || undefined,
+    personData: profile ? {
+      name: displayName,
+      url: `/users/${userId}`,
+      image: profile.avatar_url || undefined,
+      description: profile.bio || undefined,
+    } : undefined,
+    breadcrumbs: [
+      { name: 'ホーム', url: '/' },
+      { name: displayName, url: `/users/${userId}` },
+    ],
+  });
 
   return (
     <Layout>
