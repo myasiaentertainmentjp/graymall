@@ -121,14 +121,8 @@ export default function UserProfile() {
               {/* Avatar + Name row */}
               <div className="flex items-start gap-4 mb-4">
                 {/* Avatar */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-700 overflow-hidden flex-shrink-0">
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
-                      {(profile.display_name?.[0] || 'U').toUpperCase()}
-                    </div>
-                  )}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-600 overflow-hidden flex-shrink-0">
+                  <img src={profile.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
                 </div>
                 {/* Name */}
                 <div className="flex-1 min-w-0 pt-1">

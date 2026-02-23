@@ -771,12 +771,8 @@ export default function ArticleDetail() {
               const authorInfo = getAuthorInfo(article);
               return (
                 <Link to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`} className="flex items-center gap-4 hover:opacity-80 transition">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-lg font-medium overflow-hidden">
-                    {authorInfo.avatar_url ? (
-                      <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      (authorInfo.display_name || 'U')[0].toUpperCase()
-                    )}
+                  <div className="w-12 h-12 bg-gray-600 rounded-full overflow-hidden">
+                    <img src={authorInfo.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">
@@ -1006,14 +1002,8 @@ export default function ArticleDetail() {
               return (
                 <div className="flex items-center gap-3 sm:gap-4">
                   <Link to={article.author_profile_id ? `/authors/${article.author_profile_id}` : `/users/${article.author_id}`} className="flex-shrink-0">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden">
-                      {authorInfo.avatar_url ? (
-                        <img src={authorInfo.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl font-bold text-gray-400">
-                          {(authorInfo.display_name?.[0] || 'U').toUpperCase()}
-                        </div>
-                      )}
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-600 overflow-hidden">
+                      <img src={authorInfo.avatar_url || '/noicon.png'} alt="" className="w-full h-full object-cover" />
                     </div>
                   </Link>
                   <div className="flex-1 min-w-0">
@@ -1124,13 +1114,13 @@ export default function ArticleDetail() {
           {relatedArticles.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-white">
                   関連記事
                 </h3>
                 {article.primary_category && (
                   <Link
                     to={`/articles?category=${article.primary_category.slug}`}
-                    className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
                   >
                     {article.primary_category.name}をもっと見る
                     <ChevronRight className="w-4 h-4" />

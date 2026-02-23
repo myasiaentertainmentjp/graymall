@@ -44,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
         本文へスキップ
       </a>
 
-      <header className="bg-black border-b border-gray-800 sticky top-0 z-50" role="banner">
+      <header className="marble-dark border-b border-gray-800 sticky top-0 z-50" role="banner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Left: Logo */}
@@ -90,26 +90,14 @@ export default function Layout({ children }: LayoutProps) {
                     {/* ユーザーメニュー */}
                     <div className="relative group">
                       <button className="flex items-center gap-1 ml-2 p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-gray-800" type="button">
-                        {profile?.avatar_url ? (
-                          <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                            <User className="w-4 h-4 text-gray-400" />
-                          </div>
-                        )}
+                        <img src={profile?.avatar_url || '/noicon.png'} alt="" className="w-8 h-8 rounded-full object-cover" />
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       <div className="absolute right-0 pt-2 w-52 hidden group-hover:block">
                         <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-700 py-2">
                           <Link to={`/users/${user.id}`} className="block px-4 py-3 hover:bg-gray-800">
                             <div className="flex items-center gap-3">
-                              {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-                              ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                                  <User className="w-5 h-5 text-gray-400" />
-                                </div>
-                              )}
+                              <img src={profile?.avatar_url || '/noicon.png'} alt="" className="w-10 h-10 rounded-full object-cover" />
                               <div>
                                 <div className="text-sm font-medium text-white">
                                   {profile?.display_name || user.email?.split('@')[0]}
@@ -207,13 +195,7 @@ export default function Layout({ children }: LayoutProps) {
               className="flex items-center gap-3 px-4 py-4 border-b border-gray-800 hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-400" />
-                </div>
-              )}
+              <img src={profile?.avatar_url || '/noicon.png'} alt="" className="w-12 h-12 rounded-full object-cover" />
               <div>
                 <div className="font-medium text-white">
                   {profile?.display_name || user.email?.split('@')[0]}

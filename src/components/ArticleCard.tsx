@@ -265,14 +265,13 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
               onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1.5 min-w-0 hover:text-white transition"
             >
-              <div className="w-5 h-5 rounded-full bg-emerald-500 overflow-hidden flex-shrink-0">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt={`${label}のアイコン`} loading="lazy" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] font-medium text-white">
-                    {authorInitial(label)}
-                  </div>
-                )}
+              <div className="w-5 h-5 rounded-full bg-gray-600 overflow-hidden flex-shrink-0">
+                <img
+                  src={avatarUrl || '/noicon.png'}
+                  alt={`${label}のアイコン`}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="truncate">{label}</span>
             </Link>
@@ -292,11 +291,11 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
                 className={`w-4 h-4 transition ${
                   isLiked
                     ? 'text-red-500 fill-red-500'
-                    : 'text-gray-500 group-hover/like:text-red-400'
+                    : 'text-gray-400 group-hover/like:text-red-400'
                 }`}
               />
               {totalFavoriteCount > 0 && (
-                <span className={`text-xs ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
+                <span className={`text-xs ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
                   {totalFavoriteCount}
                 </span>
               )}

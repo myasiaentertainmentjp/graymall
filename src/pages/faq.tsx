@@ -171,7 +171,7 @@ function FAQAccordion({ item }: { item: FAQItem }) {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
-        <span className="flex items-center justify-center w-7 h-7 bg-blue-600 text-white font-bold text-sm rounded-full flex-shrink-0">Q</span>
+        <span className="flex items-center justify-center w-7 h-7 bg-emerald-600 text-white font-bold text-sm rounded-full flex-shrink-0">Q</span>
         <span className="flex-1 text-gray-100 font-medium">{item.question}</span>
         <span className="text-gray-400 text-xl font-light">{isOpen ? '−' : '+'}</span>
       </button>

@@ -5,7 +5,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 border-t border-gray-800 mt-20">
+    <footer className="marble-footer border-t border-gray-800 mt-20">
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* 上部: ロゴ + リンク */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-12 mb-12">
