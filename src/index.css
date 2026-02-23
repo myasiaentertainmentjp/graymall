@@ -57,41 +57,53 @@ button {
 }
 
 /* ========================================
-   大理石風デザイン（ダークマーブル）
+   大理石風デザイン（リアルダークマーブル）
    ======================================== */
 .marble-dark {
-  background:
-    /* 大理石の白い脈 */
-    linear-gradient(125deg, rgba(255,255,255,0.08) 0%, transparent 20%, rgba(255,255,255,0.04) 40%, transparent 60%),
-    linear-gradient(235deg, rgba(255,255,255,0.06) 10%, transparent 30%, rgba(255,255,255,0.03) 50%, transparent 70%),
-    linear-gradient(55deg, rgba(200,200,200,0.05) 5%, transparent 25%, rgba(180,180,180,0.04) 45%, transparent 65%),
-    /* 深みのあるグレーの層 */
-    linear-gradient(175deg, rgba(100,100,100,0.12) 0%, transparent 40%),
-    linear-gradient(355deg, rgba(60,60,60,0.1) 0%, transparent 50%),
-    /* 微細なテクスチャ */
-    radial-gradient(ellipse at 15% 85%, rgba(255,255,255,0.06) 0%, transparent 35%),
-    radial-gradient(ellipse at 85% 15%, rgba(220,220,220,0.05) 0%, transparent 30%),
-    radial-gradient(ellipse at 50% 50%, rgba(150,150,150,0.03) 0%, transparent 60%),
+  background-color: #1a1a1a;
+  background-image:
+    /* メインの白い脈（太め） */
+    linear-gradient(127deg, transparent 0%, transparent 40%, rgba(255,255,255,0.15) 42%, rgba(255,255,255,0.25) 44%, rgba(255,255,255,0.15) 46%, transparent 48%, transparent 100%),
+    linear-gradient(73deg, transparent 0%, transparent 55%, rgba(255,255,255,0.12) 57%, rgba(255,255,255,0.2) 59%, rgba(255,255,255,0.12) 61%, transparent 63%, transparent 100%),
+    /* サブの脈（細め） */
+    linear-gradient(168deg, transparent 0%, transparent 30%, rgba(200,200,200,0.08) 31%, rgba(220,220,220,0.12) 32%, rgba(200,200,200,0.08) 33%, transparent 34%, transparent 100%),
+    linear-gradient(42deg, transparent 0%, transparent 65%, rgba(180,180,180,0.06) 66%, rgba(200,200,200,0.1) 67%, rgba(180,180,180,0.06) 68%, transparent 69%, transparent 100%),
+    linear-gradient(195deg, transparent 0%, transparent 20%, rgba(220,220,220,0.07) 21%, rgba(240,240,240,0.1) 22%, rgba(220,220,220,0.07) 23%, transparent 24%, transparent 100%),
+    /* 細かいひび割れ */
+    linear-gradient(85deg, transparent 0%, transparent 75%, rgba(255,255,255,0.05) 76%, rgba(255,255,255,0.08) 77%, transparent 78%, transparent 100%),
+    linear-gradient(152deg, transparent 0%, transparent 45%, rgba(200,200,200,0.04) 46%, rgba(200,200,200,0.07) 47%, transparent 48%, transparent 100%),
+    /* グレーの深み・影 */
+    radial-gradient(ellipse at 20% 80%, rgba(0,0,0,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(40,40,40,0.4) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 60%, rgba(30,30,30,0.3) 0%, transparent 60%),
     /* ベース */
-    linear-gradient(180deg, #0d0d0d 0%, #121212 40%, #0a0a0a 100%);
-  background-size: 100% 100%;
+    linear-gradient(180deg, #1a1a1a 0%, #141414 50%, #0f0f0f 100%);
+  background-size: 200% 200%;
+  animation: marble-shift 30s ease-in-out infinite;
 }
 
 .marble-footer {
-  background:
-    /* 大理石の白い脈（フッター用・より繊細） */
-    linear-gradient(140deg, rgba(255,255,255,0.07) 0%, transparent 25%, rgba(255,255,255,0.035) 50%, transparent 75%),
-    linear-gradient(220deg, rgba(255,255,255,0.05) 5%, transparent 35%, rgba(255,255,255,0.025) 55%, transparent 80%),
-    linear-gradient(40deg, rgba(180,180,180,0.04) 0%, transparent 30%, rgba(160,160,160,0.03) 60%, transparent 90%),
+  background-color: #141414;
+  background-image:
+    /* メインの白い脈 */
+    linear-gradient(145deg, transparent 0%, transparent 35%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.18) 39%, rgba(255,255,255,0.12) 41%, transparent 43%, transparent 100%),
+    linear-gradient(62deg, transparent 0%, transparent 50%, rgba(255,255,255,0.1) 52%, rgba(255,255,255,0.15) 54%, rgba(255,255,255,0.1) 56%, transparent 58%, transparent 100%),
+    /* サブの脈 */
+    linear-gradient(175deg, transparent 0%, transparent 25%, rgba(200,200,200,0.06) 26%, rgba(220,220,220,0.09) 27%, rgba(200,200,200,0.06) 28%, transparent 29%, transparent 100%),
+    linear-gradient(38deg, transparent 0%, transparent 60%, rgba(180,180,180,0.05) 61%, rgba(200,200,200,0.08) 62%, rgba(180,180,180,0.05) 63%, transparent 64%, transparent 100%),
+    linear-gradient(112deg, transparent 0%, transparent 70%, rgba(220,220,220,0.06) 71%, rgba(240,240,240,0.09) 72%, rgba(220,220,220,0.06) 73%, transparent 74%, transparent 100%),
     /* グレーの深み */
-    linear-gradient(185deg, rgba(80,80,80,0.1) 0%, transparent 45%),
-    linear-gradient(5deg, rgba(50,50,50,0.08) 0%, transparent 50%),
-    /* 微細なテクスチャ */
-    radial-gradient(ellipse at 25% 75%, rgba(255,255,255,0.05) 0%, transparent 40%),
-    radial-gradient(ellipse at 75% 25%, rgba(200,200,200,0.04) 0%, transparent 35%),
+    radial-gradient(ellipse at 30% 70%, rgba(0,0,0,0.25) 0%, transparent 45%),
+    radial-gradient(ellipse at 70% 30%, rgba(35,35,35,0.35) 0%, transparent 40%),
     /* ベース */
-    linear-gradient(180deg, #0e0e0e 0%, #0a0a0a 100%);
-  background-size: 100% 100%;
+    linear-gradient(180deg, #161616 0%, #101010 100%);
+  background-size: 200% 200%;
+  animation: marble-shift 25s ease-in-out infinite reverse;
+}
+
+@keyframes marble-shift {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
 }
 
 /* ========================================
