@@ -78,8 +78,7 @@ button {
     radial-gradient(ellipse at 60% 60%, rgba(30,30,30,0.3) 0%, transparent 60%),
     /* ベース */
     linear-gradient(180deg, #1a1a1a 0%, #141414 50%, #0f0f0f 100%);
-  background-size: 200% 200%;
-  animation: marble-shift 30s ease-in-out infinite;
+  background-size: 100% 100%;
 }
 
 .marble-footer {
@@ -97,13 +96,7 @@ button {
     radial-gradient(ellipse at 70% 30%, rgba(35,35,35,0.35) 0%, transparent 40%),
     /* ベース */
     linear-gradient(180deg, #161616 0%, #101010 100%);
-  background-size: 200% 200%;
-  animation: marble-shift 25s ease-in-out infinite reverse;
-}
-
-@keyframes marble-shift {
-  0%, 100% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
+  background-size: 100% 100%;
 }
 
 /* ========================================
