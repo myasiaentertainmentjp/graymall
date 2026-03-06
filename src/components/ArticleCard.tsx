@@ -193,9 +193,9 @@ export default function ArticleCard({ article, rank, hideTime, priority, skipDbQ
       <Link href={`/articles/${article.slug}`} className="block">
         {/* Thumbnail */}
         <div className={`relative aspect-[1280/670] overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-          {article.cover_image_url && !imageError ? (
+          {article.thumbnail_url && !imageError ? (
             <Image
-              src={article.cover_image_url}
+              src={article.thumbnail_url}
               alt={article.title}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 256px"

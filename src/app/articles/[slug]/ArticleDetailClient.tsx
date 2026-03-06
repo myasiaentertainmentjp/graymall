@@ -253,10 +253,10 @@ export default function ArticleDetailClient({ article, relatedArticles }: Articl
         </div>
 
         {/* アイキャッチ画像 */}
-        {article.cover_image_url && (
+        {article.thumbnail_url && (
           <div className="mb-8 relative aspect-video">
             <Image
-              src={article.cover_image_url}
+              src={article.thumbnail_url}
               alt={article.title}
               fill
               sizes="(max-width: 768px) 100vw, 768px"

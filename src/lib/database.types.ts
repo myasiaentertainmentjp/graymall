@@ -181,7 +181,7 @@ export interface Database {
           content: string
           price: number
           is_subscription_product: boolean
-          cover_image_url: string | null
+          thumbnail_url: string | null
           status: 'draft' | 'pending_review' | 'published' | 'rejected'
           admin_comment: string | null
           has_partial_paywall: boolean
@@ -209,7 +209,7 @@ export interface Database {
           content: string
           price?: number
           is_subscription_product?: boolean
-          cover_image_url?: string | null
+          thumbnail_url?: string | null
           status?: 'draft' | 'pending_review' | 'published' | 'rejected'
           admin_comment?: string | null
           has_partial_paywall?: boolean
@@ -237,7 +237,7 @@ export interface Database {
           content?: string
           price?: number
           is_subscription_product?: boolean
-          cover_image_url?: string | null
+          thumbnail_url?: string | null
           status?: 'draft' | 'pending_review' | 'published' | 'rejected'
           admin_comment?: string | null
           has_partial_paywall?: boolean

@@ -41,7 +41,7 @@ interface Article {
   slug: string
   status: string
   created_at: string
-  cover_image_url: string | null
+  thumbnail_url: string | null
   users: { display_name: string | null; email: string } | null
 }
 

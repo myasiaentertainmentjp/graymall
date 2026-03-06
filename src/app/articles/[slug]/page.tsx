@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     article.users?.email?.split('@')[0] ||
     '著者不明'
 
-  const ogImage = article.cover_image_url || 'https://graymall.jp/og-image.png'
+  const ogImage = article.thumbnail_url || 'https://graymall.jp/og-image.png'
 
   return {
     title: article.title,
@@ -126,7 +126,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       <ArticleSchema
         title={article.title}
         description={article.excerpt || article.title}
-        image={article.cover_image_url || 'https://graymall.jp/og-image.png'}
+        image={article.thumbnail_url || 'https://graymall.jp/og-image.png'}
         datePublished={article.published_at || article.created_at}
         dateModified={article.updated_at}
         authorName={authorName}

@@ -25,7 +25,7 @@ async function getData(userId: string) {
       .from('orders')
       .select(`
         *,
-        articles (id, title, slug, cover_image_url, price)
+        articles (id, title, slug, thumbnail_url, price)
       `)
       .eq('buyer_id', userId)
       .eq('status', 'paid')
@@ -35,7 +35,7 @@ async function getData(userId: string) {
       .select(`
         *,
         articles (
-          id, title, slug, cover_image_url, price, published_at,
+          id, title, slug, thumbnail_url, price, published_at,
           users:author_id (display_name, avatar_url),
           author_profile:author_profile_id (id, display_name, avatar_url)
         )

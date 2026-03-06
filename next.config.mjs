@@ -10,12 +10,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'wjvccdnyhfdcmsrcjysc.supabase.co',
+        hostname: 'josanlblwfjdaaezqbnw.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Google OAuth avatars
+        hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },
     ],

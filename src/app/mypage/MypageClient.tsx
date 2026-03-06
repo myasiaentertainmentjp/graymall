@@ -8,14 +8,14 @@ import type { Database } from '@/lib/database.types'
 
 type UserProfile = Database['public']['Tables']['users']['Row']
 type Order = Database['public']['Tables']['orders']['Row'] & {
-  articles: { id: string; title: string; slug: string; cover_image_url: string | null; price: number } | null
+  articles: { id: string; title: string; slug: string; thumbnail_url: string | null; price: number } | null
 }
 type Favorite = Database['public']['Tables']['article_favorites']['Row'] & {
   articles: {
     id: string
     title: string
     slug: string
-    cover_image_url: string | null
+    thumbnail_url: string | null
     price: number
     published_at: string | null
     users: { display_name: string | null; avatar_url: string | null } | null
@@ -143,9 +143,9 @@ export default function MypageClient({
                   className="flex items-center gap-4 bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition"
                 >
                   <div className="w-20 h-12 bg-gray-700 rounded overflow-hidden flex-shrink-0 relative">
-                    {order.articles?.cover_image_url && (
+                    {order.articles?.thumbnail_url && (
                       <Image
-                        src={order.articles.cover_image_url}
+                        src={order.articles.thumbnail_url}
                         alt=""
                         fill
                         className="object-cover"
@@ -192,9 +192,9 @@ export default function MypageClient({
                   className="flex items-center gap-4 bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition"
                 >
                   <div className="w-20 h-12 bg-gray-700 rounded overflow-hidden flex-shrink-0 relative">
-                    {fav.articles?.cover_image_url && (
+                    {fav.articles?.thumbnail_url && (
                       <Image
-                        src={fav.articles.cover_image_url}
+                        src={fav.articles.thumbnail_url}
                         alt=""
                         fill
                         className="object-cover"
@@ -244,9 +244,9 @@ export default function MypageClient({
                   className="flex items-center gap-4 bg-gray-900 rounded-lg p-4"
                 >
                   <div className="w-20 h-12 bg-gray-700 rounded overflow-hidden flex-shrink-0 relative">
-                    {article.cover_image_url && (
+                    {article.thumbnail_url && (
                       <Image
-                        src={article.cover_image_url}
+                        src={article.thumbnail_url}
                         alt=""
                         fill
                         className="object-cover"

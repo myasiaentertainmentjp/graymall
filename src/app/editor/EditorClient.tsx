@@ -58,7 +58,7 @@ export default function EditorClient({ article, categories, userId }: EditorClie
 
   const [title, setTitle] = useState(article?.title || '')
   const [excerpt, setExcerpt] = useState(article?.excerpt || '')
-  const [coverImageUrl, setCoverImageUrl] = useState(article?.cover_image_url || '')
+  const [coverImageUrl, setCoverImageUrl] = useState(article?.thumbnail_url || '')
   const [categoryId, setCategoryId] = useState(article?.primary_category_id || '')
   const [price, setPrice] = useState(article?.price || 0)
   const [affiliateEnabled, setAffiliateEnabled] = useState(article?.affiliate_enabled || false)
@@ -165,7 +165,7 @@ export default function EditorClient({ article, categories, userId }: EditorClie
       slug,
       content,
       excerpt,
-      cover_image_url: coverImageUrl || null,
+      thumbnail_url: coverImageUrl || null,
       primary_category_id: categoryId || null,
       price,
       affiliate_enabled: affiliateEnabled,
