@@ -17,16 +17,6 @@ export default async function SearchPage({
 
   const supabase = await createClient()
 
-  type Category = { id: string; name: string; slug: string; parent_id: string | null; sort_order: number; created_at: string }
-
-  // カテゴリ一覧を取得
-  const { data: categoriesData } = await supabase
-    .from('categories')
-    .select('*')
-    .order('sort_order')
-
-  const categories = (categoriesData || []) as Category[]
-
   // 検索実行
   let articlesQuery = supabase
     .from('articles')
@@ -50,7 +40,7 @@ export default async function SearchPage({
         initialQuery={query}
         initialCategory={categorySlug}
         articles={articles || []}
-        categories={categories}
+        categories={[]}
       />
     </Suspense>
   )

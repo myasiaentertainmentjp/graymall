@@ -7,16 +7,6 @@ interface ArticleRow {
   published_at: string | null
 }
 
-interface AuthorRow {
-  id: string
-  updated_at: string | null
-}
-
-interface CategoryRow {
-  slug: string
-  updated_at: string | null
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const baseUrl = 'https://graymall.jp'
@@ -59,33 +49,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  // 著者ページを取得（author_profileを持つユーザー）
-  const { data: authorsData } = await supabase
-    .from('author_profiles')
-    .select('id, updated_at')
-
-  const authors = (authorsData || []) as AuthorRow[]
-
-  const authorPages: MetadataRoute.Sitemap = authors.map((author) => ({
-    url: `${baseUrl}/authors/${author.id}`,
-    lastModified: new Date(author.updated_at || new Date().toISOString()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
-
-  // カテゴリページ（カテゴリが存在する場合）
-  const { data: categoriesData } = await supabase
-    .from('categories')
-    .select('slug, updated_at')
-
-  const categories = (categoriesData || []) as CategoryRow[]
-
-  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${baseUrl}/search?category=${category.slug}`,
-    lastModified: new Date(category.updated_at || new Date().toISOString()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
-
-  return [...staticPages, ...articlePages, ...authorPages, ...categoryPages]
+  return [...staticPages, ...articlePages]
 }
