@@ -34,7 +34,7 @@ async function getDashboardData() {
     { data: homepageSections },
   ] = await Promise.all([
     supabase.from('users').select('*', { count: 'exact', head: true }),
-    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('is_published', true),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published'),
     supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid'),
     supabase
       .from('orders')
@@ -58,7 +58,7 @@ async function getDashboardData() {
     supabase
       .from('articles')
       .select('*')
-      .eq('is_published', false)
+      .neq('status', 'published')
       .order('created_at', { ascending: false }),
     supabase
       .from('homepage_sections')

@@ -10,7 +10,7 @@ async function fetchData() {
   const { data: allArticlesData } = await supabase
     .from('articles')
     .select('*')
-    .eq('is_published', true)
+    .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(500)
 

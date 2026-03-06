@@ -41,7 +41,7 @@ async function getAuthorData(id: string) {
       .from('articles')
       .select('*')
       .eq('author_id', id)
-      .eq('is_published', true)
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
 
     const { count: followerCount } = await supabase
@@ -79,7 +79,7 @@ async function getAuthorData(id: string) {
     .from('articles')
     .select('*')
     .eq('author_id', id)
-    .eq('is_published', true)
+    .eq('status', 'published')
     .order('published_at', { ascending: false })
 
   const { count: followerCount } = await supabase

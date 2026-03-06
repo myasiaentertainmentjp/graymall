@@ -21,7 +21,7 @@ export default async function SearchPage({
   let articlesQuery = supabase
     .from('articles')
     .select('*')
-    .eq('is_published', true)
+    .eq('status', 'published')
     .order('published_at', { ascending: false })
 
   if (query) {

@@ -25,7 +25,7 @@ async function getArticle(slug: string): Promise<Article | null> {
     .from('articles')
     .select('*')
     .eq('slug', slug)
-    .eq('is_published', true)
+    .eq('status', 'published')
     .single()
 
   if (error || !article) {
@@ -101,7 +101,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       .from('articles')
       .select('*')
       .eq('category', article.category)
-      .eq('is_published', true)
+      .eq('status', 'published')
       .neq('id', article.id)
       .limit(4)
 
