@@ -1,0 +1,104 @@
+import Link from 'next/link'
+import Image from 'next/image'
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear()
+
+  return (
+    <footer className="marble-footer border-t border-gray-800 mt-20">
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        {/* 上部: ロゴ + リンク */}
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-12 mb-12">
+          {/* ロゴ・説明 */}
+          <div className="lg:max-w-xs">
+            <Link href="/" className="inline-block mb-4">
+              <Image src="/logo-white.png" alt="GRAYMALL" width={120} height={32} className="h-8 w-auto" />
+            </Link>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              個人の体験談やノウハウを売買できるデジタルコンテンツマーケットプレイス
+            </p>
+          </div>
+
+          {/* リンク群 */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 lg:gap-16">
+            <div>
+              <h4 className="text-base font-semibold text-white mb-4">
+                サービス
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    利用規約
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    プライバシーポリシー
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/law" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    特定商取引法に基づく表記
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-base font-semibold text-white mb-4">
+                ガイド
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <Link href="/guidelines" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    使い方ガイド
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/affiliate-guide" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    アフィリエイトガイド
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/payments" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    取引・支払いについて
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/faq" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    よくある質問
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-base font-semibold text-white mb-4">
+                サポート
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <Link href="/contact" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    お問い合わせ
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/company" className="text-sm text-gray-400 hover:text-white transition-colors">
+                    会社概要
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* 下部: コピーライト */}
+        <div className="border-t border-gray-800 pt-8">
+          <p className="text-xs text-gray-500 text-center">
+            &copy; {currentYear} グレーモール / 合同会社マイアジアエンターテインメント
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}

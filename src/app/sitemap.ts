@@ -1,0 +1,91 @@
+import { MetadataRoute } from 'next'
+import { createClient } from '@/lib/supabase/server'
+
+interface ArticleRow {
+  slug: string
+  updated_at: string | null
+  published_at: string | null
+}
+
+interface AuthorRow {
+  id: string
+  updated_at: string | null
+}
+
+interface CategoryRow {
+  slug: string
+  updated_at: string | null
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabase = await createClient()
+  const baseUrl = 'https://graymall.jp'
+
+  // 固定ページ
+  const staticPages: MetadataRoute.Sitemap = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/search`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/signin`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+  ]
+
+  // 公開記事を取得
+  const { data: articlesData } = await supabase
+    .from('articles')
+    .select('slug, updated_at, published_at')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+
+  const articles = (articlesData || []) as ArticleRow[]
+
+  const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({
+    url: `${baseUrl}/articles/${article.slug}`,
+    lastModified: new Date(article.updated_at || article.published_at || new Date().toISOString()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
+  // 著者ページを取得（author_profileを持つユーザー）
+  const { data: authorsData } = await supabase
+    .from('author_profiles')
+    .select('id, updated_at')
+
+  const authors = (authorsData || []) as AuthorRow[]
+
+  const authorPages: MetadataRoute.Sitemap = authors.map((author) => ({
+    url: `${baseUrl}/authors/${author.id}`,
+    lastModified: new Date(author.updated_at || new Date().toISOString()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
+
+  // カテゴリページ（カテゴリが存在する場合）
+  const { data: categoriesData } = await supabase
+    .from('categories')
+    .select('slug, updated_at')
+
+  const categories = (categoriesData || []) as CategoryRow[]
+
+  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${baseUrl}/search?category=${category.slug}`,
+    lastModified: new Date(category.updated_at || new Date().toISOString()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  return [...staticPages, ...articlePages, ...authorPages, ...categoryPages]
+}

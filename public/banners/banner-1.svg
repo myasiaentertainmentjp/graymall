@@ -1,0 +1,13 @@
+<svg width="1200" height="628" viewBox="0 0 1200 628" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#065f46;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="628" fill="url(#grad1)"/>
+  <text x="600" y="280" text-anchor="middle" font-family="sans-serif" font-size="64" font-weight="bold" fill="white">グレーモールとは？</text>
+  <text x="600" y="360" text-anchor="middle" font-family="sans-serif" font-size="32" fill="rgba(255,255,255,0.8)">あなたの知識を、価値に変える</text>
+  <rect x="480" y="420" width="240" height="56" rx="28" fill="white"/>
+  <text x="600" y="458" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="bold" fill="#059669">詳しく見る</text>
+</svg>
