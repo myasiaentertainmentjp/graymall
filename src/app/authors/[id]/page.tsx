@@ -39,14 +39,9 @@ async function getAuthorData(id: string) {
     // author_profilesの場合
     const { data: articles } = await supabase
       .from('articles')
-      .select(`
-        *,
-        users:author_id (display_name, email, avatar_url),
-        author_profile:author_profile_id (id, display_name, avatar_url),
-        primary_category:primary_category_id (id, name, slug)
-      `)
-      .eq('author_profile_id', id)
-      .eq('status', 'published')
+      .select('*')
+      .eq('author_id', id)
+      .eq('is_published', true)
       .order('published_at', { ascending: false })
 
     const { count: followerCount } = await supabase
@@ -82,14 +77,9 @@ async function getAuthorData(id: string) {
 
   const { data: articles } = await supabase
     .from('articles')
-    .select(`
-      *,
-      users:author_id (display_name, email, avatar_url),
-      author_profile:author_profile_id (id, display_name, avatar_url),
-      primary_category:primary_category_id (id, name, slug)
-    `)
+    .select('*')
     .eq('author_id', id)
-    .eq('status', 'published')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
 
   const { count: followerCount } = await supabase

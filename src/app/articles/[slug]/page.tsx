@@ -11,6 +11,7 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
   users?: { display_name: string | null; email: string; avatar_url?: string | null; bio?: string | null }
   author_profile?: { id?: string; display_name: string; avatar_url?: string | null; bio?: string | null } | null
   primary_category?: { id: string; name: string; slug: string } | null
+  category?: string | null
 }
 
 interface Props {
@@ -22,14 +23,9 @@ async function getArticle(slug: string): Promise<Article | null> {
 
   const { data: article, error } = await supabase
     .from('articles')
-    .select(`
-      *,
-      users:author_id (display_name, email, avatar_url, bio),
-      author_profile:author_profile_id (id, display_name, avatar_url, bio),
-      primary_category:primary_category_id (id, name, slug)
-    `)
+    .select('*')
     .eq('slug', slug)
-    .eq('status', 'published')
+    .eq('is_published', true)
     .single()
 
   if (error || !article) {
@@ -100,17 +96,12 @@ export default async function ArticleDetailPage({ params }: Props) {
   const supabase = await createClient()
   let relatedArticles: Article[] = []
 
-  if (article.primary_category_id) {
+  if (article.category) {
     const { data } = await supabase
       .from('articles')
-      .select(`
-        *,
-        users:author_id (display_name, email, avatar_url),
-        author_profile:author_profile_id (id, display_name, avatar_url),
-        primary_category:primary_category_id (id, name, slug)
-      `)
-      .eq('primary_category_id', article.primary_category_id)
-      .eq('status', 'published')
+      .select('*')
+      .eq('category', article.category)
+      .eq('is_published', true)
       .neq('id', article.id)
       .limit(4)
 

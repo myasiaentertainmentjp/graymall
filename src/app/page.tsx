@@ -21,14 +21,8 @@ async function fetchData() {
 
   const { data: allArticlesData } = await supabase
     .from('articles')
-    .select(`
-      *,
-      users:author_id (display_name, email, avatar_url),
-      author_profile:author_profile_id (id, display_name, avatar_url),
-      primary_category:primary_category_id (id, name, slug)
-    `)
-    .eq('status', 'published')
-    .eq('is_archived', false)
+    .select('*')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
     .limit(500)
 

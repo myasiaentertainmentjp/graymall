@@ -30,14 +30,8 @@ export default async function SearchPage({
   // 検索実行
   let articlesQuery = supabase
     .from('articles')
-    .select(`
-      *,
-      users:author_id (display_name, email, avatar_url),
-      author_profile:author_profile_id (id, display_name, avatar_url),
-      primary_category:primary_category_id (id, name, slug)
-    `)
-    .eq('status', 'published')
-    .eq('is_archived', false)
+    .select('*')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
 
   if (query) {
@@ -45,10 +39,7 @@ export default async function SearchPage({
   }
 
   if (categorySlug) {
-    const category = categories.find(c => c.slug === categorySlug)
-    if (category) {
-      articlesQuery = articlesQuery.eq('primary_category_id', category.id)
-    }
+    articlesQuery = articlesQuery.eq('category', categorySlug)
   }
 
   const { data: articles } = await articlesQuery.limit(50)
