@@ -39,7 +39,7 @@ async function getAuthorData(id: string) {
     // author_profilesの場合
     const { data: articlesData } = await supabase
       .from('articles')
-      .select('*, users:author_id(id, display_name, email, avatar_url)')
+      .select('id, title, slug, excerpt, cover_image_url, thumbnail_url, price, published_at, created_at, like_count, fake_favorite_count, author_id, primary_category_id, users:author_id(id, display_name, email, avatar_url)')
       .eq('author_id', id)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
@@ -82,7 +82,7 @@ async function getAuthorData(id: string) {
 
   const { data: articlesData2 } = await supabase
     .from('articles')
-    .select('*, users:author_id(id, display_name, email, avatar_url)')
+    .select('id, title, slug, excerpt, cover_image_url, thumbnail_url, price, published_at, created_at, like_count, fake_favorite_count, author_id, primary_category_id, users:author_id(id, display_name, email, avatar_url)')
     .eq('author_id', id)
     .eq('status', 'published')
     .order('published_at', { ascending: false })

@@ -24,7 +24,7 @@ async function getArticle(slug: string): Promise<Article | null> {
 
   const { data: article, error } = await supabase
     .from('articles')
-    .select('*, users:author_id(id, display_name, email, avatar_url, bio)')
+    .select('id, title, slug, excerpt, content, cover_image_url, thumbnail_url, price, published_at, created_at, updated_at, like_count, fake_favorite_count, author_id, primary_category_id, category, affiliate_enabled, affiliate_rate, affiliate_target, users:author_id(id, display_name, email, avatar_url, bio)')
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
@@ -105,7 +105,7 @@ export default async function ArticleDetailPage({ params }: Props) {
   if (article.category) {
     const { data } = await supabase
       .from('articles')
-      .select('*, users:author_id(id, display_name, email, avatar_url)')
+      .select('id, title, slug, excerpt, cover_image_url, thumbnail_url, price, published_at, created_at, like_count, fake_favorite_count, author_id, primary_category_id, category, users:author_id(id, display_name, email, avatar_url)')
       .eq('category', article.category)
       .eq('status', 'published')
       .neq('id', article.id)

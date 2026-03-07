@@ -20,7 +20,7 @@ export default async function SearchPage({
   // 検索実行
   let articlesQuery = supabase
     .from('articles')
-    .select('*, users:author_id(id, display_name, email, avatar_url)')
+    .select('id, title, slug, excerpt, cover_image_url, thumbnail_url, price, published_at, created_at, like_count, fake_favorite_count, author_id, primary_category_id, affiliate_enabled, affiliate_rate, affiliate_target, users:author_id(id, display_name, avatar_url)')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
 
