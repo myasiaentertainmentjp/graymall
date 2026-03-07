@@ -32,9 +32,11 @@ async function getArticle(slug: string): Promise<Article | null> {
     return null
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articleData = article as any
   return {
-    ...article,
-    thumbnail_url: article.thumbnail_url || article.cover_image_url,
+    ...articleData,
+    thumbnail_url: articleData.thumbnail_url || articleData.cover_image_url,
   } as Article
 }
 
@@ -108,7 +110,8 @@ export default async function ArticleDetailPage({ params }: Props) {
       .neq('id', article.id)
       .limit(4)
 
-    relatedArticles = (data || []).map((a) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    relatedArticles = (data || []).map((a: any) => ({
       ...a,
       thumbnail_url: a.thumbnail_url || a.cover_image_url,
     })) as Article[]
