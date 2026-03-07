@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
+import { z } from 'zod'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+// 入力バリデーションスキーマ
+const checkoutSchema = z.object({
+  articleId: z.string().uuid('Invalid article ID format'),
+  articleSlug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Invalid slug format'),
+  affiliateCode: z.string().max(50).optional().nullable(),
+})
 
 // サービスロールでSupabaseクライアントを作成
 const supabaseAdmin = createClient(
@@ -12,6 +21,22 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: NextRequest) {
   try {
+    // レートリミットチェック（IP + User-Agent ベース）
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+    const rateLimitResult = checkRateLimit(`checkout:${ip}`, RATE_LIMITS.checkout)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)),
+          },
+        }
+      )
+    }
+
     // cookieからユーザーセッションを取得
     const { createClient: createServerClient } = await import('@/lib/supabase/server')
     const supabase = await createServerClient()
@@ -23,11 +48,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { articleId, articleSlug, affiliateCode } = body
 
-    if (!articleId) {
-      return NextResponse.json({ error: 'Article ID is required' }, { status: 400 })
+    // 入力バリデーション
+    const parseResult = checkoutSchema.safeParse(body)
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parseResult.error.flatten() },
+        { status: 400 }
+      )
     }
+
+    const { articleId, articleSlug, affiliateCode } = parseResult.data
 
     // 記事情報を取得
     const { data: article, error: articleError } = await supabaseAdmin

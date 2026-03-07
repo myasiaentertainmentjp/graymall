@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -12,6 +13,17 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  // レートリミットチェック（Stripeからのwebhookは信頼するが、DDoS対策）
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+  const rateLimitResult = checkRateLimit(`webhook:${ip}`, RATE_LIMITS.webhook)
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    )
+  }
+
   const body = await request.text()
   const headersList = await headers()
   const signature = headersList.get('stripe-signature')
