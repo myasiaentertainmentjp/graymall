@@ -20,7 +20,7 @@ export default async function SearchPage({
   // 検索実行
   let articlesQuery = supabase
     .from('articles')
-    .select('*')
+    .select('*, users:author_id(id, display_name, email, avatar_url)')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
 
@@ -32,7 +32,13 @@ export default async function SearchPage({
     articlesQuery = articlesQuery.eq('category', categorySlug)
   }
 
-  const { data: articles } = await articlesQuery.limit(50)
+  const { data: articlesData } = await articlesQuery.limit(50)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles = (articlesData || []).map((article: any) => ({
+    ...article,
+    thumbnail_url: article.thumbnail_url || article.cover_image_url,
+  }))
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>

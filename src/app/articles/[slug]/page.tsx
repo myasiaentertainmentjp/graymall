@@ -23,7 +23,7 @@ async function getArticle(slug: string): Promise<Article | null> {
 
   const { data: article, error } = await supabase
     .from('articles')
-    .select('*')
+    .select('*, users:author_id(id, display_name, email, avatar_url, bio)')
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
@@ -32,7 +32,10 @@ async function getArticle(slug: string): Promise<Article | null> {
     return null
   }
 
-  return article as Article
+  return {
+    ...article,
+    thumbnail_url: article.thumbnail_url || article.cover_image_url,
+  } as Article
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -50,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     article.users?.email?.split('@')[0] ||
     '著者不明'
 
-  const ogImage = article.thumbnail_url || 'https://graymall.jp/og-image.png'
+  const ogImage = article.thumbnail_url || article.cover_image_url || 'https://graymall.jp/og-image.png'
 
   return {
     title: article.title,
@@ -99,13 +102,16 @@ export default async function ArticleDetailPage({ params }: Props) {
   if (article.category) {
     const { data } = await supabase
       .from('articles')
-      .select('*')
+      .select('*, users:author_id(id, display_name, email, avatar_url)')
       .eq('category', article.category)
       .eq('status', 'published')
       .neq('id', article.id)
       .limit(4)
 
-    relatedArticles = (data || []) as Article[]
+    relatedArticles = (data || []).map((a) => ({
+      ...a,
+      thumbnail_url: a.thumbnail_url || a.cover_image_url,
+    })) as Article[]
   }
 
   const authorName = article.author_profile?.display_name ||
@@ -126,7 +132,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       <ArticleSchema
         title={article.title}
         description={article.excerpt || article.title}
-        image={article.thumbnail_url || 'https://graymall.jp/og-image.png'}
+        image={article.thumbnail_url || article.cover_image_url || 'https://graymall.jp/og-image.png'}
         datePublished={article.published_at || article.created_at}
         dateModified={article.updated_at}
         authorName={authorName}

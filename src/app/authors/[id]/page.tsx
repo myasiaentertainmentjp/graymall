@@ -37,12 +37,17 @@ async function getAuthorData(id: string) {
 
   if (authorProfile) {
     // author_profilesの場合
-    const { data: articles } = await supabase
+    const { data: articlesData } = await supabase
       .from('articles')
-      .select('*')
+      .select('*, users:author_id(id, display_name, email, avatar_url)')
       .eq('author_id', id)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const articles = (articlesData || []).map((article: any) => ({
+      ...article,
+      thumbnail_url: article.thumbnail_url || article.cover_image_url,
+    }))
 
     const { count: followerCount } = await supabase
       .from('follows')
@@ -75,12 +80,17 @@ async function getAuthorData(id: string) {
     return null
   }
 
-  const { data: articles } = await supabase
+  const { data: articlesData2 } = await supabase
     .from('articles')
-    .select('*')
+    .select('*, users:author_id(id, display_name, email, avatar_url)')
     .eq('author_id', id)
     .eq('status', 'published')
     .order('published_at', { ascending: false })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles2 = (articlesData2 || []).map((article: any) => ({
+    ...article,
+    thumbnail_url: article.thumbnail_url || article.cover_image_url,
+  }))
 
   const { count: followerCount } = await supabase
     .from('follows')
@@ -95,7 +105,7 @@ async function getAuthorData(id: string) {
       bio: user.bio,
       type: 'user' as const,
     },
-    articles: articles || [],
+    articles: articles2,
     followerCount: followerCount || 0,
   }
 }

@@ -10,7 +10,7 @@ async function fetchData() {
   const [{ data: allArticlesData }, { data: categoriesData }] = await Promise.all([
     supabase
       .from('articles')
-      .select('*')
+      .select('*, users:author_id(id, display_name, email, avatar_url)')
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(500),
@@ -21,7 +21,11 @@ async function fetchData() {
   ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allArticles = (allArticlesData || []) as any[]
+  const allArticles = (allArticlesData || []).map((article: any) => ({
+    ...article,
+    // cover_image_url を thumbnail_url として使用
+    thumbnail_url: article.thumbnail_url || article.cover_image_url,
+  }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allCategories = (categoriesData || []) as any[]
   const parentCategories = allCategories.filter((c) => !c.parent_id)
