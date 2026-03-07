@@ -12,6 +12,7 @@ type Article = Database['public']['Tables']['articles']['Row'] & {
   author_profile?: { id?: string; display_name: string; avatar_url?: string | null; bio?: string | null } | null
   primary_category?: { id: string; name: string; slug: string } | null
   category?: string | null
+  cover_image_url?: string | null
 }
 
 interface Props {
