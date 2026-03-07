@@ -1,11 +1,17 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 
+// sitemapは1時間ごとに再生成
+export const revalidate = 3600
+
 interface ArticleRow {
   slug: string
   updated_at: string | null
   published_at: string | null
 }
+
+// 最大記事数（sitemapが大きくなりすぎないように）
+const MAX_ARTICLES = 1000
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
@@ -33,12 +39,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // 公開記事を取得
+  // 公開記事を取得（上限付き）
   const { data: articlesData } = await supabase
     .from('articles')
     .select('slug, updated_at, published_at')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
+    .limit(MAX_ARTICLES)
 
   const articles = (articlesData || []) as ArticleRow[]
 
